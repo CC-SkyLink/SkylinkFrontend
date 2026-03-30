@@ -1,73 +1,97 @@
-# React + TypeScript + Vite
+# ✈️ SkyLink Airline Reservation System
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A web-based airline reservation platform that allows users to search, book, and manage flight reservations efficiently.
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## 📋 Project Overview
 
-## React Compiler
+SkyLink is a standalone, browser-based airline reservation system built for both passengers and administrators. It handles the full reservation lifecycle — from flight search and ticket booking to payment processing and admin management.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+---
 
-## Expanding the ESLint configuration
+## 👥 User Roles
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+| Role | Description |
+|---|---|
+| **Passenger** | Registers, searches for flights, books tickets, and manages reservations |
+| **Administrator** | Manages flights, users, and views booking reports |
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+---
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+## ⚙️ Core Features
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+### Passenger
+- User registration and login
+- Flight search and filtering
+- Ticket booking and cancellation / rescheduling
+- Secure online payment processing
+
+### Admin
+- Add, edit, and delete flights
+- Manage user accounts
+- View booking reports and system data
+
+---
+
+## 🛠️ Tech Stack (Frontend)
+
+| Tool | Purpose |
+|---|---|
+| React 19 | UI component framework |
+| TypeScript | Type-safe JavaScript |
+| Vite | Build tool and dev server |
+| Tailwind CSS v4 | Utility-first styling |
+| React Router DOM | Client-side routing |
+
+---
+
+## 🚀 Getting Started
+
+### Installation
+
+```bash
+# Clone the repository
+git clone https://github.com/your-username/skylink-frontend.git
+
+# Navigate into the project
+cd skylink-frontend
+
+# Install dependencies
+npm install
+
+# Start the development server
+npm run dev
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+### Environment Variables
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+Copy the example env file and fill in your values:
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+cp .env.example .env
 ```
+
+---
+
+## 📐 Non-Functional Requirements
+
+- **Performance:** System responds within 2 seconds
+- **Security:** Encrypted passwords, secure payment gateway
+- **Usability:** Clean, intuitive, and mobile-responsive interface
+- **Reliability:** Targets 99% uptime availability
+- **Compatibility:** Runs on modern browsers (Chrome, Edge, Firefox)
+
+---
+
+## 🔮 Planned Future Enhancements
+
+- Mobile application version
+- AI-based flight recommendations
+- Loyalty rewards system
+
+---
+
+## 📄 License
+
+This project is developed as part of an academic software engineering requirement. All rights reserved.
