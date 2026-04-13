@@ -3,6 +3,8 @@ import { ROUTES } from "@/constants/routes";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import ProtectedRoute from "@/components/layout/ProtectedRoute";
+import PublicOnlyRoute from "@/components/layout/PublicOnlyRoute";
+import AdminRoute from "@/components/layout/AdminRoute";
 import ScreenPlaceholder from "@/components/ui/ScreenPlaceholder";
 import HomePage from "@/pages/HomePage";
 import LoginPage from "@/pages/LoginPage";
@@ -53,26 +55,6 @@ function App() {
             )}
           />
           <Route path={ROUTES.PNR_STATUS} element={<PNRStatusPage />} />
-          <Route path={ROUTES.LOGIN} element={<LoginPage />} />
-          <Route
-            path={ROUTES.FORGOT_PASSWORD}
-            element={screen(
-              "S-06",
-              "Forgot Password",
-              "public",
-              "Password recovery request and resend flow.",
-            )}
-          />
-          <Route
-            path={ROUTES.RESET_PASSWORD}
-            element={screen(
-              "S-07",
-              "Reset Password",
-              "public",
-              "Set new password with strength and confirmation rules.",
-            )}
-          />
-          <Route path={ROUTES.REGISTER} element={<RegisterPage />} />
           <Route
             path={ROUTES.VERIFY_EMAIL_PENDING}
             element={screen(
@@ -91,15 +73,39 @@ function App() {
               "Prompt shown when user must authenticate to continue.",
             )}
           />
-          <Route
-            path={ROUTES.ADMIN_LOGIN}
-            element={screen(
-              "A-01",
-              "Admin Login",
-              "public",
-              "Dedicated admin authentication entry with role verification.",
-            )}
-          />
+
+          {/* Public-only Routes (guest only) */}
+          <Route element={<PublicOnlyRoute />}>
+            <Route path={ROUTES.LOGIN} element={<LoginPage />} />
+            <Route
+              path={ROUTES.FORGOT_PASSWORD}
+              element={screen(
+                "S-06",
+                "Forgot Password",
+                "public",
+                "Password recovery request and resend flow.",
+              )}
+            />
+            <Route
+              path={ROUTES.RESET_PASSWORD}
+              element={screen(
+                "S-07",
+                "Reset Password",
+                "public",
+                "Set new password with strength and confirmation rules.",
+              )}
+            />
+            <Route path={ROUTES.REGISTER} element={<RegisterPage />} />
+            <Route
+              path={ROUTES.ADMIN_LOGIN}
+              element={screen(
+                "A-01",
+                "Admin Login",
+                "public",
+                "Dedicated admin authentication entry with role verification.",
+              )}
+            />
+          </Route>
 
           {/* User Routes (Login required) */}
           <Route element={<ProtectedRoute />}>
@@ -212,8 +218,10 @@ function App() {
                 "Payment failure recovery with retry and support actions.",
               )}
             />
+          </Route>
 
-            {/* Admin Routes (Admin guard to be applied in next phase) */}
+          {/* Admin Routes (Admin role required) */}
+          <Route element={<AdminRoute />}>
             <Route
               path={ROUTES.ADMIN_DASHBOARD}
               element={<AdminDashboardPage />}
