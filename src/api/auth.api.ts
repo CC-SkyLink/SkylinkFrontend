@@ -35,3 +35,37 @@ export async function getProfile(): Promise<User> {
     handleApiError(err);
   }
 }
+
+export async function forgotPassword(
+  email: string,
+): Promise<{ message: string }> {
+  try {
+    const res = await axiosClient.post("/auth/forgot-password", { email });
+    return res.data as { message: string };
+  } catch (err) {
+    handleApiError(err);
+  }
+}
+
+export async function resetPassword(payload: {
+  token: string;
+  password: string;
+}): Promise<{ message: string }> {
+  try {
+    const res = await axiosClient.post("/auth/reset-password", payload);
+    return res.data as { message: string };
+  } catch (err) {
+    handleApiError(err);
+  }
+}
+
+export async function resendVerification(
+  email: string,
+): Promise<{ message: string }> {
+  try {
+    const res = await axiosClient.post("/auth/resend-verification", { email });
+    return res.data as { message: string };
+  } catch (err) {
+    handleApiError(err);
+  }
+}
