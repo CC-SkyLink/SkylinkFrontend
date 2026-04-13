@@ -1,9 +1,14 @@
-const HomePage = () => {
-  return (
-    <div>
-      <h1>Login Page</h1>
-    </div>
-  )
-}
+import ScreenPlaceholder from "@/components/ui/ScreenPlaceholder";
 
-export default HomePage
+const LoginPage = () => {
+  return (
+    <ScreenPlaceholder
+      id="S-05"
+      title="Login"
+      scope="public"
+      description="User login with password and recovery pathways."
+    />
+  );
+};
+
+export default LoginPage;

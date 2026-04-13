@@ -1,9 +1,14 @@
-const HomePage = () => {
-  return (
-    <div>
-      <h1>Booking Detail Page</h1>
-    </div>
-  )
-}
+import ScreenPlaceholder from "@/components/ui/ScreenPlaceholder";
 
-export default HomePage
+const BookingDetailPage = () => {
+  return (
+    <ScreenPlaceholder
+      id="S-13"
+      title="Booking Detail"
+      scope="user"
+      description="Detailed itinerary, passenger, payment, and action controls for booking management."
+    />
+  );
+};
+
+export default BookingDetailPage;

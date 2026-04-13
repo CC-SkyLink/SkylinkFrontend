@@ -1,9 +1,14 @@
+import ScreenPlaceholder from "@/components/ui/ScreenPlaceholder";
+
 const HomePage = () => {
   return (
-    <div>
-      <h1>Home Page</h1>
-    </div>
-  )
-}
+    <ScreenPlaceholder
+      id="S-01"
+      title="Homepage"
+      scope="public"
+      description="Main landing page with hero, search entry point, and trust signals."
+    />
+  );
+};
 
-export default HomePage
+export default HomePage;

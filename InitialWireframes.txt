@@ -1,0 +1,51 @@
+Table
+
+Public Screens
+
+· S-01 Homepage
+. S-02 Search Results
+. S-03 Flight Detail
+· S-04 PNR Status Check
+. S-05 Login Page
+. S-06 Forgot Password
+· S-07 Reset Password
+· S-08 Register Page
+. S-09 Verify Email Pending
+. S-10 Login Prompt / Auth Gate
+
+User Screens (Login required)
+
+· S-11 User Dashboard
+. S-12 My Bookings List
+. S-13 Booking Detail
+. S-14 Cancel Booking Modal
+. S-15 Reschedule - Pick Date / Flight
+. S-16 Reschedule Summary
+. S-17 Profile / Settings
+. S-18 Passenger Details Form
+. S-19 Seat Selection
+· S-20 Meal Preference
+. S-21 Booking Summary
+. S-22 Payment Page
+· S-23 3DS / OTP Screen
+· S-24 Booking Confirmation
+· S-25 Payment Failure Page
+
+Admin Screens (Admin role required)
+
+. A-01 Admin Login Page
+. A-02 Admin Dashboard
+. A-03 Flight List
+A-04 Add Flight Form
+. A-05 Edit Flight Form
+. A-06 Delete Flight Modal
+. A-07 User List
+. A-08 User Profile (Admin View)
+· A-09 Suspend / Reactivate Modal
+. A-10 Booking List
+· A-11 Booking Detail (Admin)
+. A-12 Admin Cancel Modal
+· A-13 Reports Module
+. A-14 Report Result
+
+
