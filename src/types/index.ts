@@ -53,5 +53,5 @@ export interface FlightSearchParams {
 export interface APIError {
   message: string;
   status?: number;
-  details?: any;
+  details?: unknown;
 }

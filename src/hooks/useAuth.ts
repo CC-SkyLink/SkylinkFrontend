@@ -4,7 +4,7 @@ import {
   register as apiRegister,
   getProfile,
 } from "@/api/auth.api";
-import { useAuthStore } from "@/store/authStore";
+import { useAuthStore } from "@/store/useAuthStore";
 import type { AuthResponse, User } from "@/types";
 
 export function useAuth() {
@@ -37,7 +37,7 @@ export function useAuth() {
       const profile = await getProfile();
       store.setUser(profile);
       return profile;
-    } catch (err) {
+    } catch {
       return null;
     }
   }, [store]);

@@ -1,23 +1,7 @@
-import React, { createContext, useContext, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
+import { AuthContext, type AuthContextType, type User } from "./authContext";
 
-// Minimal User shape for the auth store. This will be centralized in `src/types` later.
-export interface User {
-  id: string;
-  name?: string;
-  email?: string;
-  role?: "user" | "admin" | string;
-}
-
-interface AuthContextType {
-  user: User | null;
-  token: string | null;
-  isAuthenticated: boolean;
-  login: (token: string, user?: User | null) => void;
-  logout: () => void;
-  setUser: (user: User | null) => void;
-}
-
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+export type { User, AuthContextType } from "./authContext";
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
@@ -25,7 +9,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const [token, setToken] = useState<string | null>(() => {
     try {
       return localStorage.getItem("token");
-    } catch (e) {
+    } catch {
       return null;
     }
   });
@@ -36,7 +20,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     try {
       if (token) localStorage.setItem("token", token);
       else localStorage.removeItem("token");
-    } catch (e) {
+    } catch {
       // ignore localStorage errors
     }
   }, [token]);
@@ -51,7 +35,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     setUserState(null);
     try {
       localStorage.removeItem("token");
-    } catch (e) {
+    } catch {
       // ignore
     }
   };
@@ -71,11 +55,5 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
-
-export function useAuthStore(): AuthContextType {
-  const ctx = useContext(AuthContext);
-  if (!ctx) throw new Error("useAuthStore must be used within an AuthProvider");
-  return ctx;
-}
 
 export default AuthProvider;
