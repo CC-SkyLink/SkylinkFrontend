@@ -1,0 +1,305 @@
+Table
+
+Public Screens
+
+· S-01 Homepage
+. S-02 Search Results
+. S-03 Flight Detail
+· S-04 PNR Status Check
+. S-05 Login Page
+. S-06 Forgot Password
+· S-07 Reset Password
+· S-08 Register Page
+. S-09 Verify Email Pending
+. S-10 Login Prompt / Auth Gate
+
+User Screens (Login required)
+
+· S-11 User Dashboard
+. S-12 My Bookings List
+. S-13 Booking Detail
+. S-14 Cancel Booking Modal
+. S-15 Reschedule - Pick Date / Flight
+. S-16 Reschedule Summary
+. S-17 Profile / Settings
+. S-18 Passenger Details Form
+. S-19 Seat Selection
+· S-20 Meal Preference
+. S-21 Booking Summary
+. S-22 Payment Page
+· S-23 3DS / OTP Screen
+· S-24 Booking Confirmation
+· S-25 Payment Failure Page
+
+Admin Screens (Admin role required)
+
+. A-01 Admin Login Page
+. A-02 Admin Dashboard
+. A-03 Flight List
+A-04 Add Flight Form
+. A-05 Edit Flight Form
+. A-06 Delete Flight Modal
+. A-07 User List
+. A-08 User Profile (Admin View)
+· A-09 Suspend / Reactivate Modal
+. A-10 Booking List
+· A-11 Booking Detail (Admin)
+. A-12 Admin Cancel Modal
+· A-13 Reports Module
+. A-14 Report Result
+
+
+Onboarding Flow:
+
+· Welcome:
+. Welcome / Introduction screen
+. User type selection (Admin, Business
+Owner, Guest)
+· Sign Up:
+. Input personal details
+· Set up username / password
+· Verification (email or phone)
+. ! Duplicate email > show inline error
+· ! Weak password > show strength guide
+· Login:
+. Username / password input
+. Forgot password / reset password
+. ! 3 failed attempts > show CAPTCHA
+. ! Unverified account > resend link prompt
+· Onboarding tutorial (optional):
+· Feature introduction (swipe through)
+· Permissions (e.g. notifications, location)
+
+User Profiles Flow:
+
+. Profile setup:
+. Upload profile picture
+. Input personal details
+· Set preferences
+. Profile view:
+. View personal details
+. View bookings associated
+· Profile edit:
+· Edit personal details
+. Change password
+. ! Wrong current password > block save
+. ! Invalid phone format > inline error
+. Settings / preferences:
+. Notification settings
+. Privacy settings
+
+Flight Search Flow
+
+· Search:
+. Input search query (origin, destination, date,
+passengers, cabin class)
+· View search results (with filters)
+. ! Same origin & destination > field error
+. ! Past date selected > blocked by picker
+. ! No flights found > empty state with alt dates
+· Flight detail:
+· View flight info (times, stops, price, baggage)
+. View fare rules
+. Click Book Now
+. Filter & sort:
+. Price range
+. Number of stops
+Departure time
+· Airline preference
+. Cabin class
+
+Booking Flow
+
+· Passenger details:
+. Input name, DOB, ID / Passport
+. Input contact email and phone
+. ! Required field empty > highlight on
+submit
+· ! Session timeout > seat released, re-
+search prompt
+. Seat selection:
+. Choose seat from seat map
+· Skip (any available)
+· ! Seat taken mid-session > prompt to re-
+select
+. Meal preference:
+. Choose meal type per passenger
+. Skip > defaults to Standard
+. Booking summary:
+. Review all details and itemized price
+. Edit any section before paying
+
+Cancellation Flow
+
+. My bookings:
+View all bookings with status badges
+. Click on a Confirmed booking
+Cancel booking:
+. Click Cancel Booking button
+. View refund amount and policy in modal
+. Confirm cancellation
+. ! Past flight > Cancel button disabled
+. ! Non-refundable > modal shows ₱O
+refund clearly before confirming
+. After cancellation:
+. Status updated to Cancelled
+. Seat released to inventory
+. Refund queued (3-7 business days)
+. Confirmation email sent
+
+Reschedule Flow
+
+· Start reschedule:
+. Click Reschedule on booking detail
+. Select new travel date
+. ! Non-reschedulable fare > button
+disabled with tooltip
+. ! No flights on new date > suggest
+adjacent dates
+. Pick new flight:
+. View available flights for same route
+. Price difference shown per flight
+· Select new flight
+. Summary & confirm:
+. Old vs new itinerary side by side
+. Pay price difference (if any)
+. Confirm reschedule
+. After reschedule:
+. New e-ticket emailed
+. Original booking marked Rescheduled
+
+Payment Flow
+
+. Payment method:
+. Credit / Debit card
+. GCash
+· PayPal
+. Bank transfer
+· Card payment:
+. Enter card number, name, expiry, CVV
+· Submit payment
+. ! Invalid card > inline field error
+. ! Payment declined > show reason + retry
+option
+. ! Gateway timeout > 'Card not charged'
+message
+3DS / OTP:
+· Bank OTP or 3D Secure step
+· Verification completes payment
+. ! User abandons OTP > return to payment
+page
+. Confirmation:
+. Booking ID and PNR displayed
+. E-ticket sent to email
+
+Flight Status Flow
+
+. PNR check:
+· Navigate to PNR Status page
+. Input PNR number (auto-uppercase, 6
+chars)
+· Submit
+. ! Invalid PNR format > inline error, block
+submit
+. ! PNR not found > 'No booking found'
+message
+. Status result:
+. On Time
+. Delayed (shows new time)
+. Cancelled
+. Boarding
+. Landed
+. Note: Status uses color + icon + text - never
+color alone (accessibility)
+
+
+Table
+
+Onboarding Flow:
+
+· Login:
+· Navigate to /admin (separate URL)
+. Enter admin email and password
+. Backend checks credentials AND Admin role
+. ! Non-admin user > 403 Forbidden
+. ! 5 failed attempts > account locked
+. ! All login attempts logged to audit trail
+. Dashboard:
+· KPI tiles: bookings today, revenue, active flights, cancellations
+· Sidebar nav: Flights, Users, Bookings, Reports
+
+Flight Management Flow
+
+· Add flight:
+. Click + Add Flight
+. Fill: Flight No., Airline, Origin, Destination, Date/Times, Aircraft, Seats, Price
+. Preview and publish
+. ! Duplicate flight number > inline error
+. ! Departure after arrival > block save
+· Edit flight:
+. Click Edit on any flight row
+. Pre-filled form with all current values
+Save changes
+. ! Has active bookings > yellow warning banner showing count
+. ! Auto-notifies affected passengers on save
+. Delete / deactivate flight:
+. Click Delete icon
+. Modal shows number of active bookings affected
+. Choose: Deactivate (recommended) or Delete permanently
+. ! 10+ active bookings > Deactivate is highlighted as safe option
+
+User Management Flow
+
+· User list:
+. Search by name or email
+. Filter by status or registration date
+. View: Name, Email, Status badge, Booking count
+. User profile:
+· View personal info
+. View full booking history (paginated)
+. View status history
+. Suspend account:
+. Click Suspend
+Enter mandatory reason
+aConfirm > user session terminated, email sent
+. ! Reason field empty > block confirmation
+. Reactivate account:
+. Click Reactivate
+. Confirm > account restored, user notified
+
+Booking Management Flow
+
+· Booking list:
+· Search by PNR, name, or flight number
+. Filter by status, date range, payment status
+. Export filtered results as CSV
+· Booking detail:
+· View: passenger info, payment, flight, seat, meal
+. View status history timeline
+· Admin cancel booking:
+. Click Cancel This Booking
+. Enter mandatory reason
+. System shows auto-calculated refund amount
+. Confirm > booking cancelled, refund queued, passenger notified
+. ! Reason field empty > block confirmation
+
+Reports & Export Flow
+
+· Select report type:
+. Booking Summary
+. Revenue Overview
+. Cancellations
+. User Activity
+. Configure filters:
+. Date range (presets: Today, This Week, This Month, Custom)
+. Flight or route filter
+· Status filter
+. ! End date before start date > block and show error
+. Generate report:
+. Charts at top
+. Sortable data table below
+. Loads in under 2 seconds
+· Export:
+. PDF (formatted report)
+· CSV (raw data)
+. ! Export fails > toast error with Retry button

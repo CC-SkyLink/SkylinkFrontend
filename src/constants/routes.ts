@@ -1,18 +1,54 @@
 export const ROUTES = {
-  // Public
-  HOME:           '/',
-  LOGIN:          '/login',
-  REGISTER:       '/register',
-  SEARCH:         '/search',
+  // Public Screens
+  HOME: "/",
+  SEARCH_RESULTS: "/search",
+  FLIGHT_DETAIL: "/flights/:id",
+  PNR_STATUS: "/pnr-status",
+  LOGIN: "/login",
+  FORGOT_PASSWORD: "/forgot-password",
+  RESET_PASSWORD: "/reset-password",
+  REGISTER: "/register",
+  VERIFY_EMAIL_PENDING: "/verify-email-pending",
+  AUTH_GATE: "/auth-gate",
 
-  // Protected
-  BOOKING:        '/booking',
-  BOOKING_DETAIL: '/booking/:id',
-  MY_BOOKINGS:    '/my-bookings',
+  // User Screens (auth required)
+  USER_DASHBOARD: "/dashboard",
+  MY_BOOKINGS: "/my-bookings",
+  BOOKING_DETAIL: "/my-bookings/:id",
+  BOOKING_CANCEL: "/my-bookings/:id/cancel",
+  RESCHEDULE_PICK: "/my-bookings/:id/reschedule/pick",
+  RESCHEDULE_SUMMARY: "/my-bookings/:id/reschedule/summary",
+  PROFILE_SETTINGS: "/profile/settings",
+  BOOKING_PASSENGER_DETAILS: "/booking/passengers",
+  BOOKING_SEAT_SELECTION: "/booking/seats",
+  BOOKING_MEAL_PREFERENCE: "/booking/meals",
+  BOOKING_SUMMARY: "/booking/summary",
+  PAYMENT: "/payment",
+  PAYMENT_OTP: "/payment/otp",
+  BOOKING_CONFIRMATION: "/booking/confirmation",
+  PAYMENT_FAILURE: "/payment/failure",
 
-  // Admin
-  ADMIN:          '/admin',
-  ADMIN_FLIGHTS:  '/admin/flights',
-  ADMIN_USERS:    '/admin/users',
-  ADMIN_REPORTS:  '/admin/reports',
-} as const
+  // Admin Screens
+  ADMIN_LOGIN: "/admin/login",
+  ADMIN_DASHBOARD: "/admin",
+  ADMIN_FLIGHTS: "/admin/flights",
+  ADMIN_ADD_FLIGHT: "/admin/flights/new",
+  ADMIN_EDIT_FLIGHT: "/admin/flights/:id/edit",
+  ADMIN_DELETE_FLIGHT: "/admin/flights/:id/delete",
+  ADMIN_USERS: "/admin/users",
+  ADMIN_USER_PROFILE: "/admin/users/:id",
+  ADMIN_USER_STATUS: "/admin/users/:id/status",
+  ADMIN_BOOKINGS: "/admin/bookings",
+  ADMIN_BOOKING_DETAIL: "/admin/bookings/:id",
+  ADMIN_BOOKING_CANCEL: "/admin/bookings/:id/cancel",
+  ADMIN_REPORTS: "/admin/reports",
+  ADMIN_REPORT_RESULT: "/admin/reports/result",
+
+  // Fallbacks
+  UNAUTHORIZED: "/unauthorized",
+
+  // Legacy aliases kept during transition
+  SEARCH: "/search",
+  BOOKING: "/booking/passengers",
+  ADMIN: "/admin",
+} as const;

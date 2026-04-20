@@ -1,9 +1,14 @@
-const HomePage = () => {
-  return (
-    <div>
-      <h1>PNR Status Page</h1>
-    </div>
-  )
-}
+import ScreenPlaceholder from "@/components/ui/ScreenPlaceholder";
 
-export default HomePage
+const PNRStatusPage = () => {
+  return (
+    <ScreenPlaceholder
+      id="S-04"
+      title="PNR Status Check"
+      scope="public"
+      description="Public status lookup with strict PNR format validation and result states."
+    />
+  );
+};
+
+export default PNRStatusPage;
