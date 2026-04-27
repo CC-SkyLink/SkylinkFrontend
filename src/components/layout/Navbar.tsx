@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { ROUTES } from "@/constants/routes";
 import { useAuthStore } from "@/store/useAuthStore";
-import BlueSkylinkLogo from "../../../public/logos/Logo 1.png";
+import BlueSkylinkLogo from "@/assets/logos/Logo 1.png";
 const Navbar = () => {
   const { isAuthenticated, user } = useAuthStore();
   const isAdmin = user?.role === "admin";
