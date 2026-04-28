@@ -1,7 +1,5 @@
 import { useState } from "react";
 import { colors, typography } from "@/constants/theme";
-import CalendarIcon from "@/assets/icons/calendar-icon.svg?react";
-import PassengerIcon from "@/assets/icons/passenger-icon.svg?react";
 import { CiCalendar, CiLocationOn } from "react-icons/ci"
 import { CiSearch } from 'react-icons/ci'
 import { CiClock2 } from "react-icons/ci"
@@ -199,7 +197,7 @@ function SectionHeader({ title, linkLabel }: { title: string; linkLabel: string 
   );
 }
 
-const BookPage = () => {
+const SearchResultsPage = () => {
   const [tripType, setTripType] = useState<TripType>("one-way");
 
   return (
@@ -331,4 +329,4 @@ const BookPage = () => {
   );
 };
 
-export default BookPage;
+export default SearchResultsPage;
