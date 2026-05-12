@@ -14,7 +14,7 @@ const Navbar = () => {
   const navLinks = [
     { label: "Book", path: ROUTES.BOOK },
     { label: "Explore", path: ROUTES.EXPLORE },
-    { label: "Flight Status", path: "#" },
+    { label: "Flight Status", path: ROUTES.FLIGHTS },
     { label: "Manage", path: ROUTES.PNR_STATUS },
   ];
 
