@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Search, Plane, MapPin, Monitor,CheckCircle, AlertTriangle, XCircle } from "lucide-react";
+import { Search, Plane, MapPin, Monitor, CheckCircle, AlertTriangle, XCircle } from "lucide-react";
 
 /* ================= TYPES ================= */
 
@@ -28,8 +28,9 @@ type FlightResult = {
 
 /* ================= MOCK DATA ================= */
 
-const MOCK_FLIGHTS: Record<string, FlightResult> = {
-  SK7831: {
+// Looked up by PNR / booking reference (e.g. ABC123)
+const MOCK_PNR: Record<string, FlightResult> = {
+  ABC123: {
     status: "on-time",
     flightCode: "SK 7831",
     departure: { code: "MNL", city: "Manila", scheduled: "06:45", actual: null },
@@ -37,7 +38,7 @@ const MOCK_FLIGHTS: Record<string, FlightResult> = {
     gate: "Gate 3",
     terminal: "Terminal 1",
   },
-  SK4421: {
+  XYZ789: {
     status: "cancelled",
     flightCode: "SK 4421",
     departure: { code: "MNL", city: "Manila", scheduled: "10:00", actual: null },
@@ -45,7 +46,7 @@ const MOCK_FLIGHTS: Record<string, FlightResult> = {
     gate: "Gate 9",
     terminal: "Terminal 2",
   },
-  PR101: {
+  DEF456: {
     status: "delayed",
     flightCode: "PR 101",
     newArrival: "14:50",
@@ -54,6 +55,10 @@ const MOCK_FLIGHTS: Record<string, FlightResult> = {
     gate: "Gate 12",
     terminal: "Terminal 1",
   },
+};
+
+// Looked up by flight number (e.g. PR101)
+const MOCK_FLIGHTS: Record<string, FlightResult> = {
   "5J213": {
     status: "on-time",
     flightCode: "5J 213",
@@ -71,6 +76,14 @@ const MOCK_FLIGHTS: Record<string, FlightResult> = {
     gate: "Gate 5",
     terminal: "Terminal 2",
   },
+  PR101: {
+    status: "on-time",
+    flightCode: "PR 101",
+    departure: { code: "MNL", city: "Manila",    scheduled: "09:00", actual: null },
+    arrival:   { code: "HKG", city: "Hong Kong", scheduled: "13:30", actual: null },
+    gate: "Gate 12",
+    terminal: "Terminal 1",
+  },
 };
 
 /* ================= CONFIG ================= */
@@ -84,14 +97,14 @@ const TAB_CONFIG: Record<TabType, {
   pnr: {
     label: "By PNR",
     inputLabel: "PNR / Booking Reference",
-    placeholder: "E.G. SK7831",
-    examples: ["SK7831", "SK4421"],
+    placeholder: "E.G. ABC123",
+    examples: ["ABC123", "XYZ789", "DEF456"],
   },
   flight: {
     label: "By Flight No.",
     inputLabel: "Flight Number",
     placeholder: "E.G. PR101",
-    examples: ["PR101", "5J213"],
+    examples: ["PR101", "5J213", "SK4500"],
   },
 };
 
@@ -101,12 +114,12 @@ const STATUS_CONFIG: Record<FlightStatus, {
   bg: string;
   border: string;
   text: string;
-   icon: React.ReactNode;
+  icon: React.ReactNode;
   label: string;
 }> = {
-  "on-time":  { bg: "bg-green-50",  border: "border-green-200",  text: "text-green-700",    icon: <CheckCircle className="w-4 h-4 text-green-600" />,  label: "On Time"   },
-  delayed:    { bg: "bg-yellow-50", border: "border-yellow-200", text: "text-yellow-700",  icon: <AlertTriangle className="w-4 h-4 text-yellow-600" />, label: "Delayed"   },
-  cancelled:  { bg: "bg-red-50",    border: "border-red-200",    text: "text-red-700",   icon: <XCircle className="w-4 h-4 text-red-600" />,   label: "Cancelled" },
+  "on-time":  { bg: "bg-green-50",  border: "border-green-200",  text: "text-green-700",  icon: <CheckCircle className="w-4 h-4 text-green-600" />,  label: "On Time"   },
+  delayed:    { bg: "bg-yellow-50", border: "border-yellow-200", text: "text-yellow-700", icon: <AlertTriangle className="w-4 h-4 text-yellow-600" />, label: "Delayed"   },
+  cancelled:  { bg: "bg-red-50",    border: "border-red-200",    text: "text-red-700",    icon: <XCircle className="w-4 h-4 text-red-600" />,         label: "Cancelled" },
 };
 
 /* ================= COMPONENTS ================= */
@@ -151,8 +164,7 @@ const FlightResultCard = ({
       {/* Status Bar */}
       <div className={`flex items-center justify-between px-4 py-2.5 ${s.bg} border-b ${s.border}`}>
         <div className="flex items-center gap-2">
-        <div className="flex items-center gap-2">
-  {s.icon}</div>
+          {s.icon}
           <span className={`text-xs font-semibold ${s.text}`}>
             {isDelayed
               ? `Delayed — New arrival: ${data.newArrival}`
@@ -273,13 +285,16 @@ const FlightStatusPage = () => {
       return;
     }
 
-    const found = MOCK_FLIGHTS[val];
+    // Use the correct dataset based on the active tab
+    const dataset = activeTab === "pnr" ? MOCK_PNR : MOCK_FLIGHTS;
+    const found = dataset[val];
+
     if (found) {
       setResult(found);
       setError("");
     } else {
       setResult(null);
-      setError("No flight found. Try the example codes below.");
+      setError("No flight found.");
     }
   };
 
