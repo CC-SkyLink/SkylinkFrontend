@@ -1,11 +1,22 @@
 import { useState } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { colors, typography } from "@/constants/theme";
 import { CiLocationOn } from "react-icons/ci"
 import { CiSearch } from 'react-icons/ci'
 import { CiClock2 } from "react-icons/ci"
 import DatePicker from "@/components/ui/DatePicker";
+import {
+  DEFAULT_SEARCH_CRITERIA,
+  buildSearchResultsPath,
+  mapUiCabinToApi,
+  parseSearchCriteriaFromParams,
+  resolveAirportFromInput,
+} from "@/pages/SearchResultsPage/searchResults.utils";
 import TripTypePill, { type TripType } from "./components/TripTypePill";
-import PassengerSelector from "./components/PassengerSelector";
+import PassengerSelector, {
+  type CabinClass as UiCabinClass,
+  type PassengerCounts,
+} from "./components/PassengerSelector";
 
 
 type Deal = {
@@ -197,8 +208,60 @@ function SectionHeader({ title, linkLabel }: { title: string; linkLabel: string 
   );
 }
 
+function mapApiCabinToUi(cabin: string): UiCabinClass {
+  if (cabin === "business") return "Business";
+  if (cabin === "first") return "First";
+  return "Economy";
+}
+
 const BookingLandingPage = () => {
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const initialCriteria = parseSearchCriteriaFromParams(
+    searchParams,
+    DEFAULT_SEARCH_CRITERIA,
+  );
+
   const [tripType, setTripType] = useState<TripType>("one-way");
+  const [originInput, setOriginInput] = useState(initialCriteria.origin);
+  const [destinationInput, setDestinationInput] = useState(
+    initialCriteria.destination,
+  );
+  const [departureDate, setDepartureDate] = useState(initialCriteria.date);
+  const [passengers, setPassengers] = useState<PassengerCounts>({
+    adults: initialCriteria.passengers,
+    children: 0,
+    infants: 0,
+  });
+  const [cabinClass, setCabinClass] = useState<UiCabinClass>(
+    mapApiCabinToUi(initialCriteria.cabinClass),
+  );
+
+  const handleSearchFlights = () => {
+    const origin = resolveAirportFromInput(originInput, {
+      city: DEFAULT_SEARCH_CRITERIA.origin,
+      code: DEFAULT_SEARCH_CRITERIA.originCode,
+    });
+    const destination = resolveAirportFromInput(destinationInput, {
+      city: DEFAULT_SEARCH_CRITERIA.destination,
+      code: DEFAULT_SEARCH_CRITERIA.destinationCode,
+    });
+
+    const totalPassengers =
+      passengers.adults + passengers.children + passengers.infants;
+
+    const path = buildSearchResultsPath({
+      origin: origin.city,
+      originCode: origin.code,
+      destination: destination.city,
+      destinationCode: destination.code,
+      date: departureDate || DEFAULT_SEARCH_CRITERIA.date,
+      passengers: Math.max(totalPassengers, 1),
+      cabinClass: mapUiCabinToApi(cabinClass),
+    });
+
+    navigate(path);
+  };
 
   return (
     <div className="bg-bg-surface min-h-screen">
@@ -235,6 +298,8 @@ const BookingLandingPage = () => {
                 <CiLocationOn size={16} strokeWidth={1} className={`shrink-0 text-primary-60`} />
                 <input
                   type="text"
+                  value={originInput}
+                  onChange={(event) => setOriginInput(event.target.value)}
                   placeholder="From — City or airport"
                   className={`bg-transparent flex-1 ${typography.paragraph.md.normal} ${colors.text.primary} outline-none placeholder:${colors.text.tertiary}`}
                 />
@@ -243,6 +308,8 @@ const BookingLandingPage = () => {
                 <CiLocationOn size={16} strokeWidth={1} className={`shrink-0 text-primary-60`} />
                 <input
                   type="text"
+                  value={destinationInput}
+                  onChange={(event) => setDestinationInput(event.target.value)}
                   placeholder="To — City or airport"
                   className={`bg-transparent flex-1 ${typography.paragraph.md.normal} ${colors.text.primary} outline-none placeholder:${colors.text.tertiary}`}
                 />
@@ -251,13 +318,24 @@ const BookingLandingPage = () => {
 
             {/* Date / Passengers */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              <DatePicker />
-              <PassengerSelector />
+              <DatePicker
+                value={departureDate}
+                onChange={setDepartureDate}
+              />
+              <PassengerSelector
+                defaultPassengers={passengers}
+                defaultCabinClass={cabinClass}
+                onChange={(nextPassengers, nextCabin) => {
+                  setPassengers(nextPassengers);
+                  setCabinClass(nextCabin);
+                }}
+              />
             </div>
 
             {/* Search CTA */}
             <button
               type="button"
+              onClick={handleSearchFlights}
               className={`w-full ${colors.action.primary} ${colors.action.primaryHover} ${colors.action.primaryPress} ${typography.label.md.semiBold} h-14 rounded-[10px] flex items-center justify-center gap-2 transition-colors`}
             >
               <CiSearch size={18} strokeWidth={1.5} className="shrink-0" />
