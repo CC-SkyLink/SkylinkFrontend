@@ -1,11 +1,11 @@
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { ROUTES } from "@/constants/routes";
-import Navbar from "@/components/layout/Navbar";
-import Footer from "@/components/layout/Footer";
-import ProtectedRoute from "@/components/layout/ProtectedRoute";
-import PublicOnlyRoute from "@/components/layout/PublicOnlyRoute";
-import AdminRoute from "@/components/layout/AdminRoute";
-import ScreenPlaceholder from "@/components/ui/ScreenPlaceholder";
+import Navbar from "@/pages/_shared/components/layout/Navbar";
+import Footer from "@/pages/_shared/components/layout/Footer";
+import ProtectedRoute from "@/pages/_shared/components/layout/ProtectedRoute";
+import PublicOnlyRoute from "@/pages/_shared/components/layout/PublicOnlyRoute";
+import AdminRoute from "@/pages/_shared/components/layout/AdminRoute";
+import ScreenPlaceholder from "@/pages/_shared/components/ui/ScreenPlaceholder";
 import HomePage from "@/pages/HomePage/HomePage";
 import BookingLandingPage from "@/pages/BookingLandingPage/BookingLandingPage";
 import LoginPage from "@/pages/LoginPage";
