@@ -7,7 +7,7 @@ import PublicOnlyRoute from "@/pages/_shared/components/layout/PublicOnlyRoute";
 import AdminRoute from "@/pages/_shared/components/layout/AdminRoute";
 import ScreenPlaceholder from "@/pages/_shared/components/ui/ScreenPlaceholder";
 import HomePage from "@/pages/HomePage/HomePage";
-import BookingLandingPage from "@/pages/BookingLandingPage/BookingLandingPage";
+import BookingLandingPage from "@/pages/MainPagesFolder/BookingLandingPage/BookingLandingPage";
 import LoginPage from "@/pages/LoginPage";
 import RegisterPage from "@/pages/RegisterPage";
 import SearchResultsPage from "@/pages/SearchResultsPage";
@@ -15,12 +15,13 @@ import BookingPage from "@/pages/BookingPage";
 import BookingDetailPage from "@/pages/BookingDetailPage";
 import MyBookingsPage from "@/pages/MyBookingsPage";
 import PaymentPage from "@/pages/PaymentPage";
-import PNRStatusPage from "@/pages/ManagePage/ManagePage";
+import FlightStatusPage from "@/pages/MainPagesFolder/FlightStatusPage/FlightStatusPage";
+import ManagePage from "@/pages/MainPagesFolder/ManagePage/ManagePage";
 import AdminDashboardPage from "@/pages/admin/AdminDashboardPage";
 import AdminFlightsPage from "@/pages/admin/AdminFlightsPage";
 import AdminUsersPage from "@/pages/admin/AdminUsersPage";
 import AdminReportsPage from "@/pages/admin/AdminReportsPage";
-import ExplorePage from "./pages/ExplorePage/ExplorePage";
+import ExplorePage from "@/pages/MainPagesFolder/ExplorePage/ExplorePage";
 
 function screen(
   id: string,
@@ -58,7 +59,8 @@ function App() {
               "Flight detail with fare rules, baggage info, and book now action.",
             )}
           />
-          <Route path={ROUTES.PNR_STATUS} element={<PNRStatusPage />} />
+          <Route path={ROUTES.PNR_STATUS} element={<FlightStatusPage />} />
+          <Route path={ROUTES.MANAGE} element={<ManagePage />} />
           <Route
             path={ROUTES.VERIFY_EMAIL_PENDING}
             element={screen(

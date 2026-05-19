@@ -6,6 +6,7 @@ export const ROUTES = {
   SEARCH_RESULTS: "/search",
   FLIGHT_DETAIL: "/flights/:id",
   PNR_STATUS: "/pnr-status",
+  MANAGE: "/manage",
   LOGIN: "/login",
   FORGOT_PASSWORD: "/forgot-password",
   RESET_PASSWORD: "/reset-password",
