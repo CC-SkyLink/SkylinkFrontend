@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { ROUTES } from "@/constants/routes";
 import FiltersPanel from "./components/FiltersPanel";
 import FlightResultCard, {
@@ -75,10 +75,24 @@ function getTimeBucket(time: string) {
   return "evening";
 }
 
+function cleanLocation(value: string) {
+  return value.replace(/\s*\([A-Z]{3}\)\s*/, "").trim();
+}
+
 const SearchResultsPage = () => {
+  const [searchParams] = useSearchParams();
   const [maxPrice, setMaxPrice] = useState(50000);
   const [directOnly, setDirectOnly] = useState(true);
   const [timeFilters, setTimeFilters] = useState<string[]>([]);
+
+  const fromParam = searchParams.get("from") ?? "Manila (MNL)";
+  const toParam = searchParams.get("to") ?? "Cebu (CEB)";
+  const dateParam = searchParams.get("date") ?? "";
+  const paxParam = searchParams.get("pax") ?? "1";
+  const cabinParam = searchParams.get("cabin") ?? "Economy";
+  const fromLabel = cleanLocation(fromParam) || "Manila";
+  const toLabel = cleanLocation(toParam) || "Cebu";
+  const dateLabel = dateParam || "Any date";
 
   const filteredFlights = useMemo(() => {
     return FLIGHTS.filter((flight) => {
@@ -118,9 +132,11 @@ const SearchResultsPage = () => {
               Home
             </Link>
             <span>/</span>
-            <span className="font-semibold text-slate-900">Manila to Cebu</span>
+            <span className="font-semibold text-slate-900">
+              {fromLabel} to {toLabel}
+            </span>
             <span className="text-xs text-slate-400">
-              2026-04-19 | 1 pax - Economy
+              {dateLabel} | {paxParam} pax - {cabinParam}
             </span>
           </div>
           <Link

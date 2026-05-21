@@ -7,7 +7,10 @@ import { CiSearch } from "react-icons/ci";
 import { CiClock2 } from "react-icons/ci";
 import DatePicker from "@/pages/_shared/components/ui/DatePicker";
 import TripTypePill, { type TripType } from "./components/TripTypePill";
-import PassengerSelector from "./components/PassengerSelector";
+import PassengerSelector, {
+  type CabinClass,
+  type PassengerCounts,
+} from "./components/PassengerSelector";
 
 type Deal = {
   id: string;
@@ -417,6 +420,13 @@ const BookingLandingPage = () => {
   const [tripType, setTripType] = useState<TripType>("one-way");
   const [fromQuery, setFromQuery] = useState("Manila (MNL)");
   const [toQuery, setToQuery] = useState("Cebu (CEB)");
+  const [dateValue, setDateValue] = useState("");
+  const [passengers, setPassengers] = useState<PassengerCounts>({
+    adults: 1,
+    children: 0,
+    infants: 0,
+  });
+  const [cabinClass, setCabinClass] = useState<CabinClass>("Economy");
   const [openField, setOpenField] = useState<"from" | "to" | null>(null);
   const fromRef = useRef<HTMLDivElement>(null);
   const toRef = useRef<HTMLDivElement>(null);
@@ -453,6 +463,20 @@ const BookingLandingPage = () => {
     setToQuery(`${option.city} (${option.code})`);
     setOpenField(null);
   };
+
+  const totalPassengers =
+    passengers.adults + passengers.children + passengers.infants;
+  const searchHref = (() => {
+    const params = new URLSearchParams();
+    params.set("from", fromQuery);
+    params.set("to", toQuery);
+    if (dateValue) {
+      params.set("date", dateValue);
+    }
+    params.set("pax", String(totalPassengers));
+    params.set("cabin", cabinClass);
+    return `${ROUTES.SEARCH_RESULTS}?${params.toString()}`;
+  })();
 
   return (
     <div className="bg-bg-surface min-h-screen">
@@ -585,13 +609,20 @@ const BookingLandingPage = () => {
 
             {/* Date / Passengers */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              <DatePicker />
-              <PassengerSelector />
+              <DatePicker value={dateValue} onChange={setDateValue} />
+              <PassengerSelector
+                defaultPassengers={passengers}
+                defaultCabinClass={cabinClass}
+                onChange={(counts, cabin) => {
+                  setPassengers(counts);
+                  setCabinClass(cabin);
+                }}
+              />
             </div>
 
             {/* Search CTA */}
             <Link
-              to={ROUTES.SEARCH_RESULTS}
+              to={searchHref}
               className={`w-full ${colors.action.primary} ${colors.action.primaryHover} ${colors.action.primaryPress} ${typography.label.md.semiBold} h-14 rounded-[10px] flex items-center justify-center gap-2 transition-colors`}
             >
               <CiSearch size={18} strokeWidth={1.5} className="shrink-0" />

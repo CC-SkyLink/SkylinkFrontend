@@ -1,7 +1,9 @@
 import { useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { ROUTES } from "@/constants/routes";
-import FlightDetailCard, { type FlightDetail } from "./components/FlightDetailCard";
+import FlightDetailCard, {
+  type FlightDetail,
+} from "./components/FlightDetailCard";
 import PriceSummaryCard from "./components/PriceSummaryCard";
 import FareRulesCard, { type FareRule } from "./components/FareRulesCard";
 import AuthGateModal from "./components/AuthGateModal";
