@@ -93,6 +93,7 @@ const SearchResultsPage = () => {
   const fromLabel = cleanLocation(fromParam) || "Manila";
   const toLabel = cleanLocation(toParam) || "Cebu";
   const dateLabel = dateParam || "Any date";
+  const queryString = searchParams.toString();
 
   const filteredFlights = useMemo(() => {
     return FLIGHTS.filter((flight) => {
@@ -166,7 +167,11 @@ const SearchResultsPage = () => {
               {filteredFlights.length} flights found
             </p>
             {filteredFlights.map((flight) => (
-              <FlightResultCard key={flight.id} flight={flight} />
+              <FlightResultCard
+                key={flight.id}
+                flight={flight}
+                queryString={queryString}
+              />
             ))}
           </div>
         </div>

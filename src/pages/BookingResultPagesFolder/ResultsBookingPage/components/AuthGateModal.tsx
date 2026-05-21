@@ -4,12 +4,15 @@ import { ROUTES } from "@/constants/routes";
 type AuthGateModalProps = {
   open: boolean;
   onClose: () => void;
+  continueTo?: string;
 };
 
-const AuthGateModal = ({ open, onClose }: AuthGateModalProps) => {
+const AuthGateModal = ({ open, onClose, continueTo }: AuthGateModalProps) => {
   if (!open) {
     return null;
   }
+
+  const guestLink = continueTo ?? ROUTES.BOOKING_PASSENGER_DETAILS;
 
   return (
     <div
@@ -47,7 +50,7 @@ const AuthGateModal = ({ open, onClose }: AuthGateModalProps) => {
             Sign In
           </Link>
           <Link
-            to={ROUTES.BOOKING_PASSENGER_DETAILS}
+            to={guestLink}
             className="block w-full rounded-lg border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-600 hover:border-slate-300"
           >
             Continue as Guest

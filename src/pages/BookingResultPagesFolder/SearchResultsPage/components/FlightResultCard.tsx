@@ -21,8 +21,14 @@ export type FlightResult = {
   seatsLeft?: number;
 };
 
-const FlightResultCard = ({ flight }: { flight: FlightResult }) => {
+type FlightResultCardProps = {
+  flight: FlightResult;
+  queryString?: string;
+};
+
+const FlightResultCard = ({ flight, queryString }: FlightResultCardProps) => {
   const detailLink = ROUTES.FLIGHT_DETAIL.replace(":id", flight.id);
+  const detailHref = queryString ? `${detailLink}?${queryString}` : detailLink;
   const showSeats =
     typeof flight.seatsLeft === "number" && flight.seatsLeft > 0;
 
@@ -87,7 +93,7 @@ const FlightResultCard = ({ flight }: { flight: FlightResult }) => {
             ) : null}
           </div>
           <Link
-            to={detailLink}
+            to={detailHref}
             className="rounded-lg bg-[#5D7FA7] px-4 py-2 text-xs font-semibold text-white transition hover:bg-[#4E6B8D]"
           >
             Select

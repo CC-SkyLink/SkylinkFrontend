@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useLocation, useParams } from "react-router-dom";
 import { ROUTES } from "@/constants/routes";
 import FlightDetailCard, {
   type FlightDetail,
@@ -86,7 +86,10 @@ const FARE_RULES: FareRule[] = [
 
 const ResultsBookingPage = () => {
   const { id } = useParams();
+  const location = useLocation();
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const searchSuffix = location.search ?? "";
+  const searchResultsLink = `${ROUTES.SEARCH_RESULTS}${searchSuffix}`;
 
   const flight = useMemo(() => {
     return FLIGHTS.find((item) => item.id === id) ?? FLIGHTS[0];
@@ -96,7 +99,7 @@ const ResultsBookingPage = () => {
     <main className="min-h-[calc(100vh-160px)] bg-[#F3F5F7]">
       <section className="mx-auto w-full max-w-6xl px-6 py-6">
         <div className="mb-4 flex items-center gap-2 text-xs text-slate-500">
-          <Link to={ROUTES.SEARCH_RESULTS} className="hover:text-slate-700">
+          <Link to={searchResultsLink} className="hover:text-slate-700">
             Search Results
           </Link>
           <span>/</span>
@@ -118,7 +121,11 @@ const ResultsBookingPage = () => {
         </div>
       </section>
 
-      <AuthGateModal open={isModalOpen} onClose={() => setIsModalOpen(false)} />
+      <AuthGateModal
+        open={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        continueTo={`${ROUTES.BOOKING_PASSENGER_DETAILS}${searchSuffix}`}
+      />
     </main>
   );
 };
