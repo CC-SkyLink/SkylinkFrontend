@@ -1,4 +1,4 @@
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Route, Routes, useLocation } from "react-router-dom";
 import { ROUTES } from "@/constants/routes";
 import Navbar from "@/pages/_shared/components/layout/Navbar";
 import Footer from "@/pages/_shared/components/layout/Footer";
@@ -49,10 +49,13 @@ function screen(
   );
 }
 
-function App() {
+const AppContent = () => {
+  const location = useLocation();
+  const isAdminRoute = location.pathname.startsWith("/admin");
+
   return (
-    <BrowserRouter>
-      <Navbar />
+    <>
+      {!isAdminRoute && <Navbar />}
       <main>
         <Routes>
           {/* Public Routes */}
@@ -318,7 +321,15 @@ function App() {
           />
         </Routes>
       </main>
-      <Footer />
+      {!isAdminRoute && <Footer />}
+    </>
+  );
+};
+
+function App() {
+  return (
+    <BrowserRouter>
+      <AppContent />
     </BrowserRouter>
   );
 }

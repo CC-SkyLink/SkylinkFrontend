@@ -19,6 +19,7 @@ function DataTable<T>({
   rowKey,
   emptyState,
 }: DataTableProps<T>) {
+  console.log("DataTable rows:", rows);
   // Defensive check for non-array rows
   const safeRows = Array.isArray(rows) ? rows : [];
 

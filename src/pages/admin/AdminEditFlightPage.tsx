@@ -58,7 +58,12 @@ const AdminEditFlightPage = () => {
       await updateFlight(id, data as Partial<Flight>);
       navigate(ROUTES.ADMIN_FLIGHTS);
     } catch (err: any) {
-      setServerError(err.message || "Failed to update flight");
+      // Show detailed error if available from backend (FastAPI style)
+      const detail = err.details?.detail;
+      const message = Array.isArray(detail) 
+        ? detail.map((d: any) => `${d.loc.join('.')}: ${d.msg}`).join(' | ')
+        : err.message || "Failed to update flight";
+      setServerError(message);
     }
   };
 
@@ -87,9 +92,12 @@ const AdminEditFlightPage = () => {
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 pb-20">
           {serverError && (
-            <div className="p-4 bg-rose-50 text-rose-600 text-sm font-bold rounded-2xl border border-rose-100 flex items-center gap-3">
-              <div className="size-2 rounded-full bg-rose-600" />
-              {serverError}
+            <div className="p-4 bg-rose-50 text-rose-600 text-sm font-bold rounded-2xl border border-rose-100 flex flex-col gap-1">
+              <div className="flex items-center gap-3">
+                <div className="size-2 rounded-full bg-rose-600" />
+                <span>Error from Server:</span>
+              </div>
+              <p className="ml-5 font-medium opacity-90">{serverError}</p>
             </div>
           )}
 
