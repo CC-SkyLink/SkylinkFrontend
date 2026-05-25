@@ -20,7 +20,7 @@ const AdminFlightsPage = () => {
   const [sortBy, setSortBy] = useState("");
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [flightToDelete, setFlightToDelete] = useState<Flight | null>(null);
-  const [isDeleting, setIsRegistering] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   // Client-side filtering logic
   const filteredFlights = (flights || []).filter((flight) => {
@@ -54,7 +54,7 @@ const AdminFlightsPage = () => {
 
   const handleDeleteConfirm = async () => {
     if (!flightToDelete) return;
-    setIsRegistering(true);
+    setIsDeleting(true);
     try {
       await deleteFlight(flightToDelete.id);
       setDeleteModalOpen(false);
@@ -63,7 +63,7 @@ const AdminFlightsPage = () => {
     } catch (err) {
       console.error("Failed to delete flight", err);
     } finally {
-      setIsRegistering(false);
+      setIsDeleting(false);
     }
   };
 
@@ -268,7 +268,9 @@ const AdminFlightsPage = () => {
               <div className="flex justify-between items-center mb-1">
                 <span className="font-bold text-slate-900">{flightToDelete.flightNumber} — {flightToDelete.origin} → {flightToDelete.destination}</span>
               </div>
-              <span className="text-sm text-slate-500">{new Date(flightToDelete.departureTime).toLocaleString()}</span>
+              <span className="text-sm text-slate-500">
+                {flightToDelete.departureTime ? new Date(flightToDelete.departureTime).toLocaleString() : "—"}
+              </span>
             </div>
           )}
 
