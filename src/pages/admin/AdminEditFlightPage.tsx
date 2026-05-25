@@ -23,7 +23,7 @@ const AdminEditFlightPage = () => {
     reset,
     formState: { errors, isSubmitting },
   } = useForm<FlightFormValues>({
-    resolver: zodResolver(flightSchema),
+    resolver: zodResolver(flightSchema) as any,
   });
 
   useEffect(() => {

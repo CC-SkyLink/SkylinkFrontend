@@ -20,7 +20,7 @@ const AdminAddFlightPage = () => {
     handleSubmit,
     formState: { errors, isSubmitting },
   } = useForm<FlightFormValues>({
-    resolver: zodResolver(flightSchema),
+    resolver: zodResolver(flightSchema) as any,
     defaultValues: {
       status: "scheduled",
       stops: 0,

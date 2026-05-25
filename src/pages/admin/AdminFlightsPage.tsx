@@ -63,22 +63,36 @@ const AdminFlightsPage = () => {
     {
       key: "departure",
       header: "DEPARTURE",
-      cell: (row) => (
-        <div className="flex flex-col">
-          <span className="text-slate-700 font-medium">{new Date(row.departureTime).toISOString().split('T')[0]}</span>
-          <span className="text-xs text-slate-500">{new Date(row.departureTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
-        </div>
-      ),
+      cell: (row) => {
+        const date = row.departureTime ? new Date(row.departureTime) : null;
+        return (
+          <div className="flex flex-col">
+            <span className="text-slate-700 font-medium">
+              {date ? date.toISOString().split('T')[0] : "—"}
+            </span>
+            <span className="text-xs text-slate-500">
+              {date ? date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : "—"}
+            </span>
+          </div>
+        );
+      },
     },
     {
       key: "arrival",
       header: "ARRIVAL",
-      cell: (row) => (
-        <div className="flex flex-col">
-          <span className="text-slate-700 font-medium">{new Date(row.arrivalTime).toISOString().split('T')[0]}</span>
-          <span className="text-xs text-slate-500">{new Date(row.arrivalTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
-        </div>
-      ),
+      cell: (row) => {
+        const date = row.arrivalTime ? new Date(row.arrivalTime) : null;
+        return (
+          <div className="flex flex-col">
+            <span className="text-slate-700 font-medium">
+              {date ? date.toISOString().split('T')[0] : "—"}
+            </span>
+            <span className="text-xs text-slate-500">
+              {date ? date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : "—"}
+            </span>
+          </div>
+        );
+      },
     },
     {
       key: "status",
@@ -93,7 +107,7 @@ const AdminFlightsPage = () => {
           "font-medium",
           (row.seatsAvailable ?? 0) < 20 ? "text-rose-600" : "text-slate-700"
         )}>
-          {row.seatsAvailable} / {row.totalSeats || 180}
+          {row.seatsAvailable ?? 0} / {row.totalSeats || 180}
         </span>
       ),
     },
