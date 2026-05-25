@@ -2,12 +2,31 @@ import axiosClient from "./axiosClient";
 import { handleApiError } from "./api.helpers";
 import type { Flight, FlightSearchParams } from "@/types";
 
+// Helper to map backend data to frontend Flight type
+const mapBackendFlight = (f: any): Flight => ({
+  id: f.id,
+  flightNumber: f.flight_number,
+  origin: f.origin_airport?.iata_code || f.origin,
+  destination: f.destination_airport?.iata_code || f.destination,
+  departureTime: f.departure_time,
+  arrivalTime: f.arrival_time,
+  status: f.status,
+  // Use price from economy if available
+  price: f.seat_pricing?.find((p: any) => p.seat_class?.name === 'economy')?.price / 100 || f.price || 0,
+  seatsAvailable: f.seat_pricing?.reduce((acc: number, p: any) => acc + (p.available_seats || 0), 0) || f.seatsAvailable,
+  totalSeats: f.seat_pricing?.reduce((acc: number, p: any) => acc + (p.total_seats || 0), 0) || f.totalSeats,
+  airline: f.airline || "SkyLink",
+  cabinClass: f.cabin_class || "economy",
+});
+
 export async function searchFlights(
   params: FlightSearchParams = {},
 ): Promise<Flight[]> {
   try {
     const res = await axiosClient.get("/flights", { params });
-    return res.data as Flight[];
+    // Handle both direct array and paginated object { items: [] }
+    const items = Array.isArray(res.data) ? res.data : (res.data?.items || []);
+    return items.map(mapBackendFlight);
   } catch (err) {
     handleApiError(err);
   }
@@ -16,7 +35,7 @@ export async function searchFlights(
 export async function getFlightById(id: string): Promise<Flight> {
   try {
     const res = await axiosClient.get(`/flights/${id}`);
-    return res.data as Flight;
+    return mapBackendFlight(res.data);
   } catch (err) {
     handleApiError(err);
   }
@@ -24,8 +43,16 @@ export async function getFlightById(id: string): Promise<Flight> {
 
 export async function createFlight(payload: Partial<Flight>): Promise<Flight> {
   try {
+    // Map frontend camelCase to backend snake_case for creation if needed
+    const backendPayload = {
+      flight_number: payload.flightNumber,
+      departure_time: payload.departureTime,
+      arrival_time: payload.arrivalTime,
+      status: payload.status,
+      // Add other mappings as required by your backend
+    };
     const res = await axiosClient.post("/flights", payload);
-    return res.data as Flight;
+    return mapBackendFlight(res.data);
   } catch (err) {
     handleApiError(err);
   }
@@ -37,7 +64,7 @@ export async function updateFlight(
 ): Promise<Flight> {
   try {
     const res = await axiosClient.put(`/flights/${id}`, payload);
-    return res.data as Flight;
+    return mapBackendFlight(res.data);
   } catch (err) {
     handleApiError(err);
   }
