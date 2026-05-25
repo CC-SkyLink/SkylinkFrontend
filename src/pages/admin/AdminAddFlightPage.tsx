@@ -173,8 +173,8 @@ const AdminAddFlightPage = () => {
                 label="Business Fare (₱)"
                 type="number"
                 placeholder="₱ 0"
-                className="[&>input]:rounded-xl [&>input]:h-12 opacity-50"
-                disabled
+                className={cn("[&>input]:rounded-xl [&>input]:h-12", !showBusinessFare && "opacity-50")}
+                disabled={!showBusinessFare}
               />
               <div className="space-y-2">
                 <label className="text-[13px] font-bold text-slate-500 uppercase tracking-widest ml-1">Status *</label>

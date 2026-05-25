@@ -43,15 +43,24 @@ export async function getFlightById(id: string): Promise<Flight> {
 
 export async function createFlight(payload: Partial<Flight>): Promise<Flight> {
   try {
-    // Map frontend camelCase to backend snake_case for creation if needed
+    // Temporary mapping for demo purposes
+    const AIRPORT_MAP: Record<string, number> = { MNL: 1, CEB: 2, DVO: 3, ILO: 4, BCD: 5 };
+    
+    // Map frontend camelCase to backend snake_case
     const backendPayload = {
       flight_number: payload.flightNumber,
+      origin_airport_id: AIRPORT_MAP[payload.origin?.toUpperCase() || ""] || 1,
+      destination_airport_id: AIRPORT_MAP[payload.destination?.toUpperCase() || ""] || 2,
       departure_time: payload.departureTime,
       arrival_time: payload.arrivalTime,
       status: payload.status,
-      // Add other mappings as required by your backend
+      aircraft_id: 1, // Default aircraft for now
+      seat_pricing: [
+        { seat_class_id: 1, total_seats: payload.totalSeats || 153, available_seats: payload.seatsAvailable || 153, price: (payload.price || 0) * 100 },
+        // You can add logic here to handle multiple seat classes
+      ]
     };
-    const res = await axiosClient.post("/flights", payload);
+    const res = await axiosClient.post("/flights", backendPayload);
     return mapBackendFlight(res.data);
   } catch (err) {
     handleApiError(err);
