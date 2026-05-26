@@ -27,6 +27,7 @@ import AdminFlightsPage from "@/pages/admin/AdminFlightsPage";
 import AdminAddFlightPage from "@/pages/admin/AdminAddFlightPage";
 import AdminEditFlightPage from "@/pages/admin/AdminEditFlightPage";
 import AdminUsersPage from "@/pages/admin/AdminUsersPage";
+import AdminUserDetailPage from "@/pages/admin/AdminUserDetailPage";
 import AdminReportsPage from "@/pages/admin/AdminReportsPage";
 import ExplorePage from "@/pages/MainPagesFolder/ExplorePage/ExplorePage";
 import DestinationPage from "@/pages/ExplorePagesFolder/DestinationPage/DestinationPage";
@@ -245,12 +246,7 @@ const AppContent = () => {
             <Route path={ROUTES.ADMIN_USERS} element={<AdminUsersPage />} />
             <Route
               path={ROUTES.ADMIN_USER_PROFILE}
-              element={screen(
-                "A-08",
-                "Admin User Profile",
-                "admin",
-                "Detailed user profile, booking history, and status timeline.",
-              )}
+              element={<AdminUserDetailPage />}
             />
             <Route
               path={ROUTES.ADMIN_USER_STATUS}
