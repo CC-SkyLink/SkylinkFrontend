@@ -14,6 +14,8 @@ import {
   X,
 } from "lucide-react";
 import logos1 from "@/assets/logos/Logos-1.png";
+import { useState } from "react";
+import Toast from "@/pages/_shared/components/ui/Toast";
 
 type AdminSidebarProps = {
   isOpen: boolean;
@@ -24,10 +26,14 @@ const AdminSidebar = ({ isOpen, onClose }: AdminSidebarProps) => {
   const location = useLocation();
   const navigate = useNavigate();
   const { signOut } = useAuth();
+  const [showLogoutToast, setShowLogoutToast] = useState(false);
 
   const handleLogout = () => {
     signOut();
-    navigate(ROUTES.LOGIN);
+    setShowLogoutToast(true);
+    setTimeout(() => {
+      navigate(ROUTES.HOME);
+    }, 1500);
   };
 
   const menuItems = [
@@ -50,6 +56,11 @@ const AdminSidebar = ({ isOpen, onClose }: AdminSidebarProps) => {
 
   return (
     <>
+      <Toast 
+        message="Logout Successful" 
+        isOpen={showLogoutToast} 
+        onClose={() => setShowLogoutToast(false)} 
+      />
       {/* Mobile Overlay */}
       {isOpen && (
         <div
