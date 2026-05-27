@@ -3,7 +3,7 @@ import { ROUTES } from "@/constants/routes";
 import { useAuthStore } from "@/store/useAuthStore";
 import { useAuth } from "@/hooks/useAuth";
 import { cn } from "@/utils/cn";
-import { LogOut, LayoutDashboard, Ticket, ChevronDown } from "lucide-react";
+import { LogOut, Settings, BookOpen, ChevronDown, LayoutDashboard } from "lucide-react";
 import logos1 from "@/assets/logos/Logos-1.png";
 import { colors, typography } from "@/constants/theme";
 import { useState, useRef, useEffect } from "react";
@@ -127,25 +127,34 @@ const Navbar = () => {
                     <p className="text-sm font-bold text-slate-900 truncate">{user?.email}</p>
                   </div>
                   
-                  <Link 
-                    to={isAdmin ? ROUTES.ADMIN_DASHBOARD : ROUTES.USER_DASHBOARD}
-                    className="flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-primary-60 transition-colors"
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    <LayoutDashboard size={18} />
-                    {isAdmin ? "Admin Portal" : "My Dashboard"}
-                  </Link>
-
-                  {!isAdmin && (
+                  {isAdmin && (
                     <Link 
-                      to={ROUTES.MY_BOOKINGS}
+                      to={ROUTES.ADMIN_DASHBOARD}
                       className="flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-primary-60 transition-colors"
                       onClick={() => setIsMenuOpen(false)}
                     >
-                      <Ticket size={18} />
-                      My Bookings
+                      <LayoutDashboard size={18} />
+                      Admin Portal
                     </Link>
                   )}
+
+                  <Link 
+                    to={ROUTES.PROFILE_SETTINGS}
+                    className="flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-primary-60 transition-colors"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    <Settings size={18} />
+                    Account Settings
+                  </Link>
+
+                  <Link 
+                    to={ROUTES.MY_BOOKINGS}
+                    className="flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-primary-60 transition-colors"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    <BookOpen size={18} />
+                    My Bookings
+                  </Link>
 
                   <div className="h-px bg-slate-50 my-1" />
                   
