@@ -7,6 +7,7 @@ export const BOOKING_DATA = {
   duration: "1h 20m",
   cabin: "Economy",
   baggage: "20kg",
+  meal: "Standard Meal",
   passengerName: "Marco Gonzales",
   passengerNationality: "Filipino",
   passengerId: "1234567890",
