@@ -50,6 +50,7 @@ export const ROUTES = {
   ADMIN_BOOKING_CANCEL: "/admin/bookings/:id/cancel",
   ADMIN_REPORTS: "/admin/reports",
   ADMIN_REPORT_RESULT: "/admin/reports/result",
+  ADMIN_PROMOTIONS: "/admin/promotions",
 
   // Fallbacks
   UNAUTHORIZED: "/unauthorized",

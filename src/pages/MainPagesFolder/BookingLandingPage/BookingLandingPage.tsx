@@ -1,28 +1,16 @@
 import { useEffect, useRef, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { colors, typography } from "@/constants/theme";
 import { ROUTES } from "@/constants/routes";
-import { CiLocationOn } from "react-icons/ci";
-import { CiSearch } from "react-icons/ci";
-import { CiClock2 } from "react-icons/ci";
+import { CiLocationOn, CiSearch, CiClock2 } from "react-icons/ci";
 import DatePicker from "@/pages/_shared/components/ui/DatePicker";
 import TripTypePill, { type TripType } from "./components/TripTypePill";
 import PassengerSelector, {
   type CabinClass,
   type PassengerCounts,
 } from "./components/PassengerSelector";
-
-type Deal = {
-  id: string;
-  title: string;
-  price: string;
-  originalPrice: string;
-  discount: string;
-  badge: string;
-  badgeClass: string;
-  validUntil: string;
-  image?: string;
-};
+import { getPromotions } from "@/api/promotions.api";
+import type { Promotion } from "@/types/promotion.types";
 
 type Route = {
   id: string;
@@ -48,39 +36,6 @@ type AirportOption = {
   airport: string;
   country: string;
 };
-
-const DEALS: Deal[] = [
-  {
-    id: "1",
-    title: "Flash Sale: Manila–Cebu",
-    price: "₱1,490",
-    originalPrice: "₱3,500",
-    discount: "-57%",
-    badge: "Flash",
-    badgeClass: "bg-warning-60",
-    validUntil: "Until April 30",
-  },
-  {
-    id: "2",
-    title: "Weekend Escape: Manila–Palawan",
-    price: "₱2,199",
-    originalPrice: "₱4,200",
-    discount: "-48%",
-    badge: "Weekend",
-    badgeClass: "bg-success-60",
-    validUntil: "Until May 15",
-  },
-  {
-    id: "3",
-    title: "Fly to Singapore from ₱7,500",
-    price: "₱7,500",
-    originalPrice: "₱12,500",
-    discount: "-40%",
-    badge: "International",
-    badgeClass: "bg-success-60",
-    validUntil: "Until May 31",
-  },
-];
 
 const POPULAR_ROUTES: Route[] = [
   {
@@ -240,47 +195,65 @@ function getCode(value: string) {
   return match ? match[1] : "";
 }
 
-function DealCard({ deal }: { deal: Deal }) {
+function DealCard({ deal }: { deal: Promotion }) {
+  const discount = Math.round(((deal.original_price - deal.sale_price) / deal.original_price) * 100);
+  
+  // Construct search link for this promotion
+  const searchParams = new URLSearchParams();
+  searchParams.set("from", "Manila (MNL)");
+  searchParams.set("to", deal.destination_code);
+  searchParams.set("pax", "1");
+  searchParams.set("cabin", "Economy");
+  const searchHref = `${ROUTES.SEARCH_RESULTS}?${searchParams.toString()}`;
+
+  const badgeClass = cn(
+    "absolute bottom-3 right-3 text-text-on-primary px-2 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider",
+    deal.category === "flash" && "bg-warning-60",
+    deal.category === "weekend" && "bg-success-60",
+    deal.category === "international" && "bg-purple-60",
+    deal.category === "promo" && "bg-blue-60",
+  );
+
   return (
     <Link
-      to={ROUTES.EXPLORE_PROMO_DETAIL}
-      className="bg-bg-page border border-tertiary-30 rounded-[14px] overflow-hidden shadow-[0px_2px_8px_rgba(0,0,0,0.04)] text-left w-full hover:shadow-md transition-shadow"
+      to={searchHref}
+      className="bg-bg-page border border-tertiary-30 rounded-[14px] overflow-hidden shadow-[0px_2px_8px_rgba(0,0,0,0.04)] text-left w-full hover:shadow-md transition-shadow group"
     >
       <div className="relative h-[140px] bg-tertiary-20">
-        {deal.image ? (
+        {deal.image_url ? (
           <img
-            src={deal.image}
+            src={deal.image_url}
             alt={deal.title}
-            className="absolute inset-0 w-full h-full object-cover"
+            className="absolute inset-0 w-full h-full object-cover transition-transform group-hover:scale-105"
           />
         ) : (
-          <div className="absolute inset-0 bg-tertiary-20" />
+          <div className="absolute inset-0 bg-gradient-to-br from-primary-60 to-primary-80 flex items-center justify-center">
+            <Tag size={40} className="text-white/20" />
+          </div>
         )}
         <span
-          className={`absolute top-3 left-3 bg-danger-60 text-text-on-primary ${typography.label.xs.bold} px-2 py-1 rounded-full`}
+          className="absolute top-3 left-3 bg-rose-600 text-text-on-primary text-[11px] font-bold px-2 py-1 rounded-full"
         >
-          {deal.discount}
+          -{discount}%
         </span>
-        <span
-          className={`absolute bottom-3 right-3 ${deal.badgeClass} text-text-on-primary ${typography.label.xs.semiBold} px-2 py-1 rounded-full`}
-        >
-          {deal.badge}
+        <span className={badgeClass}>
+          {deal.category}
         </span>
       </div>
       <div className="p-4">
-        <p className={`${typography.label.md.bold} ${colors.text.primary}`}>
+        <p className={`${typography.label.md.bold} ${colors.text.primary} line-clamp-1`}>
           {deal.title}
         </p>
         <div className="flex items-baseline gap-2 mt-2">
           <span
-            className={`${typography.heading.h3.bold} font-extrabold text-primary-60`}
+            className={`${typography.heading.h3.bold} font-extrabold text-[#496B92]`}
           >
-            {deal.price}
+            ₱{deal.sale_price.toLocaleString()}
           </span>
           <span
             className={`${typography.paragraph.sm.medium} ${colors.text.secondary} line-through`}
           >
-            {deal.originalPrice}
+            ₱{deal.original_price.toLocaleString()}
           </span>
         </div>
         <div
@@ -288,7 +261,7 @@ function DealCard({ deal }: { deal: Deal }) {
         >
           <CiClock2 size={11} className="shrink-0" />
           <span className={typography.paragraph.xs.medium}>
-            {deal.validUntil}
+            {deal.valid_until}
           </span>
         </div>
       </div>
@@ -340,7 +313,7 @@ function RouteCard({ route }: { route: Route }) {
         </div>
       </div>
       <div className="text-right">
-        <p className={`${typography.label.md.bold} text-primary-60`}>
+        <p className={`${typography.label.md.bold} text-[#496B92]`}>
           {route.price}
         </p>
         <p
@@ -428,8 +401,25 @@ const BookingLandingPage = () => {
   });
   const [cabinClass, setCabinClass] = useState<CabinClass>("Economy");
   const [openField, setOpenField] = useState<"from" | "to" | null>(null);
+  const [promotions, setPromotions] = useState<Promotion[]>([]);
+  const [isPromosLoading, setIsPromosLoading] = useState(true);
+  
   const fromRef = useRef<HTMLDivElement>(null);
   const toRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const fetchPromos = async () => {
+      try {
+        const data = await getPromotions();
+        setPromotions(data);
+      } catch (err) {
+        console.error("Failed to fetch promos", err);
+      } finally {
+        setIsPromosLoading(false);
+      }
+    };
+    fetchPromos();
+  }, []);
 
   useEffect(() => {
     const handler = (event: MouseEvent) => {
@@ -516,7 +506,7 @@ const BookingLandingPage = () => {
                   <CiLocationOn
                     size={16}
                     strokeWidth={1}
-                    className={`shrink-0 text-primary-60`}
+                    className={`shrink-0 text-[#496B92]`}
                   />
                   <input
                     type="text"
@@ -565,7 +555,7 @@ const BookingLandingPage = () => {
                   <CiLocationOn
                     size={16}
                     strokeWidth={1}
-                    className={`shrink-0 text-primary-60`}
+                    className={`shrink-0 text-[#496B92]`}
                   />
                   <input
                     type="text"
@@ -623,7 +613,7 @@ const BookingLandingPage = () => {
             {/* Search CTA */}
             <Link
               to={searchHref}
-              className={`w-full ${colors.action.primary} ${colors.action.primaryHover} ${colors.action.primaryPress} ${typography.label.md.semiBold} h-14 rounded-[10px] flex items-center justify-center gap-2 transition-colors`}
+              className={`w-full bg-[#496B92] hover:bg-[#3B5470] ${typography.label.md.semiBold} h-14 rounded-[10px] flex items-center justify-center gap-2 transition-colors text-white`}
             >
               <CiSearch size={18} strokeWidth={1.5} className="shrink-0" />
               Search Flights
@@ -640,11 +630,22 @@ const BookingLandingPage = () => {
             linkLabel="See all deals"
             to={ROUTES.EXPLORE_PROMOS}
           />
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {DEALS.map((deal) => (
-              <DealCard key={deal.id} deal={deal} />
-            ))}
-          </div>
+          {isPromosLoading ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {[1, 2, 3].map((n) => (
+                <div key={n} className="h-[260px] rounded-[14px] bg-slate-100 animate-pulse" />
+              ))}
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {promotions.map((deal) => (
+                <DealCard key={deal.id} deal={deal} />
+              ))}
+              {promotions.length === 0 && (
+                <p className="col-span-full text-center py-10 text-slate-500 font-medium">No active deals at the moment. Check back soon!</p>
+              )}
+            </div>
+          )}
         </section>
 
         <section>

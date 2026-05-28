@@ -29,6 +29,7 @@ import AdminEditFlightPage from "@/pages/admin/AdminEditFlightPage";
 import AdminUsersPage from "@/pages/admin/AdminUsersPage";
 import AdminUserDetailPage from "@/pages/admin/AdminUserDetailPage";
 import AdminReportsPage from "@/pages/admin/AdminReportsPage";
+import AdminPromotionsPage from "@/pages/admin/AdminPromotionsPage";
 import ExplorePage from "@/pages/MainPagesFolder/ExplorePage/ExplorePage";
 import DestinationPage from "@/pages/ExplorePagesFolder/DestinationPage/DestinationPage";
 import PromosPage from "@/pages/ExplorePagesFolder/PromosPage/PromosPage";
@@ -280,6 +281,7 @@ const AppContent = () => {
               )}
             />
             <Route path={ROUTES.ADMIN_REPORTS} element={<AdminReportsPage />} />
+            <Route path={ROUTES.ADMIN_PROMOTIONS} element={<AdminPromotionsPage />} />
             <Route
               path={ROUTES.ADMIN_REPORT_RESULT}
               element={screen(

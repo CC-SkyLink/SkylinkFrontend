@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
-import { Link, useLocation, useParams } from "react-router-dom";
+import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import { ROUTES } from "@/constants/routes";
+import useAuth from "@/hooks/useAuth";
 import FlightDetailCard, {
   type FlightDetail,
 } from "./components/FlightDetailCard";
@@ -107,6 +108,8 @@ function formatCurrency(value: number) {
 const ResultsBookingPage = () => {
   const { id } = useParams();
   const location = useLocation();
+  const navigate = useNavigate();
+  const { isAuthenticated } = useAuth();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const searchSuffix = location.search ?? "";
   const searchResultsLink = `${ROUTES.SEARCH_RESULTS}${searchSuffix}`;
@@ -126,6 +129,15 @@ const ResultsBookingPage = () => {
   const totalLabel = formatCurrency(totalValue);
   const baseLabel = formatCurrency(baseValue);
   const taxesLabel = formatCurrency(taxesValue);
+
+  const handleBook = () => {
+    const nextPath = `${ROUTES.BOOKING_PASSENGER_DETAILS}${searchSuffix}`;
+    if (isAuthenticated) {
+      navigate(nextPath);
+    } else {
+      setIsModalOpen(true);
+    }
+  };
 
   return (
     <main className="min-h-[calc(100vh-160px)] bg-[#F3F5F7]">
@@ -148,7 +160,7 @@ const ResultsBookingPage = () => {
             baseFare={baseLabel}
             taxes={taxesLabel}
             total={totalLabel}
-            onBook={() => setIsModalOpen(true)}
+            onBook={handleBook}
           />
         </div>
       </section>
