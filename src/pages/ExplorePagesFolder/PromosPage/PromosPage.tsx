@@ -38,8 +38,7 @@ const PROMOS: Promo[] = [
     discount: "-57% OFF",
     tag: "Flash",
     validUntil: "Apr 30",
-    image:
-      "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=800&q=80",
+    image: "/Images/BookPage/Flash Sale Manila-Cebu.png",
   },
   {
     id: "promo-2",
@@ -51,8 +50,7 @@ const PROMOS: Promo[] = [
     discount: "-48% OFF",
     tag: "Weekend",
     validUntil: "May 15",
-    image:
-      "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=800&q=80",
+    image: "/Images/BookPage/Weekend Escape Manila - Palawan.png",
   },
   {
     id: "promo-3",
@@ -64,8 +62,7 @@ const PROMOS: Promo[] = [
     discount: "-40% OFF",
     tag: "International",
     validUntil: "May 31",
-    image:
-      "https://images.unsplash.com/photo-1508817628294-5a453fa0b8fb?auto=format&fit=crop&w=800&q=80",
+    image: "/Images/BookPage/Fly to Singapore P7500.png",
   },
   {
     id: "promo-4",
@@ -77,8 +74,7 @@ const PROMOS: Promo[] = [
     discount: "-36% OFF",
     tag: "Business",
     validUntil: "Jun 30",
-    image:
-      "https://images.unsplash.com/photo-1494783367193-149034c05e8f?auto=format&fit=crop&w=800&q=80",
+    image: "/Images/BookPage/Tokyo.png",
   },
   {
     id: "promo-5",
@@ -89,8 +85,7 @@ const PROMOS: Promo[] = [
     discount: "-48% OFF",
     tag: "Flash",
     validUntil: "Apr 25",
-    image:
-      "https://images.unsplash.com/photo-1500375592092-40eb2168fd21?auto=format&fit=crop&w=800&q=80",
+    image: "/Images/BookPage/Kalibo Boracay.png",
   },
   {
     id: "promo-6",
@@ -101,8 +96,7 @@ const PROMOS: Promo[] = [
     discount: "-37% OFF",
     tag: "International",
     validUntil: "Jul 15",
-    image:
-      "https://images.unsplash.com/photo-1507525428034-16f58c1f13c1?auto=format&fit=crop&w=800&q=80",
+    image: "/Images/BookPage/Discover Bali from 6200.png",
   },
 ];
 
@@ -111,7 +105,7 @@ const TAG_STYLES: Record<PromoTag, string> = {
   Weekend: "bg-emerald-600",
   International: "bg-teal-600",
   Domestic: "bg-slate-600",
-  Business: "bg-indigo-600",
+  Business: "bg-gray-600",
 };
 
 const PromosPage = () => {
@@ -168,6 +162,7 @@ const PromosPage = () => {
               <Link
                 key={promo.id}
                 to={ROUTES.EXPLORE_PROMO_DETAIL}
+                state={{ deal: promo }}
                 className="block overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:shadow-md"
               >
                 <article>
