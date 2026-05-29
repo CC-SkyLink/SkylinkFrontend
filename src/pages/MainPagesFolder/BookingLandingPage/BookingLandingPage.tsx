@@ -1,27 +1,18 @@
 import { useEffect, useRef, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { colors, typography } from "@/constants/theme";
 import { ROUTES } from "@/constants/routes";
 import { CiLocationOn, CiSearch, CiClock2 } from "react-icons/ci";
+import { Tag } from "lucide-react";
 import DatePicker from "@/pages/_shared/components/ui/DatePicker";
 import TripTypePill, { type TripType } from "./components/TripTypePill";
 import PassengerSelector, {
   type CabinClass,
   type PassengerCounts,
 } from "./components/PassengerSelector";
-
-type Deal = {
-  id: string;
-  title: string;
-  description: string;
-  price: string;
-  originalPrice: string;
-  discount: string;
-  badge: string;
-  badgeClass: string;
-  validUntil: string;
-  image?: string;
-};
+import { getPromotions } from "@/api/promotions.api";
+import type { Promotion } from "@/types/promotion.types";
+import { cn } from "@/utils/cn";
 
 type Route = {
   id: string;
@@ -48,48 +39,6 @@ type AirportOption = {
   airport: string;
   country: string;
 };
-
-const DEALS: Deal[] = [
-  {
-    id: "1",
-    title: "Flash Sale: Manila–Cebu",
-    description:
-      "Limited seats at unbeatable prices. Book now and save big on your next getaway!",
-    price: "₱1,490",
-    originalPrice: "₱3,500",
-    discount: "-57%",
-    badge: "Flash",
-    badgeClass: "bg-warning-60",
-    validUntil: "Until April 30",
-    image: "/Images/BookPage/Flash Sale Manila-Cebu.png",
-  },
-  {
-    id: "2",
-    title: "Weekend Escape: Manila–Palawan",
-    description:
-      "Discover Palawan's pristine beaches with our special weekend rates.",
-    price: "₱2,199",
-    originalPrice: "₱4,200",
-    discount: "-48%",
-    badge: "Weekend",
-    badgeClass: "bg-success-60",
-    validUntil: "Until May 15",
-    image: "/Images/BookPage/Weekend Escape Manila - Palawan.png",
-  },
-  {
-    id: "3",
-    title: "Fly to Singapore from ₱7,500",
-    description:
-      "Experience the Lion City at amazing prices. Perfect for a long weekend getaway.",
-    price: "₱7,500",
-    originalPrice: "₱12,500",
-    discount: "-40%",
-    badge: "International",
-    badgeClass: "bg-success-60",
-    validUntil: "Until May 31",
-    image: "/Images/BookPage/Fly to Singapore P7500.png",
-  },
-];
 
 const POPULAR_ROUTES: Route[] = [
   {
@@ -260,14 +209,6 @@ function getCode(value: string) {
 function DealCard({ deal }: { deal: Promotion }) {
   const discount = Math.round(((deal.original_price - deal.sale_price) / deal.original_price) * 100);
   
-  // Construct search link for this promotion
-  const searchParams = new URLSearchParams();
-  searchParams.set("from", "Manila (MNL)");
-  searchParams.set("to", deal.destination_code);
-  searchParams.set("pax", "1");
-  searchParams.set("cabin", "Economy");
-  const searchHref = `${ROUTES.SEARCH_RESULTS}?${searchParams.toString()}`;
-
   const badgeClass = cn(
     "absolute bottom-3 right-3 text-text-on-primary px-2 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider",
     deal.category === "flash" && "bg-warning-60",
@@ -283,19 +224,19 @@ function DealCard({ deal }: { deal: Promotion }) {
         deal: {
           id: deal.id,
           title: deal.title,
-          description: deal.description,
-          price: deal.price,
-          oldPrice: deal.originalPrice,
-          discount: deal.discount,
-          validUntil: deal.validUntil,
-          image: deal.image ?? "",
-          badge: deal.badge,
+          description: deal.title,
+          price: `₱${deal.sale_price.toLocaleString()}`,
+          oldPrice: `₱${deal.original_price.toLocaleString()}`,
+          discount: `-${discount}%`,
+          validUntil: deal.valid_until,
+          image: deal.image_url ?? "",
+          badge: deal.category,
         },
       }}
       className="bg-bg-page border border-tertiary-30 rounded-[14px] overflow-hidden shadow-[0px_2px_8px_rgba(0,0,0,0.04)] text-left w-full hover:shadow-md transition-shadow"
     >
       <div className="relative h-35 bg-tertiary-20">
-        {deal.image ? (
+        {deal.image_url ? (
           <img
             src={deal.image_url}
             alt={deal.title}

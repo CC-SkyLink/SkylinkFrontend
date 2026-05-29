@@ -76,7 +76,8 @@ type DashboardData = {
 
 function mapBookingToRecentBooking(booking: Booking): RecentBooking {
   const route = `${booking.flight?.origin ?? "MNL"} → ${booking.flight?.destination ?? "CEB"}`;
-  const passenger = `${booking.passengers[0]?.firstName ?? "Guest"} ${booking.passengers[0]?.lastName ?? "Passenger"}`;
+  const firstPassenger = booking.passengers?.[0];
+  const passenger = `${firstPassenger?.firstName ?? "Guest"} ${firstPassenger?.lastName ?? "Passenger"}`;
   return {
     pnr: booking.pnr ?? booking.id.toUpperCase(),
     passenger,

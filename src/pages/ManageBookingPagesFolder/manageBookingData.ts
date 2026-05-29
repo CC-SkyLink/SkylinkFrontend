@@ -203,7 +203,7 @@ const toDuration = (departureTime?: string, arrivalTime?: string) => {
 };
 
 const passengerLabel = (booking: Booking | BookingDetail) => {
-  const count = booking.passengers.length;
+  const count = booking.passengers?.length ?? 0;
   if (count <= 0) {
     return "1 Adult";
   }
@@ -211,11 +211,12 @@ const passengerLabel = (booking: Booking | BookingDetail) => {
   return `${count} Adult${count === 1 ? "" : "s"}`;
 };
 
-const mealLabel = (booking: Booking | BookingDetail) =>
-  booking.passengers[0]?.mealPreference
-    ? booking.passengers[0].mealPreference.charAt(0).toUpperCase() +
-      booking.passengers[0].mealPreference.slice(1)
+const mealLabel = (booking: Booking | BookingDetail) => {
+  const preference = booking.passengers?.[0]?.mealPreference;
+  return preference
+    ? preference.charAt(0).toUpperCase() + preference.slice(1)
     : "Standard";
+};
 
 const toManageBooking = (booking: Booking | BookingDetail): ManageBooking => {
   const flight = booking.flight;
@@ -242,7 +243,7 @@ const toManageBooking = (booking: Booking | BookingDetail): ManageBooking => {
     date: tripDate,
     duration: toDuration(departureTime, arrivalTime),
     cabin: flight?.airline ? "Economy" : BOOKING_DATA.cabin,
-    seat: booking.passengers[0]?.seatNumber ?? BOOKING_DATA.seat,
+    seat: booking.passengers?.[0]?.seatNumber ?? BOOKING_DATA.seat,
     passengers: passengerLabel(booking),
     meal: mealLabel(booking),
     bookingDate,

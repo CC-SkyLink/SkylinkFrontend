@@ -134,10 +134,10 @@ const BookingDetailPage = () => {
                     Passengers
                   </p>
                   <p className="mt-2 text-sm font-semibold text-slate-800">
-                    {booking.passengers.length}
+                    {booking.passengers?.length ?? 0}
                   </p>
                   <p className="text-xs text-slate-500">
-                    Seat {booking.passengers[0]?.seatNumber ?? "Auto"}
+                    Seat {booking.passengers?.[0]?.seatNumber ?? "Auto"}
                   </p>
                 </div>
               </div>
@@ -185,11 +185,11 @@ const BookingDetailPage = () => {
               </div>
               <div className="mt-4 space-y-2 text-sm text-slate-600">
                 <p className="font-semibold text-slate-800">
-                  {booking.passengers[0]?.firstName}{" "}
-                  {booking.passengers[0]?.lastName}
+                  {booking.passengers?.[0]?.firstName ?? "Guest"}{" "}
+                  {booking.passengers?.[0]?.lastName ?? "Passenger"}
                 </p>
-                <p>{booking.passengers[0]?.nationality ?? "—"}</p>
-                <p>Seat {booking.passengers[0]?.seatNumber ?? "Auto"}</p>
+                <p>{booking.passengers?.[0]?.nationality ?? "—"}</p>
+                <p>Seat {booking.passengers?.[0]?.seatNumber ?? "Auto"}</p>
               </div>
             </div>
 

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, type SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { getPromotions, createPromotion, deletePromotion } from "@/api/promotions.api";
 import AdminLayout from "./_components/AdminLayout";
@@ -28,6 +28,10 @@ const AdminPromotionsPage = () => {
     resolver: zodResolver(promotionSchema),
     defaultValues: {
       category: "promo",
+      image_url: "",
+      title: "",
+      destination_code: "",
+      destination_city: "",
     },
   });
 
@@ -47,7 +51,7 @@ const AdminPromotionsPage = () => {
     fetchPromotions();
   }, []);
 
-  const onSubmit = async (data: PromotionFormValues) => {
+  const onSubmit: SubmitHandler<PromotionFormValues> = async (data) => {
     try {
       await createPromotion(data as CreatePromotionPayload);
       setIsAddModalOpen(false);
@@ -254,14 +258,14 @@ const AdminPromotionsPage = () => {
               type="number"
               placeholder="0"
               error={errors.sale_price?.message}
-              {...register("sale_price")}
+              {...register("sale_price", { valueAsNumber: true })}
             />
             <Input
               label="Original Price (₱) *"
               type="number"
               placeholder="0"
               error={errors.original_price?.message}
-              {...register("original_price")}
+              {...register("original_price", { valueAsNumber: true })}
             />
           </div>
 
