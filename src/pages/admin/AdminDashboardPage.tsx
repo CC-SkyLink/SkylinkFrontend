@@ -133,7 +133,7 @@ const AdminDashboardPage = () => {
     [dashboardData.bookings],
   );
 
-  const columns: TableColumn<RecentBooking>[] = [
+  const columns: TableColumn<RecentBooking>[] = useMemo(() => [
     {
       key: "pnr",
       header: "PNR",
@@ -168,7 +168,7 @@ const AdminDashboardPage = () => {
         <span className="font-bold text-slate-900">{row.amount}</span>
       ),
     },
-  ];
+  ], []);
 
   return (
     <AdminLayout>

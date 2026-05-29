@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useForm, type SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { getPromotions, createPromotion, deletePromotion } from "@/api/promotions.api";
@@ -62,7 +62,7 @@ const AdminPromotionsPage = () => {
     }
   };
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = useCallback(async (id: string) => {
     if (!confirm("Are you sure you want to delete this promotion?")) return;
     setIsDeleting(true);
     try {
@@ -73,7 +73,7 @@ const AdminPromotionsPage = () => {
     } finally {
       setIsDeleting(false);
     }
-  };
+  }, []);
 
   const filteredPromotions = useMemo(() => {
     return promotions.filter((p) =>
@@ -82,7 +82,7 @@ const AdminPromotionsPage = () => {
     );
   }, [promotions, searchQuery]);
 
-  const columns: TableColumn<Promotion>[] = [
+  const columns: TableColumn<Promotion>[] = useMemo(() => [
     {
       key: "title",
       header: "PROMOTION TITLE",
@@ -160,7 +160,7 @@ const AdminPromotionsPage = () => {
         </button>
       ),
     },
-  ];
+  ], [handleDelete, isDeleting]);
 
   return (
     <AdminLayout>
