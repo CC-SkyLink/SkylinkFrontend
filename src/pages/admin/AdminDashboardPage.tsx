@@ -84,7 +84,8 @@ function mapBookingToRecentBooking(booking: Booking): RecentBooking {
     route,
     date:
       booking.flight?.departureTime?.split("T")[0] ??
-      booking.createdAt.split("T")[0],
+      booking.createdAt?.split("T")[0] ??
+      new Date().toISOString().split("T")[0],
     status: booking.status,
     amount: `₱${booking.totalPrice.toLocaleString("en-US")}`,
   };
