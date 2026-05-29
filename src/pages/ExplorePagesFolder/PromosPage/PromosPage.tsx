@@ -30,24 +30,25 @@ const PromosPage = () => {
 
   const deals = useMemo(() => {
     const allDeals: Deal[] = (promotions || []).map((promo) => {
-      const discount = Math.round(
-        ((promo.original_price - promo.sale_price) / promo.original_price) * 100,
-      );
+      const sale = promo.sale_price || 0;
+      const original = promo.original_price || 1; // avoid div by zero
+      const discount = Math.round(((original - sale) / original) * 100);
+
       return {
         id: promo.id,
-        title: promo.title,
-        description: promo.title,
-        price: `₱${promo.sale_price.toLocaleString()}`,
-        originalPrice: `₱${promo.original_price.toLocaleString()}`,
+        title: promo.title || "Special Deal",
+        description: promo.title || "",
+        price: `₱${sale.toLocaleString()}`,
+        originalPrice: `₱${original.toLocaleString()}`,
         discount: `${discount}% OFF`,
-        badge: promo.category.toUpperCase(),
+        badge: (promo.category || "PROMO").toUpperCase(),
         badgeClass:
           promo.category === "flash"
             ? "bg-warning-60 text-white"
             : promo.category === "weekend"
               ? "bg-success-60 text-white"
               : "bg-primary-60 text-white",
-        validUntil: promo.valid_until,
+        validUntil: promo.valid_until || "Limited Time",
         image: promo.image_url ?? "",
       };
     });
