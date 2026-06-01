@@ -31,13 +31,16 @@ import AdminAddFlightPage from "@/pages/admin/AdminAddFlightPage";
 import AdminEditFlightPage from "@/pages/admin/AdminEditFlightPage";
 import AdminUsersPage from "@/pages/admin/AdminUsersPage";
 import AdminUserDetailPage from "@/pages/admin/AdminUserDetailPage";
-import AdminReportsPage from "@/pages/admin/AdminReportsPage";
+import AdminReportsPage from "@/pages/admin/AdminReportsPage/AdminReportsPage";
 import AdminPromotionsPage from "@/pages/admin/AdminPromotionsPage";
 import ExplorePage from "@/pages/MainPagesFolder/ExplorePage/ExplorePage";
 import DestinationPage from "@/pages/ExplorePagesFolder/DestinationPage/DestinationPage";
 import PromosPage from "@/pages/ExplorePagesFolder/PromosPage/PromosPage";
 import DeaPage from "@/pages/ExplorePagesFolder/DeaPage/DeaPage";
 import AdminDestinationsPage from "@/pages/admin/AdminDestinationsPage";
+import AdminSettingsPage from "@/pages/admin/AdminSettingsPage/AdminSettingsPage";
+import AdminBookingsPage from "@/pages/admin/AdminBookingsPage/AdminBookingsPage";
+import AdminBookingDetailPage from "@/pages/admin/AdminBookingsPage/AdminBookingDetailPage";
 
 function screen(
   id: string,
@@ -268,34 +271,30 @@ const AppContent = () => {
             />
             <Route
               path={ROUTES.ADMIN_BOOKINGS}
-              element={screen(
-                "A-10",
-                "Admin Booking List",
-                "admin",
-                "Booking management table with filters and export actions.",
-              )}
+              element={<AdminBookingsPage />}
             />
             <Route
               path={ROUTES.ADMIN_BOOKING_DETAIL}
-              element={screen(
-                "A-11",
-                "Admin Booking Detail",
-                "admin",
-                "Booking deep view including payment and passenger timeline.",
-              )}
+              element={<AdminBookingDetailPage />}
             />
             <Route
               path={ROUTES.ADMIN_BOOKING_CANCEL}
-              element={screen(
-                "A-12",
-                "Admin Cancel Modal",
-                "admin",
-                "Cancellation workflow with required reason and refund preview.",
-              )}
+              element={<AdminBookingDetailPage />}
             />
             <Route path={ROUTES.ADMIN_REPORTS} element={<AdminReportsPage />} />
-            <Route path={ROUTES.ADMIN_PROMOTIONS} element={<AdminPromotionsPage />} />
-            <Route path={ROUTES.ADMIN_DESTINATIONS} element={<AdminDestinationsPage />} />
+            <Route path="/admin/activity-log" element={<AdminReportsPage />} />
+            <Route
+              path={ROUTES.ADMIN_PROMOTIONS}
+              element={<AdminPromotionsPage />}
+            />
+            <Route
+              path={ROUTES.ADMIN_DESTINATIONS}
+              element={<AdminDestinationsPage />}
+            />
+            <Route
+              path={ROUTES.ADMIN_SETTINGS}
+              element={<AdminSettingsPage />}
+            />
             <Route
               path={ROUTES.ADMIN_REPORT_RESULT}
               element={screen(
