@@ -18,7 +18,7 @@ import { generateReport } from "@/api/reports.api";
 
 // --- Types ---
 type ReportType = "revenue" | "route" | "cancellation" | "growth";
-type DateRange = "today" | "week" | "month" | "3months" | "custom";
+type DateRange = "all" | "today" | "week" | "month" | "3months" | "custom";
 
 interface MonthlyRevenuePoint {
   month: string;
@@ -137,7 +137,7 @@ const AdminReportsPage = () => {
 
   // Filter & Active States (Reports Tab)
   const [reportType, setReportType] = useState<ReportType>("revenue");
-  const [dateRange, setDateRange] = useState<DateRange>("month");
+  const [dateRange, setDateRange] = useState<DateRange>("all");
 
   // Hover states for line chart tooltip
   const [hoveredPoint, setHoveredPoint] = useState<number | null>(null);
@@ -160,7 +160,7 @@ const AdminReportsPage = () => {
     type: "success"
   });
 
-// Reset tab scroll/state on path updates
+  // Reset tab scroll/state on path updates
   useEffect(() => {
     setHoveredPoint(null);
   }, [activeTab, reportType]);
@@ -168,10 +168,41 @@ const AdminReportsPage = () => {
   // Fetch real report data from backend
   useEffect(() => {
     if (activeTab !== "reports" || reportType !== "revenue") return;
+
+    const now = new Date();
+    let date_from: string | undefined;
+    let date_to: string | undefined = now.toISOString();
+
+    if (dateRange === "today") {
+      const start = new Date(now);
+      start.setHours(0, 0, 0, 0);
+      date_from = start.toISOString();
+    } else if (dateRange === "week") {
+      const start = new Date(now);
+      start.setDate(now.getDate() - 7);
+      date_from = start.toISOString();
+    } else if (dateRange === "month") {
+      const start = new Date(now);
+      start.setMonth(now.getMonth() - 1);
+      date_from = start.toISOString();
+    } else if (dateRange === "3months") {
+      const start = new Date(now);
+      start.setMonth(now.getMonth() - 3);
+      date_from = start.toISOString();
+    } else {
+      // "custom" or default — no filter, show all
+      date_from = undefined;
+      date_to = undefined;
+    }
+
     const fetchReport = async () => {
       setIsLoadingReport(true);
       try {
-        const data = await generateReport();
+        const data = await generateReport(
+          date_from !== undefined
+            ? ({ date_from: date_from as string, date_to: date_to as string } as any)
+            : undefined
+        );
         setReportData_api(data as unknown as BookingReport);
       } catch (err) {
         console.error("Failed to load report:", err);
@@ -180,7 +211,7 @@ const AdminReportsPage = () => {
       }
     };
     fetchReport();
-  }, [activeTab, reportType]);
+  }, [activeTab, reportType, dateRange]);
 
   // Report details matching Type
   const reportData = useMemo(() => {
@@ -223,6 +254,7 @@ const AdminReportsPage = () => {
 
   const dateRangeLabel = useMemo(() => {
     switch (dateRange) {
+      case "all": return "All Time";
       case "today": return "Today";
       case "week": return "This Week";
       case "month": return "This Month";
@@ -569,8 +601,9 @@ ${reportData.map(r => `  - ${r.period}: ${typeof r.value === "number" && reportT
               <div className="space-y-2 md:text-right">
                 <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block md:pr-1">Date Range</span>
                 <div className="flex flex-wrap gap-2 md:justify-end">
-                  {(["today", "week", "month", "3months", "custom"] as DateRange[]).map((range) => {
-                    const label = range === "today" ? "Today" :
+                  {(["all", "today", "week", "month", "3months", "custom"] as DateRange[]).map((range) => {
+                    const label = range === "all" ? "All Time" :
+                                  range === "today" ? "Today" :
                                   range === "week" ? "This Week" :
                                   range === "month" ? "This Month" :
                                   range === "3months" ? "Last 3 Months" : "Custom";
