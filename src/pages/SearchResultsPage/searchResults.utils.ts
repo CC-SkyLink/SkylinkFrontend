@@ -17,63 +17,14 @@ export type DepartureTimeFilterId =
   (typeof DEPARTURE_TIME_OPTIONS)[number]["id"];
 
 export const DEFAULT_SEARCH_CRITERIA = {
-  origin: "Manila",
-  originCode: "MNL",
-  destination: "Cebu",
-  destinationCode: "CEB",
-  date: "2026-04-19",
+  origin: "",
+  originCode: "",
+  destination: "",
+  destinationCode: "",
+  date: "",
   passengers: 1,
   cabinClass: "economy" as const,
 };
-
-/** Demo inventory aligned with the search-results mockup (MNL → CEB). */
-export const MOCK_SEARCH_FLIGHTS: Flight[] = [
-  {
-    id: "pa-2191",
-    flightNumber: "PA 2191",
-    origin: "MNL",
-    destination: "CEB",
-    departureTime: "2026-04-19T06:00:00",
-    arrivalTime: "2026-04-19T07:20:00",
-    price: 1890,
-    airline: "Philippine Airlines",
-    seatsAvailable: 24,
-    status: "on_time",
-    cabinClass: "economy",
-    baggageAllowanceKg: 20,
-    stops: 0,
-  },
-  {
-    id: "cp-1842",
-    flightNumber: "CP 1842",
-    origin: "MNL",
-    destination: "CEB",
-    departureTime: "2026-04-19T09:15:00",
-    arrivalTime: "2026-04-19T10:40:00",
-    price: 1650,
-    airline: "Cebu Pacific",
-    seatsAvailable: 18,
-    status: "on_time",
-    cabinClass: "economy",
-    baggageAllowanceKg: 20,
-    stops: 0,
-  },
-  {
-    id: "ai-504",
-    flightNumber: "AI 504",
-    origin: "MNL",
-    destination: "CEB",
-    departureTime: "2026-04-19T15:00:00",
-    arrivalTime: "2026-04-19T16:20:00",
-    price: 1490,
-    airline: "AirAsia",
-    seatsAvailable: 4,
-    status: "on_time",
-    cabinClass: "economy",
-    baggageAllowanceKg: 20,
-    stops: 0,
-  },
-];
 
 // --- Types ---
 
@@ -101,18 +52,6 @@ export type FlightDisplayMeta = {
 };
 
 // --- API / display helpers ---
-
-export function isBackendConfigured(): boolean {
-  const apiUrl = import.meta.env.VITE_API_URL;
-  if (!apiUrl || typeof apiUrl !== "string") return false;
-  if (apiUrl.includes("xxxx")) return false;
-  try {
-    const parsed = new URL(apiUrl);
-    return parsed.protocol === "http:" || parsed.protocol === "https:";
-  } catch {
-    return false;
-  }
-}
 
 const AIRCRAFT_BY_AIRLINE: Record<string, string> = {
   "Philippine Airlines": "Airbus A320",
