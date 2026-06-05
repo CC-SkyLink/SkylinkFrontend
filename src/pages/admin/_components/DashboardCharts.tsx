@@ -1,6 +1,5 @@
 import { useMemo } from "react";
 import { cn } from "@/utils/cn";
-import type { Booking } from "@/types";
 
 interface RawBooking {
   id: string;
