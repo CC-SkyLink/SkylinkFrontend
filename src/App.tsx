@@ -40,7 +40,6 @@ import DeaPage from "@/pages/ExplorePagesFolder/DeaPage/DeaPage";
 import AdminDestinationsPage from "@/pages/admin/AdminDestinationsPage";
 import AdminSettingsPage from "@/pages/admin/AdminSettingsPage/AdminSettingsPage";
 import AdminBookingsPage from "@/pages/admin/AdminBookingsPage/AdminBookingsPage";
-import AdminBookingDetailPage from "@/pages/admin/AdminBookingsPage/AdminBookingDetailPage";
 
 function screen(
   id: string,
@@ -273,14 +272,7 @@ const AppContent = () => {
               path={ROUTES.ADMIN_BOOKINGS}
               element={<AdminBookingsPage />}
             />
-            <Route
-              path={ROUTES.ADMIN_BOOKING_DETAIL}
-              element={<AdminBookingDetailPage />}
-            />
-            <Route
-              path={ROUTES.ADMIN_BOOKING_CANCEL}
-              element={<AdminBookingDetailPage />}
-            />
+
             <Route path={ROUTES.ADMIN_REPORTS} element={<AdminReportsPage />} />
             <Route path="/admin/activity-log" element={<AdminReportsPage />} />
             <Route
