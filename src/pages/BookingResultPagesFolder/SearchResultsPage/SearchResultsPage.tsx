@@ -9,61 +9,6 @@ import { searchFlights } from "@/api/flights.api";
 import type { CabinClass, Flight, FlightSearchParams } from "@/types";
 import useAsyncValue from "@/hooks/useAsyncValue";
 
-const FLIGHTS: FlightResult[] = [
-  {
-    id: "pa-2191",
-    airline: "Philippine Airlines",
-    airlineCode: "PA",
-    flightNo: "PA 2191",
-    aircraft: "Airbus A320",
-    departTime: "06:00",
-    arriveTime: "07:20",
-    duration: "1h 20m",
-    fromCode: "MNL",
-    toCode: "CEB",
-    stops: "Non-stop",
-    baggage: "20kg",
-    status: "On time",
-    price: "PHP 1,890",
-    cabin: "Economy",
-  },
-  {
-    id: "cp-2193",
-    airline: "Cebu Pacific",
-    airlineCode: "CP",
-    flightNo: "CP 2193",
-    aircraft: "Boeing 737-800",
-    departTime: "09:15",
-    arriveTime: "10:35",
-    duration: "1h 20m",
-    fromCode: "MNL",
-    toCode: "CEB",
-    stops: "Non-stop",
-    baggage: "20kg",
-    status: "On time",
-    price: "PHP 2,350",
-    cabin: "Economy",
-  },
-  {
-    id: "aa-2201",
-    airline: "AirAsia",
-    airlineCode: "AA",
-    flightNo: "AA 2201",
-    aircraft: "Airbus A321",
-    departTime: "14:30",
-    arriveTime: "15:55",
-    duration: "1h 25m",
-    fromCode: "MNL",
-    toCode: "CEB",
-    stops: "Non-stop",
-    baggage: "30kg",
-    status: "On time",
-    price: "PHP 3,150",
-    cabin: "Business",
-    seatsLeft: 4,
-  },
-];
-
 const MIN_PRICE = 1000;
 const MAX_PRICE = 50000;
 
@@ -175,12 +120,11 @@ const SearchResultsPage = () => {
     } satisfies FlightSearchParams;
 
     const response = await searchFlights(params);
-
-    return response.length > 0 ? response.map(mapFlightToResult) : FLIGHTS;
+    return response.map(mapFlightToResult);
   }, [cabinParam, dateParam, fromLabel, fromParam, paxParam, toLabel, toParam]);
 
   const { data: fetchedFlights, isLoading } = useAsyncValue(loader);
-  const baseFlights = fetchedFlights ?? FLIGHTS;
+  const baseFlights = fetchedFlights ?? [];
 
   const filteredFlights = useMemo(() => {
     return baseFlights.filter((flight) => {

@@ -16,7 +16,6 @@ import type { Flight } from "@/types";
 import {
   DEFAULT_SEARCH_CRITERIA,
   DEPARTURE_TIME_OPTIONS,
-  MOCK_SEARCH_FLIGHTS,
   PRICE_FILTER_DEFAULT,
   PRICE_FILTER_MAX,
   PRICE_FILTER_MIN,
@@ -27,7 +26,6 @@ import {
   formatPhp,
   formatTime,
   getFlightDisplayMeta,
-  isBackendConfigured,
   parseFiltersFromParams,
   parseSearchCriteriaFromParams,
   type DepartureTimeFilterId,
@@ -69,18 +67,12 @@ function useSearchResultsPage() {
     setIsLoading(true);
     setError(null);
 
-    if (!isBackendConfigured()) {
-      setFlights(MOCK_SEARCH_FLIGHTS);
-      setIsLoading(false);
-      return;
-    }
-
     try {
       const response = await searchFlights(apiParams);
-      setFlights(response.length > 0 ? response : MOCK_SEARCH_FLIGHTS);
-    } catch {
-      setFlights(MOCK_SEARCH_FLIGHTS);
-      setError(null);
+      setFlights(response ?? []);
+      } catch {
+        setFlights([]);
+        setError("Failed to load flights. Please try again.");
     } finally {
       setIsLoading(false);
     }
