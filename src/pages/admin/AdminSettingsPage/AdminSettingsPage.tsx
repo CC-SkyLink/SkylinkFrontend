@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useCallback } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -13,12 +13,13 @@ import {
   WifiOff,
   Wifi,
 } from "lucide-react";
+import { registerAdmin, getUsers } from "@/api/users.api";
 import AdminLayout from "../_components/AdminLayout";
 import { cn } from "@/utils/cn";
 
 // ─── Tab types ───────────────────────────────────────────────────────────────
 
-type SettingsTab = "general" | "regional" | "booking-rules" | "payment" | "email";
+type SettingsTab = "general" | "regional" | "booking-rules" | "payment" | "email" | "admin-accounts";
 
 // ─── Zod schemas ─────────────────────────────────────────────────────────────
 
@@ -727,6 +728,246 @@ function NavItem({
   );
 }
 
+
+// ─── Admin Accounts Tab ───────────────────────────────────────────────────────
+
+const adminAccountSchema = z.object({
+  first_name: z.string().trim().min(1, "First name is required").max(100),
+  last_name: z.string().trim().min(1, "Last name is required").max(100),
+  email: z.string().trim().email("Enter a valid email address"),
+  password: z.string().min(8, "Password must be at least 8 characters").max(72),
+  phone_number: z
+    .string()
+    .trim()
+    .regex(/^(\+?63|0)9\d{9}$/, "Enter a valid PH phone number")
+    .optional()
+    .or(z.literal(""))
+    .transform((v) => v || undefined),
+});
+
+type AdminAccountInput = z.input<typeof adminAccountSchema>;
+type AdminAccountValues = z.output<typeof adminAccountSchema>;
+
+type AdminUser = {
+  id: string;
+  first_name: string;
+  last_name: string;
+  email: string;
+  is_active: boolean;
+  created_at: string;
+};
+
+function AdminAccountsTab() {
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors, isSubmitting },
+  } = useForm<AdminAccountInput, any, AdminAccountValues>({
+    resolver: zodResolver(adminAccountSchema),
+  });
+
+  const [showPassword, setShowPassword] = useState(false);
+  const [submitStatus, setSubmitStatus] = useState<"idle" | "success" | "error">("idle");
+  const [submitMessage, setSubmitMessage] = useState("");
+  const [admins, setAdmins] = useState<AdminUser[]>([]);
+  const [loadingAdmins, setLoadingAdmins] = useState(false);
+
+  const loadAdmins = useCallback(async () => {
+    setLoadingAdmins(true);
+    try {
+      const users = await getUsers();
+      setAdmins(users.filter((u: any) => u.role_id === 1));
+    } catch {
+      // silent
+    } finally {
+      setLoadingAdmins(false);
+    }
+  }, []);
+
+  // Load on mount
+  useState(() => { loadAdmins(); });
+
+  const onSubmit = async (data: AdminAccountValues) => {
+    setSubmitStatus("idle");
+    try {
+      const payload: { first_name: string; last_name: string; email: string; password: string; phone_number?: string } = {
+        first_name: data.first_name,
+        last_name: data.last_name,
+        email: data.email,
+        password: data.password,
+      };
+      if (data.phone_number) payload.phone_number = data.phone_number;
+      await registerAdmin(payload);
+      setSubmitStatus("success");
+      setSubmitMessage(`Admin account for ${data.email} created successfully.`);
+      reset();
+      await loadAdmins();
+    } catch (err: any) {
+      setSubmitStatus("error");
+      setSubmitMessage(
+        err?.response?.data?.detail ?? "Failed to create admin account."
+      );
+    }
+    setTimeout(() => setSubmitStatus("idle"), 4000);
+  };
+
+  return (
+    <div className="space-y-6">
+      {/* Create Form */}
+      <SectionCard title="Create Admin Account">
+        <form onSubmit={handleSubmit(onSubmit)} noValidate>
+          <div className="space-y-5">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <div>
+                <label className="mb-1.5 block text-sm font-semibold text-slate-700">
+                  First Name
+                </label>
+                <input
+                  {...register("first_name")}
+                  className={inputCls(!!errors.first_name)}
+                  placeholder="Juan"
+                />
+                <FieldError message={errors.first_name?.message} />
+              </div>
+              <div>
+                <label className="mb-1.5 block text-sm font-semibold text-slate-700">
+                  Last Name
+                </label>
+                <input
+                  {...register("last_name")}
+                  className={inputCls(!!errors.last_name)}
+                  placeholder="Dela Cruz"
+                />
+                <FieldError message={errors.last_name?.message} />
+              </div>
+            </div>
+
+            <div>
+              <label className="mb-1.5 block text-sm font-semibold text-slate-700">
+                Email Address
+              </label>
+              <input
+                {...register("email")}
+                type="email"
+                className={inputCls(!!errors.email)}
+                placeholder="admin@skylink.ph"
+              />
+              <FieldError message={errors.email?.message} />
+            </div>
+
+            <div>
+              <label className="mb-1.5 block text-sm font-semibold text-slate-700">
+                Password
+              </label>
+              <div className="relative">
+                <input
+                  {...register("password")}
+                  type={showPassword ? "text" : "password"}
+                  className={cn(inputCls(!!errors.password), "pr-11")}
+                  placeholder="Min. 8 characters"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((p) => !p)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+                >
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
+              <FieldError message={errors.password?.message} />
+            </div>
+
+            <div>
+              <label className="mb-1.5 block text-sm font-semibold text-slate-700">
+                Phone Number <span className="font-normal text-slate-400">(optional)</span>
+              </label>
+              <input
+                {...register("phone_number")}
+                type="tel"
+                className={inputCls(!!errors.phone_number)}
+                placeholder="09XXXXXXXXX"
+              />
+              <FieldError message={errors.phone_number?.message} />
+            </div>
+
+            {/* Status message */}
+            {submitStatus !== "idle" && (
+              <div
+                className={cn(
+                  "flex items-center gap-2 rounded-xl px-4 py-3 text-sm font-semibold",
+                  submitStatus === "success"
+                    ? "bg-green-50 text-green-700 border border-green-200"
+                    : "bg-red-50 text-red-600 border border-red-200",
+                )}
+              >
+                {submitStatus === "success" ? (
+                  <CheckCircle2 size={16} />
+                ) : (
+                  <XCircle size={16} />
+                )}
+                {submitMessage}
+              </div>
+            )}
+
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className={cn(
+                "flex items-center gap-2 rounded-xl px-6 py-2.5 text-sm font-bold text-white transition-all",
+                isSubmitting
+                  ? "bg-[#5E83AE]/40 cursor-not-allowed"
+                  : "bg-[#5E83AE] hover:bg-[#496B92] shadow-md shadow-[#5E83AE]/20",
+              )}
+            >
+              {isSubmitting && <Loader2 size={15} className="animate-spin" />}
+              {isSubmitting ? "Creating..." : "Create Admin Account"}
+            </button>
+          </div>
+        </form>
+      </SectionCard>
+
+      {/* Existing Admins */}
+      <SectionCard title="Existing Admins">
+        {loadingAdmins ? (
+          <div className="flex items-center gap-2 text-sm text-slate-400 font-medium">
+            <Loader2 size={15} className="animate-spin" />
+            Loading...
+          </div>
+        ) : admins.length === 0 ? (
+          <p className="text-sm text-slate-400 font-medium">No admin accounts found.</p>
+        ) : (
+          <div className="space-y-3">
+            {admins.map((admin) => (
+              <div
+                key={admin.id}
+                className="flex items-center justify-between rounded-xl border border-slate-100 bg-slate-50 px-4 py-3"
+              >
+                <div>
+                  <p className="text-sm font-bold text-slate-800">
+                    {admin.first_name} {admin.last_name}
+                  </p>
+                  <p className="text-xs text-slate-500">{admin.email}</p>
+                </div>
+                <span
+                  className={cn(
+                    "rounded-full px-3 py-1 text-[11px] font-bold uppercase tracking-wider",
+                    admin.is_active
+                      ? "bg-green-100 text-green-700"
+                      : "bg-slate-200 text-slate-500",
+                  )}
+                >
+                  {admin.is_active ? "Active" : "Inactive"}
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
+      </SectionCard>
+    </div>
+  );
+}
+
 // ─── Main Page ────────────────────────────────────────────────────────────────
 
 const TABS: { id: SettingsTab; label: string }[] = [
@@ -735,6 +976,7 @@ const TABS: { id: SettingsTab; label: string }[] = [
   { id: "booking-rules", label: "Booking Rules" },
   { id: "payment", label: "Payment" },
   { id: "email", label: "Email" },
+  { id: "admin-accounts", label: "Admin Accounts" },
 ];
 
 const AdminSettingsPage = () => {
@@ -789,6 +1031,7 @@ const AdminSettingsPage = () => {
             {activeTab === "booking-rules" && <BookingRulesTab {...tabProps} />}
             {activeTab === "payment" && <PaymentTab {...tabProps} />}
             {activeTab === "email" && <EmailTab {...tabProps} />}
+            {activeTab === "admin-accounts" && <AdminAccountsTab />}
           </div>
         </div>
       </div>
