@@ -16,25 +16,6 @@ type FlightCard = {
   cabin: string;
 };
 
-function mapFlightToCard(flight: any): FlightCard {
-  const dep = new Date(flight.departure_time ?? flight.departureTime);
-  const arr = new Date(flight.arrival_time ?? flight.arrivalTime);
-  const diffMs = arr.getTime() - dep.getTime();
-  const diffHrs = Math.floor(diffMs / 3600000);
-  const diffMins = Math.round((diffMs % 3600000) / 60000);
-  const lowestPrice = flight.seat_pricing?.length
-    ? Math.min(...flight.seat_pricing.map((s: any) => s.price))
-    : 0;
-  return {
-    id: flight.flight_number ?? flight.flightNumber,
-    flightId: flight.id,
-    time: `${dep.toUTCString().slice(17, 22)} - ${arr.toUTCString().slice(17, 22)}`,
-    duration: `${diffHrs}h ${diffMins}m`,
-    price: `₱${(lowestPrice / 100).toLocaleString("en-US")}`,
-    cabin: "Economy",
-  };
-}
-
 const DestinationPage = () => {
   const { iata_code } = useParams<{ iata_code: string }>();
 
