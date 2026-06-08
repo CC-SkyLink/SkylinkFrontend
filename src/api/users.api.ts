@@ -49,6 +49,26 @@ export async function changePassword(current_password: string, new_password: str
 }
 
 /**
+ * Admin: Register admin account
+ * POST /api/v1/auth/admin/register
+ */
+export async function registerAdmin(payload: {
+  first_name: string;
+  last_name: string;
+  email: string;
+  password: string;
+  phone_number?: string;
+}): Promise<User> {
+  try {
+    const res = await axiosClient.post("/auth/admin/register", payload);
+    return res.data;
+  } catch (err) {
+    handleApiError(err);
+    throw err;
+  }
+}
+
+/**
  * Admin: Get all users
  * GET /api/v1/users
  */
