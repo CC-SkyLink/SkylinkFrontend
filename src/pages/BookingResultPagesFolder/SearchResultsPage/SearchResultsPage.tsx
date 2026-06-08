@@ -96,7 +96,7 @@ function toCabinClass(value: string): CabinClass | undefined {
 
 const SearchResultsPage = () => {
   const [searchParams] = useSearchParams();
-  const [maxPrice, setMaxPrice] = useState(50000);
+  const [maxPrice, setMaxPrice] = useState(MAX_PRICE);
   const [directOnly, setDirectOnly] = useState(true);
   const [timeFilters, setTimeFilters] = useState<string[]>([]);
 
