@@ -127,16 +127,20 @@ const mealLabel = (booking: Booking | BookingDetail) => {
     : "Standard";
 };
 
-const toManageBooking = (booking: Booking | BookingDetail): ManageBooking => {
+const toManageBooking = (booking: any): ManageBooking => {
   const flight = booking.flight;
-  const origin = flight?.origin ?? BOOKING_DATA.fromCode;
-  const destination = flight?.destination ?? BOOKING_DATA.toCode;
-  const departureTime = flight?.departureTime ?? booking.createdAt;
+  const origin =
+    flight?.origin_airport?.iata_code ?? flight?.origin ?? BOOKING_DATA.fromCode;
+  const destination =
+    flight?.destination_airport?.iata_code ?? flight?.destination ?? BOOKING_DATA.toCode;
+  const departureTime =
+    flight?.departure_time ?? flight?.departureTime ?? booking.booked_at ?? booking.createdAt;
   const arrivalTime =
-    flight?.arrivalTime ?? booking.updatedAt ?? booking.createdAt;
-  const bookingDate = booking.createdAt?.split("T")[0] ?? "2026-04-10";
+    flight?.arrival_time ?? flight?.arrivalTime ?? booking.updated_at ?? booking.updatedAt ?? booking.booked_at ?? booking.createdAt;
+  const bookingDate =
+    (booking.booked_at ?? booking.createdAt ?? "2026-04-10").split("T")[0];
   const tripDate = departureTime?.split("T")[0] ?? bookingDate;
-  const total = booking.totalPrice || BOOKING_DATA.total;
+  const total = booking.total_price ?? booking.totalPrice ?? 0;
 
   return {
     id: booking.id,

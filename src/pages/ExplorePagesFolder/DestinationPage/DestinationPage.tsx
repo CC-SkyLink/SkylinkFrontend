@@ -5,7 +5,6 @@ import { ROUTES } from "@/constants/routes";
 import { getPublicAirports } from "@/api/destinations.api";
 import { searchFlights } from "@/api/flights.api";
 import type { Airport } from "@/types/destinations.types";
-import type { Flight } from "@/types";
 import useAsyncValue from "@/hooks/useAsyncValue";
 
 type FlightCard = {
