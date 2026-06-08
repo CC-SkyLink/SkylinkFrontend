@@ -166,13 +166,6 @@ const AdminEditFlightPage = () => {
                 {...register("arrivalTime")}
                 className="[&>input]:rounded-xl [&>input]:h-12"
               />
-              <Input
-                label="Flight Image URL"
-                placeholder="https://images.unsplash.com/photo-..."
-                error={errors.imageUrl?.message}
-                {...register("imageUrl")}
-                className="[&>input]:rounded-xl [&>input]:h-12 md:col-span-2"
-              />
             </div>
           </section>
 
