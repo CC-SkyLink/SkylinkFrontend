@@ -47,115 +47,25 @@ function mapFlightToCard(flight: Flight): FlightCard {
   };
 }
 
-const DEFAULT_DESTINATION = {
-  id: "ceb",
-  code: "CEB",
-  name: "Cebu",
-  location: "Philippines",
-  duration: "1h 20m",
-  price: "PHP 1,890",
-  image: "/Images/BookPage/Cebu.png",
-};
-
-const DESTINATION_PROFILES: Record<string, DestinationProfile> = {
-  CEB: {
-    about:
-      "Known as the Queen City of the South, Cebu blends beaches, heritage landmarks, and a lively food scene in one easy island escape.",
-    highlights: [
-      "Magellan's Cross",
-      "Osmeña Peak",
-      "Kawasan Falls",
-      "Sinulog Festival",
-    ],
-    bestTime: "November to May",
-    airport: "CEB - Cebu",
-    lowestFare: "PHP 1,890",
-  },
-  PPS: {
-    about:
-      "Puerto Princesa is the gateway to Palawan's lagoons, limestone cliffs, and calm island-hopping days.",
-    highlights: ["Underground River", "Honda Bay", "Baywalk", "Island hopping"],
-    bestTime: "November to May",
-    airport: "PPS - Puerto Princesa",
-    lowestFare: "PHP 2,499",
-  },
-  KLO: {
-    about:
-      "Kalibo opens the door to Boracay's powdery beaches and sunset trips across the islands of Aklan.",
-    highlights: [
-      "White Beach",
-      "Puka Shell Beach",
-      "Sunset sailings",
-      "Island hopping",
-    ],
-    bestTime: "December to May",
-    airport: "KLO - Kalibo",
-    lowestFare: "PHP 1,650",
-  },
-  DVO: {
-    about:
-      "Davao offers mountain views, city comforts, and quick access to nature attractions across Mindanao.",
-    highlights: [
-      "Mount Apo",
-      "Philippine Eagle Center",
-      "People's Park",
-      "Davao Crocodile Park",
-    ],
-    bestTime: "December to May",
-    airport: "DVO - Davao",
-    lowestFare: "PHP 1,750",
-  },
-  SIN: {
-    about:
-      "Singapore mixes skyline views, food hubs, and world-class attractions into a compact city break.",
-    highlights: [
-      "Marina Bay Sands",
-      "Gardens by the Bay",
-      "Sentosa",
-      "Chinatown",
-    ],
-    bestTime: "February to April",
-    airport: "SIN - Singapore",
-    lowestFare: "PHP 7,500",
-  },
-  TYO: {
-    about:
-      "Tokyo combines neon nights, historic shrines, and a polished food scene that rewards longer stays.",
-    highlights: [
-      "Shibuya Crossing",
-      "Asakusa",
-      "Tsukiji Market",
-      "Mt. Fuji day trips",
-    ],
-    bestTime: "March to May or September to November",
-    airport: "TYO - Tokyo",
-    lowestFare: "PHP 18,500",
-  },
-  HKG: {
-    about:
-      "Hong Kong is built for skyline views, harbor ferries, and quick city breaks with plenty of food stops.",
-    highlights: ["Victoria Peak", "Star Ferry", "Tsim Sha Tsui", "Disneyland"],
-    bestTime: "October to December",
-    airport: "HKG - Hong Kong",
-    lowestFare: "PHP 11,200",
-  },
-  DPS: {
-    about:
-      "Bali balances beaches, rice terraces, and temple stops with an easygoing holiday rhythm.",
-    highlights: ["Uluwatu Temple", "Ubud", "Nusa Dua", "Kuta Beach"],
-    bestTime: "April to October",
-    airport: "DPS - Denpasar",
-    lowestFare: "PHP 6,200",
-  },
-};
-
 const DestinationPage = () => {
-  const location = useLocation();
   const selectedDestination =
-    (location.state as DestinationState | null)?.destination ??
-    DEFAULT_DESTINATION;
+    (location.state as DestinationState | null)?.destination;
+
+  if (!selectedDestination) {
+    return (
+      <main className="flex min-h-[calc(100vh-160px)] items-center justify-center bg-[#F3F5F7]">
+        <div className="text-center">
+          <p className="text-slate-500 text-sm">No destination selected.</p>
+          <Link to={ROUTES.EXPLORE} className="mt-4 inline-block text-sm font-semibold text-[#5D7FA7] hover:underline">
+            Back to Explore
+          </Link>
+        </div>
+      </main>
+    );
+  }
+
   const destinationProfile =
-    DESTINATION_PROFILES[selectedDestination.code] ?? DESTINATION_PROFILES.CEB;
+    DESTINATION_PROFILES[selectedDestination.code] ?? null;
 
   const loader = useCallback(async () => {
     const flights = await searchFlights({
@@ -213,7 +123,7 @@ const DestinationPage = () => {
                 About {selectedDestination.name}
               </h2>
               <p className="mt-2 text-sm text-slate-600">
-                {destinationProfile.about}
+                {destinationProfile?.about ?? "No description available."}
               </p>
             </div>
 
@@ -222,7 +132,7 @@ const DestinationPage = () => {
                 Top Highlights
               </h2>
               <ul className="mt-3 grid gap-2 text-sm text-slate-600 md:grid-cols-2">
-                {destinationProfile.highlights.map((item) => (
+                {(destinationProfile?.highlights ?? []).map((item) => (
                   <li key={item} className="flex items-center gap-2">
                     <span className="h-1.5 w-1.5 rounded-full bg-[#5D7FA7]" />
                     {item}
@@ -297,7 +207,7 @@ const DestinationPage = () => {
                     <p className="font-semibold text-slate-700">
                       Flight Duration
                     </p>
-                    <p>{selectedDestination.duration} from Manila</p>
+                    <p>{selectedDestination.duration ?? "—"} from Manila</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-3">
@@ -306,14 +216,14 @@ const DestinationPage = () => {
                     <p className="font-semibold text-slate-700">
                       Best Time to Visit
                     </p>
-                    <p>{destinationProfile.bestTime}</p>
+                    <p>{destinationProfile?.bestTime ?? "—"}</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-3">
                   <Plane size={14} className="text-[#5D7FA7]" />
                   <div>
                     <p className="font-semibold text-slate-700">Airport</p>
-                    <p>{destinationProfile.airport}</p>
+                    <p>{destinationProfile?.airport ?? selectedDestination.code}</p>
                   </div>
                 </div>
               </div>
@@ -324,7 +234,7 @@ const DestinationPage = () => {
                 Lowest fare from Manila
               </p>
               <p className="mt-2 text-2xl font-semibold text-[#5D7FA7]">
-                {availableFlights[0]?.price ?? destinationProfile.lowestFare}
+                {availableFlights[0]?.price ?? destinationProfile?.lowestFare ?? "—"}
               </p>
               <p className="mt-1 text-xs text-slate-500">One-way - Economy</p>
               <Link
