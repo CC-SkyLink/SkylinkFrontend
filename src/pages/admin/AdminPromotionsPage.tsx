@@ -78,7 +78,7 @@ const AdminPromotionsPage = () => {
   const filteredPromotions = useMemo(() => {
     return promotions.filter((p) =>
       p.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      p.destination_code.toLowerCase().includes(searchQuery.toLowerCase())
+      (p.destination_code ?? "").toLowerCase().includes(searchQuery.toLowerCase())
     );
   }, [promotions, searchQuery]);
 
@@ -128,12 +128,13 @@ const AdminPromotionsPage = () => {
       cell: (row) => (
         <span className={cn(
           "px-2.5 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider",
-          row.category === "flash" && "bg-amber-100 text-amber-700",
-          row.category === "weekend" && "bg-emerald-100 text-emerald-700",
-          row.category === "international" && "bg-purple-100 text-purple-700",
-          row.category === "promo" && "bg-blue-100 text-blue-700",
+          row.badge_type === "flash" ? "bg-amber-100 text-amber-700" :
+          row.badge_type === "weekend" ? "bg-emerald-100 text-emerald-700" :
+          row.badge_type === "hot" ? "bg-purple-100 text-purple-700" :
+          row.badge_type === "promo" ? "bg-blue-100 text-blue-700" :
+          "bg-slate-100 text-slate-600"
         )}>
-          {row.category}
+          {row.badge_type ?? "promo"}
         </span>
       ),
     },
