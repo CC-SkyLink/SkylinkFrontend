@@ -222,6 +222,17 @@ const AdminDestinationsPage = () => {
           {field("country", "Country *")}
         </div>
         {field("timezone", "Timezone *")}
+        {field("image_url", "Image URL")}
+        {field("best_time", "Best Time to Visit")}
+        <div className="space-y-1.5">
+          <label className="text-[13px] font-bold text-slate-500 uppercase tracking-widest ml-1">About</label>
+          <textarea
+            value={(form["about"] as string) ?? ""}
+            onChange={(e) => setForm((f) => ({ ...f, about: e.target.value }))}
+            rows={3}
+            className="w-full rounded-xl bg-slate-50 border border-slate-200 px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-[#496B92]/10 focus:border-[#496B92]/20 transition-all resize-none"
+          />
+        </div>
       </div>
     );
     if (activeTab === "aircraft") return (
@@ -300,6 +311,17 @@ const AdminDestinationsPage = () => {
           {field("country", "Country")}
         </div>
         {field("timezone", "Timezone")}
+        {field("image_url", "Image URL")}
+        {field("best_time", "Best Time to Visit")}
+        <div className="space-y-1.5">
+          <label className="text-[13px] font-bold text-slate-500 uppercase tracking-widest ml-1">About</label>
+          <textarea
+            value={(form["about"] as string) ?? ""}
+            onChange={(e) => setForm((f) => ({ ...f, about: e.target.value }))}
+            rows={3}
+            className="w-full rounded-xl bg-slate-50 border border-slate-200 px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-[#496B92]/10 focus:border-[#496B92]/20 transition-all resize-none"
+          />
+        </div>
       </div>
     );
     if (activeTab === "aircraft") return (
