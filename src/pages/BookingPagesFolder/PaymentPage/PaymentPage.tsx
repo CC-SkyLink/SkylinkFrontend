@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { ChevronLeft, Lock } from "lucide-react";
+import { ChevronLeft, Lock, Loader2 } from "lucide-react";
 import { ROUTES } from "@/constants/routes";
 import BookingStepper from "@/pages/BookingPagesFolder/components/BookingStepper";
 import {
@@ -9,23 +9,91 @@ import {
   formatCurrency,
 } from "@/pages/BookingPagesFolder/bookingData";
 import useAsyncValue from "@/hooks/useAsyncValue";
+import {
+  createPaymentIntent,
+  createPaymongoPaymentMethod,
+  attachPaymongoPaymentIntent,
+} from "@/api/payments.api";
 
-type PaymentMethod = "card" | "gcash" | "paypal" | "bank";
+type PaymentMethod = "card" | "gcash" | "paymaya";
 
 const PaymentPage = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const searchSuffix = location.search ?? "";
+  const query = new URLSearchParams(location.search);
+  const bookingId = query.get("booking_id") || "test_booking_id";
+  
   const backHref = `${ROUTES.BOOKING_SUMMARY}${searchSuffix}`;
   const [method, setMethod] = useState<PaymentMethod>("card");
   const { data: bookingData } = useAsyncValue(loadBookingData);
   const booking = bookingData ?? BOOKING_DATA;
   const total = formatCurrency(booking.total);
 
-  const handlePay = () => {
-    navigate(`${ROUTES.PAYMENT_OTP}${searchSuffix}`, {
-      state: { method },
-    });
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
+
+  const [cardDetails, setCardDetails] = useState({
+    cardNumber: "",
+    cardName: "",
+    expiry: "",
+    cvv: "",
+  });
+
+  const handlePay = async () => {
+    try {
+      setIsProcessing(true);
+      setErrorMsg("");
+
+      // 1. Create Payment Intent via Backend
+      const intentRes = await createPaymentIntent(bookingId);
+      if (!intentRes?.client_key) {
+        throw new Error("Failed to initialize payment intent.");
+      }
+      const clientKey = intentRes.client_key;
+      const intentId = clientKey.split("_client_")[0];
+
+      // 2. Create Payment Method via PayMongo API
+      let pmPayload: any = { type: method };
+
+      if (method === "card") {
+        const [month, year] = cardDetails.expiry.split("/").map(s => s.trim());
+        pmPayload.details = {
+          card_number: cardDetails.cardNumber.replace(/\s+/g, ""),
+          exp_month: parseInt(month, 10),
+          exp_year: parseInt(year, 10),
+          cvc: cardDetails.cvv,
+        };
+        pmPayload.billing = {
+          name: cardDetails.cardName || "Customer Name",
+          email: "customer@skylink.com",
+        };
+      } else {
+        pmPayload.billing = {
+          name: "Customer Name",
+          email: "customer@skylink.com",
+        };
+      }
+
+      const pmRes = await createPaymongoPaymentMethod(pmPayload);
+      const pmId = pmRes.id;
+
+      // 3. Attach Payment Method to Intent
+      const returnUrl = `${window.location.origin}${ROUTES.PAYMENT_PROCESSING}${searchSuffix}`;
+      const attachRes = await attachPaymongoPaymentIntent(intentId, pmId, clientKey, returnUrl);
+
+      // 4. Handle Redirect or Success
+      if (attachRes?.attributes?.next_action?.type === "redirect") {
+        window.location.href = attachRes.attributes.next_action.redirect.url;
+      } else {
+        // If no redirect (e.g. valid test card), proceed to processing/polling page
+        navigate(`${ROUTES.PAYMENT_PROCESSING}${searchSuffix}`);
+      }
+    } catch (err: any) {
+      console.error("Payment error:", err);
+      setErrorMsg(err.message || "An error occurred during payment processing.");
+      setIsProcessing(false);
+    }
   };
 
   return (
@@ -45,22 +113,27 @@ const PaymentPage = () => {
 
         <div className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,1fr)_240px]">
           <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+            {errorMsg && (
+              <div className="mb-4 rounded-lg bg-rose-50 p-3 text-sm text-rose-600 border border-rose-200">
+                {errorMsg}
+              </div>
+            )}
             <div className="flex flex-wrap items-center gap-2 border-b border-slate-100 pb-3 text-xs">
               {[
                 { id: "card", label: "Credit / Debit Card" },
                 { id: "gcash", label: "GCash" },
-                { id: "paypal", label: "PayPal" },
-                { id: "bank", label: "Bank Transfer" },
+                { id: "paymaya", label: "Maya" },
               ].map((tab) => (
                 <button
                   key={tab.id}
                   type="button"
                   onClick={() => setMethod(tab.id as PaymentMethod)}
+                  disabled={isProcessing}
                   className={`rounded-full px-3 py-1 text-xs font-semibold transition ${
                     method === tab.id
                       ? "bg-[#5D7FA7] text-white"
                       : "bg-slate-100 text-slate-500 hover:bg-slate-200"
-                  }`}
+                  } disabled:opacity-50`}
                 >
                   {tab.label}
                 </button>
@@ -74,7 +147,10 @@ const PaymentPage = () => {
                     Card Number *
                   </label>
                   <input
-                    className="mt-1 w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm"
+                    value={cardDetails.cardNumber}
+                    onChange={(e) => setCardDetails(prev => ({...prev, cardNumber: e.target.value}))}
+                    disabled={isProcessing}
+                    className="mt-1 w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm disabled:opacity-50"
                     placeholder="0000 0000 0000 0000"
                   />
                 </div>
@@ -83,7 +159,10 @@ const PaymentPage = () => {
                     Cardholder Name *
                   </label>
                   <input
-                    className="mt-1 w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm"
+                    value={cardDetails.cardName}
+                    onChange={(e) => setCardDetails(prev => ({...prev, cardName: e.target.value}))}
+                    disabled={isProcessing}
+                    className="mt-1 w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm disabled:opacity-50"
                     placeholder="AS WRITTEN ON CARD"
                   />
                 </div>
@@ -92,7 +171,10 @@ const PaymentPage = () => {
                     Expiry *
                   </label>
                   <input
-                    className="mt-1 w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm"
+                    value={cardDetails.expiry}
+                    onChange={(e) => setCardDetails(prev => ({...prev, expiry: e.target.value}))}
+                    disabled={isProcessing}
+                    className="mt-1 w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm disabled:opacity-50"
                     placeholder="MM / YY"
                   />
                 </div>
@@ -101,7 +183,10 @@ const PaymentPage = () => {
                     CVV *
                   </label>
                   <input
-                    className="mt-1 w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm"
+                    value={cardDetails.cvv}
+                    onChange={(e) => setCardDetails(prev => ({...prev, cvv: e.target.value}))}
+                    disabled={isProcessing}
+                    className="mt-1 w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm disabled:opacity-50"
                     placeholder="***"
                   />
                 </div>
@@ -112,13 +197,12 @@ const PaymentPage = () => {
               </div>
             ) : (
               <div className="mt-6 rounded-lg border border-dashed border-slate-200 bg-slate-50 p-4 text-xs text-slate-500">
-                You will be redirected to complete this payment method once you
-                continue.
+                You will be redirected to complete this payment method securely once you click Pay Now.
               </div>
             )}
           </div>
 
-          <aside className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+          <aside className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm h-fit">
             <h3 className="text-sm font-semibold text-slate-800">
               Order Total
             </h3>
@@ -136,9 +220,17 @@ const PaymentPage = () => {
             <button
               type="button"
               onClick={handlePay}
-              className="mt-4 w-full rounded-lg bg-[#5D7FA7] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#4E6B8D]"
+              disabled={isProcessing}
+              className="mt-4 flex w-full items-center justify-center gap-2 rounded-lg bg-[#5D7FA7] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#4E6B8D] disabled:opacity-60"
             >
-              Pay Now - {total}
+              {isProcessing ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Processing...
+                </>
+              ) : (
+                `Pay Now - ${total}`
+              )}
             </button>
             <p className="mt-2 text-[11px] text-slate-400">
               By paying, you agree to our Terms of Service.

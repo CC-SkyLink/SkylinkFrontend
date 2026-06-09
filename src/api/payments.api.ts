@@ -62,3 +62,88 @@ export async function getPaymentFailure(
     handleApiError(err);
   }
 }
+
+// --- PayMongo Integrations ---
+
+export async function createPaymentIntent(bookingId: string): Promise<{ client_key: string }> {
+  try {
+    const res = await axiosClient.post(`/payments/create-intent?booking_id=${bookingId}`);
+    return res.data;
+  } catch (err) {
+    handleApiError(err);
+  }
+}
+
+interface PaymongoMethodPayload {
+  type: "card" | "gcash" | "paymaya";
+  details?: {
+    card_number: string;
+    exp_month: number;
+    exp_year: number;
+    cvc: string;
+  };
+  billing?: {
+    name: string;
+    email: string;
+    phone?: string;
+  };
+}
+
+const PAYMONGO_PUBLIC_KEY = import.meta.env.VITE_PAYMONGO_PUBLIC_KEY || "pk_test_QTFqGzqXDCZ1KZ3dmWHc95Yw";
+
+export async function createPaymongoPaymentMethod(payload: PaymongoMethodPayload): Promise<any> {
+  const options = {
+    method: 'POST',
+    headers: {
+      accept: 'application/json',
+      'content-type': 'application/json',
+      authorization: `Basic ${btoa(PAYMONGO_PUBLIC_KEY)}`
+    },
+    body: JSON.stringify({
+      data: {
+        attributes: payload
+      }
+    })
+  };
+
+  const res = await fetch('https://api.paymongo.com/v1/payment_methods', options);
+  if (!res.ok) {
+    const error = await res.json();
+    throw new Error(error.errors?.[0]?.detail || "Failed to create payment method");
+  }
+  const data = await res.json();
+  return data.data;
+}
+
+export async function attachPaymongoPaymentIntent(
+  intentId: string, 
+  paymentMethodId: string, 
+  clientKey: string, 
+  returnUrl: string
+): Promise<any> {
+  const options = {
+    method: 'POST',
+    headers: {
+      accept: 'application/json',
+      'content-type': 'application/json',
+      authorization: `Basic ${btoa(PAYMONGO_PUBLIC_KEY)}`
+    },
+    body: JSON.stringify({
+      data: {
+        attributes: {
+          payment_method: paymentMethodId,
+          client_key: clientKey,
+          return_url: returnUrl
+        }
+      }
+    })
+  };
+
+  const res = await fetch(`https://api.paymongo.com/v1/payment_intents/${intentId}/attach`, options);
+  if (!res.ok) {
+    const error = await res.json();
+    throw new Error(error.errors?.[0]?.detail || "Failed to attach payment method");
+  }
+  const data = await res.json();
+  return data.data;
+}

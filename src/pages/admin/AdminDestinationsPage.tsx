@@ -181,7 +181,7 @@ const AdminDestinationsPage = () => {
 
   const seatClassColumns: TableColumn<SeatClass>[] = [
     { key: "id", header: "ID", cell: (r) => <span className="text-slate-400 text-xs">#{r.id}</span> },
-    { key: "name", header: "CLASS NAME", cell: (r) => <span className="font-bold text-slate-900">{r.name}</span> },
+    { key: "name", header: "CLASS NAME", cell: (r) => <span className="font-bold text-slate-900 capitalize">{r.name}</span> },
     {
       key: "actions", header: "ACTIONS", cell: (r) => (
         <div className="flex gap-2">
@@ -263,10 +263,10 @@ const AdminDestinationsPage = () => {
                     updated[idx].seat_class_id = Number(e.target.value);
                     setSeatConfigs(updated);
                   }}
-                  className="w-full h-10 px-3 bg-white border border-slate-200 rounded-lg text-sm outline-none focus:border-[#496B92]"
+                  className="w-full h-10 px-3 bg-white border border-slate-200 rounded-lg text-sm outline-none focus:border-[#496B92] capitalize"
                 >
                   {seatClasses.map(sc => (
-                    <option key={sc.id} value={sc.id}>{sc.name}</option>
+                    <option key={sc.id} value={sc.id} className="capitalize">{sc.name}</option>
                   ))}
                 </select>
               </div>
