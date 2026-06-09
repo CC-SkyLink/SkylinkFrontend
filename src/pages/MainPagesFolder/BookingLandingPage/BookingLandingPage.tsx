@@ -120,7 +120,7 @@ function getCode(value: string) {
 
 function DealCard({ deal }: { deal: Promotion }) {
   const discount = Math.round(
-    ((deal.original_price - deal.sale_price) / deal.original_price) * 100,
+    ((Number(deal.original_price) - Number(deal.sale_price)) / Number(deal.original_price)) * 100,
   );
 
   const badgeClass = cn(
@@ -133,19 +133,8 @@ function DealCard({ deal }: { deal: Promotion }) {
 
   return (
     <Link
-      to={ROUTES.EXPLORE_PROMO_DETAIL}
-      state={{
-        deal: {
-          id: deal.id,
-          title: deal.title,
-          description: deal.title,
-          price: `₱${(deal.sale_price || 0).toLocaleString()}`,
-          oldPrice: `₱${(deal.original_price || 0).toLocaleString()}`,
-          discount: `-${discount}%`,
-          validUntil: deal.valid_until,
-          image: deal.image_url ?? "",
-        },
-      }}
+      to={ROUTES.EXPLORE_PROMO_DETAIL.replace(":id", deal.id)}
+      state={{ deal }}
       className="bg-bg-page border border-tertiary-30 rounded-[14px] overflow-hidden shadow-[0px_2px_8px_rgba(0,0,0,0.04)] text-left w-full hover:shadow-md transition-shadow"
     >
       <div className="relative h-35 bg-tertiary-20">
@@ -175,12 +164,12 @@ function DealCard({ deal }: { deal: Promotion }) {
           <span
             className={`${typography.heading.h3.bold} font-extrabold text-[#496B92]`}
           >
-            ₱{(deal.sale_price || 0).toLocaleString()}
+            ₱{(Number(deal.sale_price) || 0).toLocaleString()}
           </span>
           <span
             className={`${typography.paragraph.sm.medium} ${colors.text.secondary} line-through`}
           >
-            ₱{(deal.original_price || 0).toLocaleString()}
+            ₱{(Number(deal.original_price) || 0).toLocaleString()}
           </span>
         </div>
         <div

@@ -30,8 +30,8 @@ const PromosPage = () => {
 
   const deals = useMemo(() => {
     const allDeals: Deal[] = (promotions || []).map((promo) => {
-      const sale = promo.sale_price || 0;
-      const original = promo.original_price || 1; // avoid div by zero
+      const sale = Number(promo.sale_price) || 0;
+      const original = Number(promo.original_price) || 1; // avoid div by zero
       const discount = Math.round(((original - sale) / original) * 100);
 
       return {
