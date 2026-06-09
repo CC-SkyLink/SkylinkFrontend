@@ -16,7 +16,6 @@ type ReschedulePickState = {
 const ReschedulePickPage = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const [maxPrice, setMaxPrice] = useState<number>(100000);
 
   const loader = useCallback(async () => {
     if (!id) return null;
@@ -42,8 +41,8 @@ const ReschedulePickPage = () => {
 
   const filteredFlights = useMemo(() => {
     if (!data?.flights) return [];
-    return data.flights.filter((f) => f.price <= maxPrice / 100);
-  }, [data, maxPrice]);
+    return data.flights;
+  }, [data]);
 
   if (isLoading) {
     return (
