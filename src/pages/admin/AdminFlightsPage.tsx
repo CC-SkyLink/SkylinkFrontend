@@ -164,17 +164,21 @@ const AdminFlightsPage = () => {
       header: "ACTIONS",
       cell: (row) => (
         <div className="flex items-center gap-2">
-          <button
-            onClick={() => handleOpenPricing(row)}
-            className="p-2 text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors border border-emerald-100"
-            title="Pricing Suggestions"
-          >
-            {pricingLoadingId === row.id ? (
-              <span className="animate-spin size-4 border-2 border-emerald-600 border-t-transparent rounded-full block" />
-            ) : (
-              <span className="text-xs font-bold">₱?</span>
-            )}
-          </button>
+          <div className="relative group/pricing">
+            <button
+              onClick={() => handleOpenPricing(row)}
+              className="p-2 text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors border border-emerald-100"
+            >
+              <div className="absolute right-0 top-full mt-2 z-50 hidden group-hover/pricing:flex w-64 rounded-xl bg-slate-900 text-white p-3 shadow-xl pointer-events-none">
+                <p className="text-[11px] text-slate-300 leading-relaxed">Suggests whether to raise or lower the ticket price based on how many seats are filled and how close the departure is. A nearly full flight close to departure should cost more.</p>
+              </div>
+              {pricingLoadingId === row.id ? (
+                <span className="animate-spin size-4 border-2 border-emerald-600 border-t-transparent rounded-full block" />
+              ) : (
+                <span className="text-xs font-bold">₱?</span>
+              )}
+            </button>
+          </div>
           <button
             onClick={() => navigate(ROUTES.ADMIN_EDIT_FLIGHT.replace(":id", row.id))}
             className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors border border-blue-100"

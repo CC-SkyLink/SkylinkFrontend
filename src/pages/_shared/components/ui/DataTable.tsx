@@ -2,7 +2,7 @@ import { memo, type ReactNode } from "react";
 
 export type TableColumn<T> = {
   key: string;
-  header: string;
+  header: string | ReactNode;
   cell: (row: T) => ReactNode;
 };
 
