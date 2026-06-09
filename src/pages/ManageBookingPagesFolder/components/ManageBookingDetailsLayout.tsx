@@ -206,13 +206,14 @@ const ManageBookingDetailsLayout = ({
               Download E-ticket
             </button>
 
-            <button
-              type="button"
+            <Link
+              to={ROUTES.RESCHEDULE_PICK.replace(":id", booking.id)}
+              aria-disabled={actionsDisabled || !isUpcoming}
               className={`${actionBaseClass} border-2 border-[#AFC2DD] bg-white text-[#5D7FA7] hover:border-[#8EA7CB] ${modifyDisabledClass}`}
             >
               <RotateCw className="h-4 w-4" />
               Reschedule Flight
-            </button>
+            </Link>
 
             <Link
               to={cancelHref}
