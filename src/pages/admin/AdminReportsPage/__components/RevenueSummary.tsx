@@ -171,22 +171,38 @@ const RevenueSummary = ({ dateRange, dateRangeLabel, onToast, customStartDate, c
                   <stop offset="100%" stopColor="#496B92" stopOpacity="0.0" />
                 </linearGradient>
               </defs>
-              {Array.from({ length: 5 }).map((_, idx) => {
-                const y = 60 + idx * 50;
-                const maxVal = Math.max(...chartPoints.map(p => p.value));
-                const step = maxVal > 0 ? Math.ceil(maxVal / 4) : 0;
+              {(() => {
+                const maxVal = Math.max(...chartPoints.map(p => p.value), 100);
+                const step = Math.ceil(maxVal / 4);
+                const labelInterval = Math.ceil(chartPoints.length / 6);
+
                 return (
-                  <g key={idx}>
-                    <line x1="80" y1={y} x2="720" y2={y} stroke="#f1f5f9" strokeWidth="1" />
-                    <text x="70" y={y + 4} textAnchor="end" className="text-[10px] font-bold text-slate-400 fill-current">
-                      ₱{((4 - idx) * step).toLocaleString()}
-                    </text>
-                  </g>
+                  <>
+                    {Array.from({ length: 5 }).map((_, idx) => {
+                      const y = 60 + idx * 50;
+                      const val = (4 - idx) * step;
+                      const formattedVal = val >= 1000 ? `₱${(val / 1000).toLocaleString()}K` : `₱${val}`;
+                      return (
+                        <g key={idx}>
+                          <line x1="80" y1={y} x2="720" y2={y} stroke="#f1f5f9" strokeWidth="1" />
+                          <text x="70" y={y + 4} textAnchor="end" className="text-[10px] font-bold text-slate-400 fill-current">
+                            {formattedVal}
+                          </text>
+                        </g>
+                      );
+                    })}
+                    {chartPoints.map((pt, idx) => {
+                      const showLabel = idx % labelInterval === 0 || idx === chartPoints.length - 1;
+                      if (!showLabel) return null;
+                      return (
+                        <text key={idx} x={pt.x} y="280" textAnchor="middle" className="text-[10px] font-bold text-slate-400 fill-current">
+                          {pt.period}
+                        </text>
+                      );
+                    })}
+                  </>
                 );
-              })}
-              {chartPoints.map((pt, idx) => (
-                <text key={idx} x={pt.x} y="280" textAnchor="middle" className="text-xs font-bold text-slate-400 fill-current">{pt.period}</text>
-              ))}
+              })()}
               {chartFillPath && <path d={chartFillPath} fill="url(#chart-gradient)" />}
               {chartSmoothPath && <path d={chartSmoothPath} fill="none" stroke="#496B92" strokeWidth="3.5" strokeLinecap="round" />}
               {chartPoints.map((pt, idx) => (
