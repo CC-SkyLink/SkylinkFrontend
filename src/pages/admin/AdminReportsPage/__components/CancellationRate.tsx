@@ -184,19 +184,30 @@ const CancellationRate = ({ dateRange, dateRangeLabel, onToast, customStartDate,
                   <stop offset="100%" stopColor="#f43f5e" stopOpacity="0.0" />
                 </linearGradient>
               </defs>
-              {Array.from({ length: 5 }).map((_, idx) => {
-                const y = 60 + idx * 50;
-                const label = (4 - idx) * 25;
+              {(() => {
+                const labelInterval = Math.ceil(chartPoints.length / 6);
                 return (
-                  <g key={idx}>
-                    <line x1="80" y1={y} x2="720" y2={y} stroke="#f1f5f9" strokeWidth="1" />
-                    <text x="70" y={y + 4} textAnchor="end" className="text-[10px] font-bold fill-slate-400">{label}%</text>
-                  </g>
+                  <>
+                    {Array.from({ length: 5 }).map((_, idx) => {
+                      const y = 60 + idx * 50;
+                      const label = (4 - idx) * 25;
+                      return (
+                        <g key={idx}>
+                          <line x1="80" y1={y} x2="720" y2={y} stroke="#f1f5f9" strokeWidth="1" />
+                          <text x="70" y={y + 4} textAnchor="end" className="text-[10px] font-bold fill-slate-400">{label}%</text>
+                        </g>
+                      );
+                    })}
+                    {chartPoints.map((pt, idx) => {
+                      const showLabel = idx % labelInterval === 0 || idx === chartPoints.length - 1;
+                      if (!showLabel) return null;
+                      return (
+                        <text key={idx} x={pt.x} y="280" textAnchor="middle" className="text-[10px] font-bold fill-slate-400">{pt.period}</text>
+                      );
+                    })}
+                  </>
                 );
-              })}
-              {chartPoints.map((pt, idx) => (
-                <text key={idx} x={pt.x} y="280" textAnchor="middle" className="text-xs font-bold fill-slate-400">{pt.period}</text>
-              ))}
+              })()}
               {chartFillPath && <path d={chartFillPath} fill="url(#cancel-gradient)" />}
               {chartSmoothPath && <path d={chartSmoothPath} fill="none" stroke="#f43f5e" strokeWidth="3.5" strokeLinecap="round" />}
               {chartPoints.map((pt, idx) => (

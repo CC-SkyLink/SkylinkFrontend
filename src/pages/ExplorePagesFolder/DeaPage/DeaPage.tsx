@@ -3,6 +3,7 @@ import { ArrowLeft, Calendar, CheckCircle2, Loader2 } from "lucide-react";
 import { Link, useLocation, useParams } from "react-router-dom";
 import { ROUTES } from "@/constants/routes";
 import { searchFlights } from "@/api/flights.api";
+import { getPromotionById } from "@/api/promotions.api";
 import type { Promotion } from "@/types/promotion.types";
 import useAsyncValue from "@/hooks/useAsyncValue";
 import { PROMO_TERMS } from "../PromosPage/constants_promotions";
@@ -19,8 +20,7 @@ const DeaPage = () => {
 
   const loader = useCallback(async (): Promise<{ deal: Promotion; routes: { from: string; to: string; label: string }[] } | null> => {
     let deal: Promotion | undefined = passedDeal ?? undefined;
-    if (id) {
-      const { getPromotionById } = await import("@/api/promotions.api");
+    if (id && !deal) {
       deal = await getPromotionById(id);
     }
     if (!deal) return null;
@@ -44,7 +44,7 @@ const DeaPage = () => {
     }
 
     return { deal, routes };
-  }, [id]);
+  }, [id, passedDeal]);
 
   const { data, isLoading } = useAsyncValue(loader);
   const deal = data?.deal;
