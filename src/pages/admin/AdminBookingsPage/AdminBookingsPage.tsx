@@ -101,7 +101,7 @@ const AdminBookingsPage = () => {
           .map((b) => getCancellationRisk(b.id))
       );
       const map: Record<string, CancellationRisk> = {};
-      results.forEach((r, idx) => {
+      results.forEach((r) => {
         if (r.status === "fulfilled") {
           map[r.value.booking_id] = r.value;
         }
