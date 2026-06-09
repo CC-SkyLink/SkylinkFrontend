@@ -18,8 +18,8 @@ const DeaPage = () => {
   const { id } = useParams<{ id: string }>();
 
   const loader = useCallback(async (): Promise<{ deal: Promotion; routes: { from: string; to: string; label: string }[] } | null> => {
-    let deal = passedDeal;
-    if (!deal && id) {
+    let deal: Promotion | undefined = passedDeal ?? undefined;
+    if (id) {
       const { getPromotionById } = await import("@/api/promotions.api");
       deal = await getPromotionById(id);
     }
@@ -44,7 +44,7 @@ const DeaPage = () => {
     }
 
     return { deal, routes };
-  }, [passedDeal, id]);
+  }, [id]);
 
   const { data, isLoading } = useAsyncValue(loader);
   const deal = data?.deal;
