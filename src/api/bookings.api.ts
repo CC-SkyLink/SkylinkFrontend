@@ -72,11 +72,13 @@ export async function getBookingDetail(id: string): Promise<BookingDetail> {
  */
 export async function cancelBooking(
   id: string,
+  reason?: string,
 ): Promise<void> {
   try {
-    await axiosClient.delete(`/bookings/${id}`);
+    await axiosClient.delete(`/bookings/${id}`, { data: { reason: reason ?? null } });
   } catch (err) {
     handleApiError(err);
+    throw err;
   }
 }
 
@@ -89,10 +91,14 @@ export async function rescheduleBooking(
   payload: RescheduleRequest,
 ): Promise<Booking> {
   try {
-    const res = await axiosClient.put(`/bookings/${id}/reschedule`, payload);
+    const res = await axiosClient.put(`/bookings/${id}/reschedule`, {
+      new_flight_id: payload.newFlightId,
+      reason: payload.reason,
+    });
     return res.data as Booking;
   } catch (err) {
     handleApiError(err);
+    throw err;
   }
 }
 
