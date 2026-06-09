@@ -1,5 +1,7 @@
-import { Link, Navigate, useParams } from "react-router-dom";
-import { X, AlertTriangle } from "lucide-react";
+import { Link, Navigate, useParams, useNavigate } from "react-router-dom";
+import { X, AlertTriangle, Loader2 } from "lucide-react";
+import { useState } from "react";
+import { cancelBooking } from "@/api/bookings.api";
 
 import { ROUTES } from "@/constants/routes";
 
@@ -13,7 +15,9 @@ import useAsyncValue from "@/hooks/useAsyncValue";
 
 const ManageBookingCancelPage = () => {
   const { id } = useParams();
-
+  const navigate = useNavigate();
+  const [isCancelling, setIsCancelling] = useState(false);
+  const [cancelError, setCancelError] = useState<string | null>(null);
   const { data: booking, isLoading } = useAsyncValue(() =>
     loadManageBookingById(id),
   );
@@ -130,6 +134,9 @@ const ManageBookingCancelPage = () => {
           </div>
 
           {/* ACTION BUTTONS */}
+          {cancelError && (
+            <p className="mt-3 text-xs font-semibold text-rose-500">{cancelError}</p>
+          )}
           <div className="mt-5 flex flex-wrap items-center gap-3">
             <Link
               to={detailHref}
@@ -137,13 +144,26 @@ const ManageBookingCancelPage = () => {
             >
               Keep Booking
             </Link>
-
-            <Link
-              to={canceledHref}
-              className="flex-1 rounded-lg border border-rose-200 bg-rose-50 px-4 py-2 text-center text-xs font-bold text-rose-600 transition hover:border-rose-300"
+            <button
+              onClick={async () => {
+                if (!id) return;
+                setIsCancelling(true);
+                setCancelError(null);
+                try {
+                  await cancelBooking(id);
+                  navigate(canceledHref);
+                } catch {
+                  setCancelError("Failed to cancel booking. Please try again.");
+                } finally {
+                  setIsCancelling(false);
+                }
+              }}
+              disabled={isCancelling}
+              className="flex-1 rounded-lg border border-rose-200 bg-rose-50 px-4 py-2 text-center text-xs font-bold text-rose-600 transition hover:border-rose-300 disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
-              Yes, Cancel
-            </Link>
+              {isCancelling && <Loader2 size={12} className="animate-spin" />}
+              {isCancelling ? "Cancelling..." : "Yes, Cancel"}
+            </button>
           </div>
         </div>
       </div>

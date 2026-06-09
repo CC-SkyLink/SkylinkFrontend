@@ -25,6 +25,8 @@ import ManageBookingsPage from "@/pages/ManageBookingPagesFolder/ManageBookingsP
 import ManageBookingDetailsPage from "@/pages/ManageBookingPagesFolder/ManageBookingDetailsPage/ManageBookingDetailsPage";
 import ManageBookingCancelPage from "@/pages/ManageBookingPagesFolder/ManageBookingCancelPage/ManageBookingCancelPage";
 import ManageBookingCanceledPage from "@/pages/ManageBookingPagesFolder/ManageBookingCanceledPage/ManageBookingCanceledPage";
+import ReschedulePickPage from "@/pages/ManageBookingPagesFolder/ReschedulePickPage/ReschedulePickPage";
+import RescheduleSummaryPage from "@/pages/ManageBookingPagesFolder/RescheduleSummaryPage/RescheduleSummaryPage";
 import AdminDashboardPage from "@/pages/admin/AdminDashboardPage";
 import AdminFlightsPage from "@/pages/admin/AdminFlightsPage";
 import AdminAddFlightPage from "@/pages/admin/AdminAddFlightPage";
@@ -189,24 +191,8 @@ const AppContent = () => {
                 "Cancellation confirmation with refund preview and policy.",
               )}
             />
-            <Route
-              path={ROUTES.RESCHEDULE_PICK}
-              element={screen(
-                "S-15",
-                "Reschedule - Pick Date / Flight",
-                "user",
-                "Select new date and eligible replacement flight.",
-              )}
-            />
-            <Route
-              path={ROUTES.RESCHEDULE_SUMMARY}
-              element={screen(
-                "S-16",
-                "Reschedule Summary",
-                "user",
-                "Compare old vs new itinerary and confirm changes.",
-              )}
-            />
+            <Route path={ROUTES.RESCHEDULE_PICK} element={<ReschedulePickPage />} />
+            <Route path={ROUTES.RESCHEDULE_SUMMARY} element={<RescheduleSummaryPage />} />
             <Route
               path={ROUTES.BOOKING_MEAL_PREFERENCE}
               element={screen(
