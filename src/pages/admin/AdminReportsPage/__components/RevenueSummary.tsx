@@ -198,9 +198,10 @@ const RevenueSummary = ({ dateRange, dateRangeLabel, onToast, customStartDate, c
             <p className="text-xs text-slate-400 font-semibold uppercase tracking-wider mt-0.5">{dateRangeLabel}</p>
           </div>
           <div className="flex gap-2 flex-wrap">
-            <button
-              onClick={() => setShowForecast((p) => !p)}
-              className={cn(
+            <div className="relative group/forecast">
+              <button
+                onClick={() => setShowForecast((p) => !p)}
+                className={cn(
                 "flex items-center gap-2 border px-4 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer",
                 showForecast
                   ? "border-[#496B92] bg-[#496B92]/10 text-[#496B92]"
@@ -224,6 +225,10 @@ const RevenueSummary = ({ dateRange, dateRangeLabel, onToast, customStartDate, c
                 </span>
               )}
             </button>
+              <div className="absolute right-0 top-full mt-2 z-50 hidden group-hover/forecast:flex w-64 rounded-xl bg-slate-900 text-white p-3 shadow-xl pointer-events-none">
+                <p className="text-[11px] text-slate-300 leading-relaxed">Shows predicted revenue for the next 6 months based on your past bookings. Colored dots mark months where revenue was unusually high or low compared to your average.</p>
+              </div>
+            </div>
             <button
               onClick={() => exportCSV("revenue", reportData, "Revenue Summary", (msg) => onToast(msg, "success"))}
               className="flex items-center gap-2 border border-slate-200 bg-white hover:border-[#496B92] hover:text-[#496B92] text-slate-700 px-4 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer"

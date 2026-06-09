@@ -82,7 +82,13 @@ const DemandForecast = ({ dateRangeLabel, onToast }: Props) => {
       <div className="bg-white rounded-3xl border border-slate-100 p-6 shadow-sm space-y-4">
         <div className="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-slate-50">
           <div>
-            <h3 className="text-lg font-bold text-slate-900">Demand Forecast by Route</h3>
+            <div className="flex items-center gap-2 group/demand relative">
+              <h3 className="text-lg font-bold text-slate-900">Demand Forecast by Route</h3>
+              <span className="text-[11px] text-slate-400 cursor-default select-none">ⓘ</span>
+              <div className="absolute left-0 top-full mt-2 z-50 hidden group-hover/demand:flex w-64 rounded-xl bg-slate-900 text-white p-3 shadow-xl pointer-events-none">
+                <p className="text-[11px] text-slate-300 leading-relaxed">Estimates how many bookings each route will get in the next 30 days, based on historical booking patterns. Use this to spot which routes need more flights or promotions.</p>
+              </div>
+            </div>
             <p className="text-xs text-slate-400 font-semibold uppercase tracking-wider mt-0.5">{dateRangeLabel} · Next 30 days</p>
           </div>
           <div className="flex gap-2">

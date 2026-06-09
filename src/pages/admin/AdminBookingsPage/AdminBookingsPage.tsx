@@ -199,7 +199,15 @@ const AdminBookingsPage = () => {
     },
     {
       key: "risk",
-      header: "RISK",
+      header: (
+        <div className="relative group/risk flex items-center gap-1 cursor-default">
+          <span>RISK</span>
+          <span className="text-[11px] text-slate-400 select-none">ⓘ</span>
+          <div className="absolute left-0 top-full mt-2 z-50 hidden group-hover/risk:flex w-64 rounded-xl bg-slate-900 text-white p-3 shadow-xl pointer-events-none">
+            <p className="text-[11px] text-slate-300 leading-relaxed">Estimates how likely each booking is to be cancelled, based on the route, seat class, ticket price, and how far in advance it was booked. High = needs attention.</p>
+          </div>
+        </div>
+      ),
       cell: (row) => {
         const risk = riskScores[row.id];
         if (!risk || risk.risk_level === "unknown") {
