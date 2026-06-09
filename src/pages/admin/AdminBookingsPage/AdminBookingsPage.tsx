@@ -5,6 +5,8 @@ import AdminLayout from "../_components/AdminLayout";
 import DataTable, { type TableColumn } from "@/pages/_shared/components/ui/DataTable";
 import StatusBadge from "@/pages/_shared/components/ui/StatusBadge";
 import { getAllBookingsAdmin } from "@/api/bookings.api";
+import { getCancellationRisk } from "@/api/reports.api";
+import type { CancellationRisk } from "@/types";
 import { ROUTES } from "@/constants/routes";
 import type { Booking } from "@/types";
 
@@ -29,6 +31,7 @@ const AdminBookingsPage = () => {
   // Pagination State
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 8;
+  const [riskScores, setRiskScores] = useState<Record<string, CancellationRisk>>({});
 
   useEffect(() => {
     const fetchBookings = async () => {
@@ -87,6 +90,26 @@ const AdminBookingsPage = () => {
     };
     fetchBookings();
   }, []);
+
+  useEffect(() => {
+    if (bookings.length === 0) return;
+    const fetchRisks = async () => {
+      const results = await Promise.allSettled(
+        bookings
+          .filter((b) => b.status !== "cancelled")
+          .slice(0, 20)
+          .map((b) => getCancellationRisk(b.id))
+      );
+      const map: Record<string, CancellationRisk> = {};
+      results.forEach((r) => {
+        if (r.status === "fulfilled") {
+          map[r.value.booking_id] = r.value;
+        }
+      });
+      setRiskScores(map);
+    };
+    fetchRisks();
+  }, [bookings]);
 
   // Filter logic
   const filteredBookings = useMemo(() => {
@@ -173,6 +196,28 @@ const AdminBookingsPage = () => {
       key: "payment",
       header: "PAYMENT",
       cell: (row) => <span className="text-slate-600">{getPaymentMethod(row.pnr)}</span>,
+    },
+    {
+      key: "risk",
+      header: "RISK",
+      cell: (row) => {
+        const risk = riskScores[row.id];
+        if (!risk || risk.risk_level === "unknown") {
+          return <span className="text-slate-300 text-xs font-medium">—</span>;
+        }
+        const cls =
+          risk.risk_level === "high"
+            ? "bg-rose-100 text-rose-700"
+            : risk.risk_level === "medium"
+              ? "bg-amber-100 text-amber-700"
+              : "bg-emerald-100 text-emerald-700";
+        return (
+          <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold uppercase ${cls}`}>
+            {risk.risk_level}
+            {risk.risk_score !== null && ` · ${risk.risk_score}%`}
+          </span>
+        );
+      },
     },
     {
       key: "status",
