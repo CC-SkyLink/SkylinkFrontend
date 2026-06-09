@@ -10,6 +10,7 @@ import RevenueSummary from "./__components/RevenueSummary";
 import BookingsRoute from "./__components/BookingsRoute";
 import CancellationRate from "./__components/CancellationRate";
 import UserGrowth from "./__components/UserGrowth";
+import DemandForecast from "./__components/DemandForecast";
 import type { ReportType, DateRange } from "./__components/types";
 import ActivityLogTab from "./subPageActivityLog";
 
@@ -118,8 +119,8 @@ const AdminReportsPage = () => {
               <div className="space-y-2">
                 <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Report Type</span>
                 <div className="flex flex-wrap gap-2">
-                  {(["revenue", "route", "cancellation", "growth"] as ReportType[]).map((type) => {
-                    const label = type === "revenue" ? "Revenue Summary" : type === "route" ? "Bookings by Route" : type === "cancellation" ? "Cancellation Rate" : "User Growth";
+                  {(["revenue", "route", "cancellation", "growth", "demand"] as ReportType[]).map((type) => {
+                    const label = type === "revenue" ? "Revenue Summary" : type === "route" ? "Bookings by Route" : type === "cancellation" ? "Cancellation Rate" : type === "growth" ? "User Growth" : "Demand Forecast";
                     return (
                       <button key={type} onClick={() => setReportType(type)} className={cn("px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer", reportType === type ? "bg-[#496B92] text-white shadow-sm" : "bg-slate-50 hover:bg-slate-100 text-slate-600 border border-transparent hover:border-slate-200")}>
                         {label}
@@ -148,6 +149,7 @@ const AdminReportsPage = () => {
             {reportType === "route" && <BookingsRoute dateRange={dateRange} dateRangeLabel={dateRangeLabel} onToast={handleToast} customStartDate={customStartDate} customEndDate={customEndDate} />}
             {reportType === "cancellation" && <CancellationRate dateRange={dateRange} dateRangeLabel={dateRangeLabel} onToast={handleToast} customStartDate={customStartDate} customEndDate={customEndDate} />}
             {reportType === "growth" && <UserGrowth dateRange={dateRange} dateRangeLabel={dateRangeLabel} onToast={handleToast} customStartDate={customStartDate} customEndDate={customEndDate} />}
+            {reportType === "demand" && <DemandForecast dateRange={dateRange} dateRangeLabel={dateRangeLabel} onToast={handleToast} />}
           </div>
         ) : (
           <ActivityLogTab />
