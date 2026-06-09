@@ -1,4 +1,4 @@
-export type ReportType = "revenue" | "route" | "cancellation" | "growth";
+export type ReportType = "revenue" | "route" | "cancellation" | "growth" | "demand";
 export type DateRange = "all" | "today" | "week" | "month" | "3months" | "custom";
 
 export interface MonthlyRevenuePoint {
