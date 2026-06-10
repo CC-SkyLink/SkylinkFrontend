@@ -80,7 +80,9 @@ export async function searchFlights(
   params: FlightSearchParams = {},
 ): Promise<Flight[]> {
   try {
-    const res = await axiosClient.get("/flights", { params });
+    const { pageSize, ...rest } = params;
+    const mappedParams = { ...rest, ...(pageSize !== undefined && { size: pageSize }) };
+    const res = await axiosClient.get("/flights", { params: mappedParams });
     const items = Array.isArray(res.data) ? res.data : (res.data?.items || []);
     return items.map(mapBackendFlight);
   } catch (err) {

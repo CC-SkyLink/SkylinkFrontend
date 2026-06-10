@@ -16,6 +16,15 @@ export async function generateReport(query?: ReportQuery): Promise<ReportResult>
 }
 
 /**
+ * Admin: Get KPI
+ * GET /api/v1/admin/kpi
+ */
+export async function getKpiSummary() {
+  const res = await axiosClient.get("/admin/kpi");
+  return res.data;
+}
+
+/**
  * Admin: Get Route Booking Report
  * GET /api/v1/admin/reports/routes
  */

@@ -42,14 +42,23 @@ export async function getBookingsForUser(userId?: string): Promise<Booking[]> {
  * Admin: Get ALL bookings
  * GET /api/v1/bookings/admin/all
  */
-export async function getAllBookingsAdmin(): Promise<Booking[]> {
+export async function getAllBookingsAdmin(params?: { page?: number; size?: number }): Promise<Booking[]> {
   try {
-    const res = await axiosClient.get("/bookings/admin/all");
-    // Handle PaginatedResponse[BookingListRead]
+    const res = await axiosClient.get("/bookings/admin/all", { params });
     const items = Array.isArray(res.data) ? res.data : (res.data?.items || []);
     return items as Booking[];
   } catch (err) {
     handleApiError(err);
+  }
+}
+
+export async function getBookingsCount(): Promise<number> {
+  try {
+    const res = await axiosClient.get("/bookings/admin/all", { params: { page: 1, size: 100 } });
+    const items = Array.isArray(res.data) ? res.data : (res.data?.items || []);
+    return items.filter((b: any) => b.status !== "cancelled").length;
+  } catch {
+    return 0;
   }
 }
 

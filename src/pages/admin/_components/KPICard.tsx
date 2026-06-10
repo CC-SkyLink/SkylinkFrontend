@@ -4,8 +4,8 @@ import { ArrowDownRight, ArrowUpRight, type LucideIcon } from "lucide-react";
 type KPICardProps = {
   label: string;
   value: string | number;
-  change: string;
-  trend: "up" | "down";
+  change?: string;
+  trend?: "up" | "down";
   icon: LucideIcon;
   iconBg: string;
   iconColor: string;
@@ -31,21 +31,23 @@ const KPICard = ({
         >
           <Icon className={cn("size-6", iconColor)} />
         </div>
-        <div
-          className={cn(
-            "flex items-center gap-1 rounded-full px-2 py-1 text-xs font-bold",
-            trend === "up"
-              ? "bg-emerald-50 text-emerald-600"
-              : "bg-rose-50 text-rose-600",
-          )}
-        >
-          {trend === "up" ? (
-            <ArrowUpRight size={14} strokeWidth={3} />
-          ) : (
-            <ArrowDownRight size={14} strokeWidth={3} />
-          )}
-          {change}
-        </div>
+        {change && trend && (
+          <div
+            className={cn(
+              "flex items-center gap-1 rounded-full px-2 py-1 text-xs font-bold",
+              trend === "up"
+                ? "bg-emerald-50 text-emerald-600"
+                : "bg-rose-50 text-rose-600",
+            )}
+          >
+            {trend === "up" ? (
+              <ArrowUpRight size={14} strokeWidth={3} />
+            ) : (
+              <ArrowDownRight size={14} strokeWidth={3} />
+            )}
+            {change}
+          </div>
+        )}
       </div>
       <div className="mt-4">
         <p className="text-sm font-medium text-slate-500">{label}</p>
