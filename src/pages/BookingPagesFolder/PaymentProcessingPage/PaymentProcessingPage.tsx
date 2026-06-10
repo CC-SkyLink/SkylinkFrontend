@@ -40,9 +40,9 @@ const PaymentProcessingPage = () => {
         if (!isSubscribed) return;
 
         // "confirmed" is typical for successful payment, could also check for "ticketed" depending on backend
-        if (detail.status === "confirmed" || detail.status === "ticketed" || detail.payment_status === "paid") {
+        if (detail.status === "confirmed" || detail.paymentStatus === "captured") {
           navigate(`${ROUTES.BOOKING_CONFIRMATION}${searchSuffix}`);
-        } else if (detail.status === "cancelled" || detail.payment_status === "failed") {
+        } else if (detail.status === "cancelled" || detail.paymentStatus === "failed") {
           setPollingError(true);
         }
       } catch (err) {

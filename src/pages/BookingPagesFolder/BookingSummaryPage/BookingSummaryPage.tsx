@@ -59,7 +59,7 @@ const BookingSummaryPage = () => {
           passport_number: p.passport,
           nationality: p.nationality
         })),
-        total_price: pricing.total,
+        total_price: pricing?.total ?? 0,
       };
 
       const booking = await create(payload as any);
