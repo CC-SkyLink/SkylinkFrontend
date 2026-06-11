@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { Search, Eye, Download } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import AdminLayout from "../_components/AdminLayout";
@@ -8,6 +8,7 @@ import StatusBadge from "@/pages/_shared/components/ui/StatusBadge";
 import { getAllBookingsAdmin } from "@/api/bookings.api";
 import { ROUTES } from "@/constants/routes";
 import type { Booking } from "@/types";
+import AdminBookingDrawer from "./_AdminBookingDrawer"; 
 
 
 const getPaymentMethod = (booking?: any) => {
@@ -15,7 +16,7 @@ const getPaymentMethod = (booking?: any) => {
 };
 
 const AdminBookingsPage = () => {
-  const navigate = useNavigate();
+  const [selectedBookingId, setSelectedBookingId] = useState<string | null>(null); 
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
   const [dateFilter, setDateFilter] = useState("");
@@ -141,7 +142,7 @@ const AdminBookingsPage = () => {
       header: "ACTIONS",
       cell: (row) => (
         <button
-          onClick={() => navigate(ROUTES.ADMIN_BOOKING_DETAIL.replace(":id", row.id))}
+          onClick={() => setSelectedBookingId(row.id)} 
           className="p-2 text-slate-500 hover:text-[#496B92] hover:bg-slate-50 rounded-lg border border-slate-100 transition-colors"
           aria-label="View Booking"
         >
@@ -321,8 +322,11 @@ const AdminBookingsPage = () => {
           )}
         </div>
       </div>
+      <AdminBookingDrawer
+        bookingId={selectedBookingId}
+        onClose={() => setSelectedBookingId(null)}
+      />app/routers/bookings.py
     </AdminLayout>
   );
 };
-
 export default AdminBookingsPage;
