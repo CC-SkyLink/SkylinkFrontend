@@ -1,6 +1,6 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { searchFlights } from "@/api/flights.api";
-import type { Flight, FlightSearchParams } from "@/types";
+import type { FlightSearchParams } from "@/types";
 
 export const FLIGHTS_QUERY_KEY = "flights";
 
