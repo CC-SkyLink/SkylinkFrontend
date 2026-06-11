@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Search, Eye, Download } from "lucide-react";
 import AdminLayout from "../_components/AdminLayout";
@@ -18,24 +18,36 @@ const getPaymentMethod = (booking?: any) => {
 const AdminBookingsPage = () => {
   const navigate = useNavigate();
   const [bookings, setBookings] = useState<Booking[]>([]);
+  const [totalBookings, setTotalBookings] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
-
   // Search & Filter State
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
-  const [paymentFilter, setPaymentFilter] = useState("");
-  // Payment filter removed from UI since payment method comes from real data
+  // const [paymentFilter, setPaymentFilter] = useState("");
   const [dateFilter, setDateFilter] = useState("");
-
   // Pagination State
   const [currentPage, setCurrentPage] = useState(1);
+
+  // Reset to page 1 when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, statusFilter, dateFilter]); // removed paymentFilter
   const itemsPerPage = 8;
   const [riskScores, setRiskScores] = useState<Record<string, CancellationRisk>>({});
 
   useEffect(() => {
     const fetchBookings = async () => {
       try {
-        const data = await getAllBookingsAdmin();
+        const params: Parameters<typeof getAllBookingsAdmin>[0] = {
+          page: currentPage,
+          size: itemsPerPage,
+        };
+        if (statusFilter) params.status = statusFilter;
+        if (searchQuery) params.search = searchQuery;
+        if (dateFilter) params.departure_date = dateFilter;
+        const result = await getAllBookingsAdmin(params);
+        const data = result?.items ?? [];
+        setTotalBookings(result?.total ?? 0);
         if (data && data.length > 0) {
           const normalized = data.map((b: any) => ({
             id: String(b.id),
@@ -83,8 +95,7 @@ const AdminBookingsPage = () => {
       }
     };
     fetchBookings();
-  }, []);
-
+  }, [currentPage, statusFilter, searchQuery, dateFilter]);
   useEffect(() => {
     if (bookings.length === 0) return;
     const fetchRisks = async () => {
@@ -106,36 +117,9 @@ const AdminBookingsPage = () => {
   }, [bookings]);
 
   // Filter logic
-  const filteredBookings = useMemo(() => {
-    return bookings.filter((b) => {
-      const pnrMatch = b.pnr?.toLowerCase().includes(searchQuery.toLowerCase()) || b.id.toLowerCase().includes(searchQuery.toLowerCase());
-      const passenger = b.passengers?.[0];
-      const nameMatch = passenger
-        ? `${passenger.firstName} ${passenger.lastName}`.toLowerCase().includes(searchQuery.toLowerCase())
-        : false;
-      const routeMatch = b.flight
-        ? `${b.flight.origin} ${b.flight.destination}`.toLowerCase().includes(searchQuery.toLowerCase())
-        : false;
-
-      const matchesSearch = pnrMatch || nameMatch || routeMatch;
-
-      const matchesStatus = statusFilter ? b.status === statusFilter : true;
-      const matchesPayment = paymentFilter ? getPaymentMethod(b.pnr) === paymentFilter : true;
-      const matchesDate = dateFilter
-        ? b.flight?.departureTime?.startsWith(dateFilter)
-        : true;
-
-      return matchesSearch && matchesStatus && matchesPayment && matchesDate;
-    });
-  }, [bookings, searchQuery, statusFilter, paymentFilter, dateFilter]);
-
-  // Paginated bookings
-  const paginatedBookings = useMemo(() => {
-    const startIndex = (currentPage - 1) * itemsPerPage;
-    return filteredBookings.slice(startIndex, startIndex + itemsPerPage);
-  }, [filteredBookings, currentPage]);
-
-  const totalPages = Math.max(1, Math.ceil(filteredBookings.length / itemsPerPage));
+  const filteredBookings = bookings; // server-side pagination, no client filtering
+  const paginatedBookings = bookings; // already paginated from server
+  const totalPages = Math.max(1, Math.ceil(totalBookings / itemsPerPage));
 
   // Columns definition
   const columns: TableColumn<Booking>[] = [
@@ -267,7 +251,7 @@ const AdminBookingsPage = () => {
           <div>
             <h2 className="text-2xl font-bold text-slate-900">Bookings</h2>
             <p className="text-sm font-medium text-slate-500">
-              {filteredBookings.length} bookings found
+              {totalBookings} bookings found
             </p>
           </div>
           <button
@@ -312,7 +296,7 @@ const AdminBookingsPage = () => {
             <option value="cancelled">Cancelled</option>
           </select>
 
-          {/* Payment Method dropdown */}
+          {/* Payment Method dropdown   --> MIGHT REMOVE THE WHOLE DROPDOWN
           <select
             value={paymentFilter}
             onChange={(e) => {
@@ -326,6 +310,7 @@ const AdminBookingsPage = () => {
             <option value="GCash">GCash</option>
             <option value="Debit Card">Debit Card</option>
           </select>
+          */}
 
           {/* Departure Date */}
           <input
@@ -360,8 +345,8 @@ const AdminBookingsPage = () => {
           {filteredBookings.length > 0 && (
             <div className="flex items-center justify-between px-6 py-4 border-t border-slate-50 bg-slate-50/30">
               <p className="text-sm font-medium text-slate-500">
-                Showing {Math.min(filteredBookings.length, (currentPage - 1) * itemsPerPage + 1)}-
-                {Math.min(filteredBookings.length, currentPage * itemsPerPage)} of {filteredBookings.length}
+                Showing {Math.min(totalBookings, (currentPage - 1) * itemsPerPage + 1)}-
+                {Math.min(totalBookings, currentPage * itemsPerPage)} of {totalBookings}
               </p>
               <div className="flex gap-2">
                 <button

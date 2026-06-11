@@ -42,11 +42,12 @@ export async function getBookingsForUser(userId?: string): Promise<Booking[]> {
  * Admin: Get ALL bookings
  * GET /api/v1/bookings/admin/all
  */
-export async function getAllBookingsAdmin(params?: { page?: number; size?: number }): Promise<Booking[]> {
+export async function getAllBookingsAdmin(params?: { page?: number; size?: number; status?: string | undefined; search?: string | undefined; departure_date?: string | undefined }): Promise<{ items: Booking[]; total: number }> {
   try {
     const res = await axiosClient.get("/bookings/admin/all", { params });
     const items = Array.isArray(res.data) ? res.data : (res.data?.items || []);
-    return items as Booking[];
+    const total = res.data?.total ?? items.length;
+    return { items: items as Booking[], total };
   } catch (err) {
     handleApiError(err);
   }
