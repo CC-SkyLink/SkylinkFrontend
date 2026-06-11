@@ -67,9 +67,11 @@ export async function getBookingsCount(): Promise<number> {
  * User/Admin: Get specific booking
  * GET /api/v1/bookings/{booking_id}
  */
-export async function getBookingDetail(id: string): Promise<BookingDetail> {
+export async function getBookingDetail(id: string, asAdmin = false): Promise<BookingDetail> {
   try {
-    const res = await axiosClient.get(`/bookings/${id}`);
+    const url = asAdmin ? `/bookings/admin/${id}` : `/bookings/${id}`;
+    const res = await axiosClient.get(url);
+    console.log("getBookingDetail raw:", res.data);
     return res.data as BookingDetail;
   } catch (err) {
     handleApiError(err);
