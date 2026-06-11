@@ -58,12 +58,12 @@ function mapBookingToRecentBooking(booking: any): RecentBooking {
 const AdminDashboardPage = () => {
   const loader = useCallback(async (): Promise<DashboardData> => {
     try {
-      const [bookings, flights, kpi] = await Promise.all([
+      const [bookingsResult, flights, kpi] = await Promise.all([
         getAllBookingsAdmin({ page: 1, size: 100 }),
         searchFlights({ pageSize: 100 }),
         getKpiSummary(),
       ]);
-      return { bookings, flights, kpi };
+      return { bookings: bookingsResult.items, flights, kpi };
     } catch {
       return {
         bookings: [],
