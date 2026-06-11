@@ -77,9 +77,15 @@ const ActivityLogTab = () => {
     {
       key: "id",
       header: "ACTION",
-      cell: () => (
-        <span className="inline-flex border px-2 py-0.5 rounded-full text-xs font-semibold uppercase tracking-wider border-emerald-200 bg-emerald-50 text-emerald-700">
-          Admin Login
+      cell: (row) => (
+        <span
+          className={`inline-flex border px-2 py-0.5 rounded-full text-xs font-semibold uppercase tracking-wider ${
+            row.success
+              ? "border-emerald-200 bg-emerald-50 text-emerald-700"
+              : "border-red-200 bg-red-50 text-red-600"
+          }`}
+        >
+          {row.success ? "Login Success" : "Login Failed"}
         </span>
       ),
     },
@@ -139,13 +145,29 @@ const ActivityLogTab = () => {
                 disabled={logPage === 1}
                 className="px-3 py-1.5 rounded-lg border border-slate-200 bg-white text-xs font-semibold text-slate-600 hover:bg-slate-50 disabled:opacity-50 transition-colors"
               >&lt;</button>
-              {Array.from({ length: totalPages }).map((_, idx) => (
-                <button
-                  key={idx}
-                  onClick={() => setLogPage(idx + 1)}
-                  className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all ${logPage === idx + 1 ? "bg-[#496B92] text-white" : "border border-slate-200 bg-white text-slate-600 hover:bg-slate-50"}`}
-                >{idx + 1}</button>
-              ))}
+              {(() => {
+                const pages: (number | "...")[] = [];
+                if (totalPages <= 7) {
+                  for (let i = 1; i <= totalPages; i++) pages.push(i);
+                } else {
+                  pages.push(1);
+                  if (logPage > 3) pages.push("...");
+                  for (let i = Math.max(2, logPage - 1); i <= Math.min(totalPages - 1, logPage + 1); i++) pages.push(i);
+                  if (logPage < totalPages - 2) pages.push("...");
+                  pages.push(totalPages);
+                }
+                return pages.map((p, idx) =>
+                  p === "..." ? (
+                    <span key={`ellipsis-${idx}`} className="px-2 py-1.5 text-xs text-slate-400">…</span>
+                  ) : (
+                    <button
+                      key={p}
+                      onClick={() => setLogPage(p)}
+                      className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all ${logPage === p ? "bg-[#496B92] text-white" : "border border-slate-200 bg-white text-slate-600 hover:bg-slate-50"}`}
+                    >{p}</button>
+                  )
+                );
+              })()}
               <button
                 onClick={() => setLogPage((p) => Math.min(totalPages, p + 1))}
                 disabled={logPage === totalPages}

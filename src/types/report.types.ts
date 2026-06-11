@@ -84,6 +84,8 @@ export interface ActivityLogItem {
   id: string;
   email: string;
   ip_address?: string | null;
+  success: boolean;
+  is_admin: boolean;
   attempted_at: string;
 }
 
