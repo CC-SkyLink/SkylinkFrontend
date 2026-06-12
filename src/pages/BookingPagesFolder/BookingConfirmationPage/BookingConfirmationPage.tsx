@@ -3,6 +3,7 @@ import { Link, useLocation } from "react-router-dom";
 import { ArrowRight, CheckCircle2, Copy, Download, Loader2 } from "lucide-react";
 import { ROUTES } from "@/constants/routes";
 import { useBookingDetail } from "@/hooks/useBookings";
+import logo1 from "@/assets/logos/Logo 1.png";
 
 const BookingConfirmationPage = () => {
   const [copied, setCopied] = useState(false);
@@ -233,13 +234,7 @@ const BookingConfirmationPage = () => {
         {/* Header Branding */}
         <div className="flex justify-between items-center border-b-2 border-[#1E3A8A] pb-3">
           <div className="flex items-center gap-2">
-            <div className="h-8 w-8 rounded-full bg-[#1E3A8A] flex items-center justify-center text-white font-bold text-lg">
-              S
-            </div>
-            <div>
-              <h1 className="text-xl font-extrabold text-[#1E3A8A] tracking-wider leading-none">SKYLINK</h1>
-              <p className="text-[9px] uppercase tracking-widest text-slate-500 font-semibold mt-0.5">Airline Reservation System</p>
-            </div>
+            <img src={logo1} alt="SkyLink Logo" className="h-10 object-contain" />
           </div>
           <div className="text-right">
             <h2 className="text-sm font-bold text-slate-700 uppercase tracking-wider">Electronic Ticket Receipt</h2>
