@@ -363,16 +363,24 @@ const BookingConfirmationPage = () => {
             <table className="w-full mt-2 text-[9px] text-slate-600 border-collapse">
               <tbody>
                 <tr className="border-b border-slate-100">
-                  <td className="py-1 font-semibold text-slate-500">Fare Calculation:</td>
-                  <td className="py-1 text-right text-slate-700 uppercase font-mono">{booking.fromCode} SK {booking.toCode} PHP {detail?.total_price || 0}END</td>
+                  <td className="py-1.5 font-semibold text-slate-500">Fare Calculation:</td>
+                  <td className="py-1.5 text-right text-slate-700 uppercase font-mono">{booking.fromCode} SK {booking.toCode} PHP {detail?.total_price || 0}END</td>
                 </tr>
                 <tr className="border-b border-slate-100">
-                  <td className="py-1 font-semibold text-slate-500">Form of Payment:</td>
-                  <td className="py-1 text-right text-slate-700 uppercase">{paymentMethod}</td>
+                  <td className="py-1.5 font-semibold text-slate-500">Form of Payment:</td>
+                  <td className="py-1.5 text-right text-slate-700 uppercase">{paymentMethod}</td>
                 </tr>
                 <tr className="border-b border-slate-100">
-                  <td className="py-1 font-semibold text-slate-500">Endorsements:</td>
-                  <td className="py-1 text-right text-slate-700">NONREF/FARE RULES APPLY/ECO SUPERSAVER</td>
+                  <td className="py-1.5 font-semibold text-slate-500">Transaction ID:</td>
+                  <td className="py-1.5 text-right text-slate-700 font-mono text-[8px]">{detail?.payment?.id || `SK-${booking.pnr}-TX`}</td>
+                </tr>
+                <tr className="border-b border-slate-100">
+                  <td className="py-1.5 font-semibold text-slate-500">Contact Details:</td>
+                  <td className="py-1.5 text-right text-slate-700 text-[8px] truncate max-w-[150px]">{detail?.contactEmail || detail?.contact_email || "customer@skylink.com"}</td>
+                </tr>
+                <tr className="border-b border-slate-100">
+                  <td className="py-1.5 font-semibold text-slate-500">Endorsements:</td>
+                  <td className="py-1.5 text-right text-slate-700">NONREF/FARE RULES APPLY/ECO SUPERSAVER</td>
                 </tr>
               </tbody>
             </table>
@@ -387,7 +395,7 @@ const BookingConfirmationPage = () => {
                   <td className="py-1 text-right text-slate-800 font-semibold">PHP {baseFare.toLocaleString()}</td>
                 </tr>
                 <tr className="border-b border-slate-100">
-                  <td className="py-1 font-semibold text-slate-500">Taxes:</td>
+                  <td className="py-1 font-semibold text-slate-500">Taxes & Fees:</td>
                   <td className="py-1 text-right text-slate-800 font-semibold">PHP {taxes.toLocaleString()}</td>
                 </tr>
                 <tr className="border-b border-slate-100">
@@ -403,8 +411,69 @@ const BookingConfirmationPage = () => {
           </div>
         </div>
 
+        {/* Passenger Information Table */}
+        <div className="mt-5">
+          <h3 className="text-[9px] font-bold uppercase tracking-wider text-slate-400 border-b border-slate-200 pb-1.5">Passenger Information</h3>
+          <table className="w-full mt-2 text-[9px] text-slate-600 border-collapse border border-slate-100">
+            <thead>
+              <tr className="bg-slate-100 text-slate-700 text-[8px] uppercase font-bold text-left border-b border-slate-200">
+                <th className="p-1.5 border-r border-slate-200">Passenger Name</th>
+                <th className="p-1.5 border-r border-slate-200 text-center">Type</th>
+                <th className="p-1.5 border-r border-slate-200 text-center">Nationality</th>
+                <th className="p-1.5">Passport / Document ID</th>
+              </tr>
+            </thead>
+            <tbody>
+              {detail?.passengers?.map((p: any, index: number) => (
+                <tr key={index} className="border-b border-slate-100">
+                  <td className="p-1.5 font-semibold text-slate-800 uppercase border-r border-slate-200">
+                    {p.first_name || p.firstName} {p.last_name || p.lastName}
+                  </td>
+                  <td className="p-1.5 border-r border-slate-200 text-center uppercase">ADT (Adult)</td>
+                  <td className="p-1.5 border-r border-slate-200 text-center uppercase">{p.nationality || "—"}</td>
+                  <td className="p-1.5 font-mono">{p.passport_number || p.passport || "—"}</td>
+                </tr>
+              )) || (
+                <tr className="border-b border-slate-100">
+                  <td className="p-1.5 font-semibold text-slate-800 uppercase border-r border-slate-200">
+                    {booking.passengerName}
+                  </td>
+                  <td className="p-1.5 border-r border-slate-200 text-center uppercase">ADT (Adult)</td>
+                  <td className="p-1.5 border-r border-slate-200 text-center uppercase">—</td>
+                  <td className="p-1.5 font-mono">—</td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Important Travel Information */}
+        <div className="mt-5 grid grid-cols-2 gap-6 text-[8px] text-slate-500 leading-normal border border-slate-200 rounded-sm p-3 bg-slate-50/50">
+          <div>
+            <h4 className="font-bold text-slate-700 uppercase tracking-wider mb-1">Check-in and Boarding Guidelines</h4>
+            <ul className="list-disc pl-3 space-y-1">
+              <li>Check-in counters open three (3) hours prior to scheduled departure and close strictly forty-five (45) minutes before flight time.</li>
+              <li>Passengers must present a valid government-issued photo ID matching the reservation name at check-in.</li>
+              <li>Boarding gates close fifteen (15) minutes before departure. Late passengers will not be accepted.</li>
+            </ul>
+          </div>
+          <div>
+            <h4 className="font-bold text-slate-700 uppercase tracking-wider mb-1">Baggage Regulations & Security Notice</h4>
+            <ul className="list-disc pl-3 space-y-1">
+              <li>Free check-in baggage allowance is 20 kg. Excess weight will be subject to airline fees at the counter.</li>
+              <li>One piece of hand baggage is allowed in the cabin up to 7 kg, max dimensions: 56 cm x 36 cm x 23 cm.</li>
+              <li>Carriage of hazardous goods (flammables, unregistered batteries, liquid volumes &gt;100ml) in carry-on baggage is prohibited.</li>
+            </ul>
+          </div>
+        </div>
+
+        {/* Carriage Conditions Legal Text */}
+        <div className="mt-5 text-[7px] text-slate-400 text-center leading-relaxed font-light">
+          Carriage and other services provided by SkyLink are subject to conditions of carriage, which are hereby incorporated by reference. These conditions may be obtained from the issuing carrier. SkyLink reserves the right to adjust flight schedules and routing due to force majeure, safety requirements, or operational constraints.
+        </div>
+
         {/* Footer */}
-        <div className="mt-8 border-t border-dashed border-slate-200 pt-4 flex justify-between items-center text-[8px] text-slate-400 font-medium">
+        <div className="mt-6 border-t border-dashed border-slate-200 pt-4 flex justify-between items-center text-[8px] text-slate-400 font-medium">
           <p>© {new Date().getFullYear()} SkyLink Airline Corporation. All rights reserved.</p>
           <p className="uppercase tracking-widest text-[#1E3A8A] font-bold">Fly Smarter, Fly SkyLink</p>
         </div>
