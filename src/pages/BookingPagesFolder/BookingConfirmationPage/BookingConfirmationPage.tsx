@@ -121,7 +121,7 @@ const BookingConfirmationPage = () => {
             non-refundable thereafter.
           </p>
 
-          <div className="printable-ticket mt-6 space-y-4">
+          <div className="mt-6 space-y-4">
             <div className="mx-auto w-full rounded-2xl border border-slate-200 bg-white px-6 py-5 shadow-sm">
               <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-400">
                 Booking Reference (PNR)
@@ -229,7 +229,7 @@ const BookingConfirmationPage = () => {
       </main>
 
       {/* Print-Only View (Professional E-Ticket Receipt) */}
-      <div className="hidden print:block bg-white text-slate-800 font-sans p-6 w-full max-w-[800px] mx-auto text-left leading-normal text-[10px]">
+      <div className="printable-ticket print-only bg-white text-slate-800 font-sans p-6 w-full max-w-[800px] mx-auto text-left leading-normal text-[10px]">
         {/* Header Branding */}
         <div className="flex justify-between items-center border-b-2 border-[#1E3A8A] pb-3">
           <div className="flex items-center gap-2">
