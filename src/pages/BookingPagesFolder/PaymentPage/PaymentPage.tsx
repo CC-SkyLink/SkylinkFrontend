@@ -37,7 +37,7 @@ const PaymentPage = () => {
   }
   
   const backHref = `${ROUTES.BOOKING_SUMMARY}${searchSuffix}`;
-  const [method, setMethod] = useState<PaymentMethod>("card");
+  const [method, setMethod] = useState<PaymentMethod>("gcash");
   
   const { data: bookingDetail, isLoading: isLoadingBooking } = useBookingDetail(bookingId);
   const bookingTotal = bookingDetail?.totalPrice || 0;
