@@ -135,7 +135,7 @@ function DealCard({ deal }: { deal: Promotion }) {
     <Link
       to={ROUTES.EXPLORE_PROMO_DETAIL.replace(":id", deal.id)}
       state={{ deal }}
-      className="bg-bg-page border border-tertiary-30 rounded-[14px] overflow-hidden shadow-[0px_2px_8px_rgba(0,0,0,0.04)] text-left w-full hover:shadow-md transition-shadow"
+      className="bg-bg-page border border-tertiary-30 rounded-[14px] overflow-hidden shadow-[0px_2px_8px_rgba(0,0,0,0.04)] text-left w-full hover:shadow-lg hover:-translate-y-1 transition-all duration-300 transform"
     >
       <div className="relative h-35 bg-tertiary-20">
         {deal.image_url ? (
@@ -189,7 +189,7 @@ function RouteCard({ route }: { route: Route }) {
   return (
     <Link
       to={ROUTES.SEARCH_RESULTS}
-      className="bg-bg-page border border-tertiary-30 rounded-[14px] p-4 flex items-center justify-between hover:shadow-sm transition-shadow w-full text-left"
+      className="bg-bg-page border border-tertiary-30 rounded-[14px] p-4 flex items-center justify-between hover:shadow-md hover:-translate-y-1 transition-all duration-300 transform w-full text-left"
     >
       <div className="flex items-center gap-3">
         <div>
@@ -294,7 +294,7 @@ function DestinationCard({ destination }: { destination: Destination }) {
   return (
     <Link
       to={`/explore/destination/${destination.code}`}
-      className="relative h-50 rounded-[14px] overflow-hidden shadow-[0px_2px_8px_rgba(0,0,0,0.06)] w-full text-left hover:shadow-md transition-shadow"
+      className="relative h-50 rounded-[14px] overflow-hidden shadow-[0px_2px_8px_rgba(0,0,0,0.06)] w-full text-left hover:shadow-lg hover:scale-[1.02] transition-all duration-300 transform"
     >
       {destination.image ? (
         <img

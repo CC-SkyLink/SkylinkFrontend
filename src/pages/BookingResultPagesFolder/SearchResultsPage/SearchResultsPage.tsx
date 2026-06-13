@@ -202,25 +202,27 @@ const SearchResultsPage = () => {
           />
 
           <div className="space-y-4">
-            <p className="text-xs text-slate-500">
+            <p className="text-xs text-slate-500 animate-fade-in">
               {isLoading
                 ? "Loading flights..."
                 : `${filteredFlights.length} flights found`}
             </p>
             {isLoading ? (
-              <>
+              <div className="space-y-4 animate-pulse">
                 <FlightResultCardSkeleton />
                 <FlightResultCardSkeleton />
                 <FlightResultCardSkeleton />
-              </>
+              </div>
             ) : (
-              filteredFlights.map((flight) => (
-                <FlightResultCard
-                  key={flight.id}
-                  flight={flight}
-                  queryString={queryString}
-                />
-              ))
+              <div className="space-y-4 animate-slide-up">
+                {filteredFlights.map((flight) => (
+                  <FlightResultCard
+                    key={flight.id}
+                    flight={flight}
+                    queryString={queryString}
+                  />
+                ))}
+              </div>
             )}
           </div>
         </div>
