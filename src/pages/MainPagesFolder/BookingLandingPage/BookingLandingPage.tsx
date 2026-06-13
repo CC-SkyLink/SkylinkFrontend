@@ -366,10 +366,15 @@ const BookingLandingPage = () => {
   });
   const [cabinClass, setCabinClass] = useState<CabinClass>("Economy");
   const [openField, setOpenField] = useState<"from" | "to" | null>(null);
+  const [dropdownFocusIndex, setDropdownFocusIndex] = useState(-1);
   const [promotions, setPromotions] = useState<Promotion[]>([]);
   const [flights, setFlights] = useState<Flight[]>([]);
   const [airports, setAirports] = useState<Airport[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    setDropdownFocusIndex(-1);
+  }, [openField]);
 
   const fromRef = useRef<HTMLDivElement>(null);
   const toRef = useRef<HTMLDivElement>(null);
@@ -426,6 +431,32 @@ const BookingLandingPage = () => {
   const selectTo = (option: AirportOption) => {
     setToQuery(`${option.city} (${option.code})`);
     setOpenField(null);
+  };
+
+  const currentOptions = openField === "from" ? fromOptions : openField === "to" ? toOptions : [];
+
+  const handleInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>, field: "from" | "to") => {
+    if (openField !== field) return;
+
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      setDropdownFocusIndex((prev) => Math.min(prev + 1, currentOptions.length - 1));
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      setDropdownFocusIndex((prev) => Math.max(prev - 1, 0));
+    } else if (e.key === "Enter") {
+      if (dropdownFocusIndex >= 0 && dropdownFocusIndex < currentOptions.length) {
+        e.preventDefault();
+        const selected = currentOptions[dropdownFocusIndex];
+        if (field === "from") {
+          selectFrom(selected);
+        } else {
+          selectTo(selected);
+        }
+      }
+    } else if (e.key === "Escape") {
+      setOpenField(null);
+    }
   };
 
   const totalPassengers =
@@ -543,6 +574,7 @@ const BookingLandingPage = () => {
                       setOpenField("from");
                     }}
                     onFocus={() => setOpenField("from")}
+                    onKeyDown={(e) => handleInputKeyDown(e, "from")}
                     placeholder="From - City or airport"
                     className={`bg-transparent flex-1 ${typography.paragraph.md.normal} ${colors.text.primary} outline-none placeholder:${colors.text.tertiary}`}
                     autoComplete="off"
@@ -550,12 +582,14 @@ const BookingLandingPage = () => {
                 </div>
                 {openField === "from" && (
                   <div className="absolute z-40 mt-2 w-full rounded-[14px] border border-tertiary-30 bg-white p-2 shadow-[0px_10px_20px_rgba(0,0,0,0.12)]">
-                    {fromOptions.map((option) => (
+                    {fromOptions.map((option, index) => (
                       <button
                         key={option.code}
                         type="button"
                         onClick={() => selectFrom(option)}
-                        className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left hover:bg-slate-50"
+                        className={`flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left hover:bg-slate-50 transition-colors duration-150 ${
+                          dropdownFocusIndex === index ? "bg-[#EAF0F7] text-[#1e2a4a] font-medium" : ""
+                        }`}
                       >
                         <div className="flex h-8 w-8 items-center justify-center rounded-md bg-slate-100 text-xs font-semibold text-slate-600">
                           {option.code}
@@ -592,6 +626,7 @@ const BookingLandingPage = () => {
                       setOpenField("to");
                     }}
                     onFocus={() => setOpenField("to")}
+                    onKeyDown={(e) => handleInputKeyDown(e, "to")}
                     placeholder="To - City or airport"
                     className={`bg-transparent flex-1 ${typography.paragraph.md.normal} ${colors.text.primary} outline-none placeholder:${colors.text.tertiary}`}
                     autoComplete="off"
@@ -599,12 +634,14 @@ const BookingLandingPage = () => {
                 </div>
                 {openField === "to" && (
                   <div className="absolute z-40 mt-2 w-full rounded-[14px] border border-tertiary-30 bg-white p-2 shadow-[0px_10px_20px_rgba(0,0,0,0.12)]">
-                    {toOptions.map((option) => (
+                    {toOptions.map((option, index) => (
                       <button
                         key={option.code}
                         type="button"
                         onClick={() => selectTo(option)}
-                        className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left hover:bg-slate-50"
+                        className={`flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left hover:bg-slate-50 transition-colors duration-150 ${
+                          dropdownFocusIndex === index ? "bg-[#EAF0F7] text-[#1e2a4a] font-medium" : ""
+                        }`}
                       >
                         <div className="flex h-8 w-8 items-center justify-center rounded-md bg-slate-100 text-xs font-semibold text-slate-600">
                           {option.code}

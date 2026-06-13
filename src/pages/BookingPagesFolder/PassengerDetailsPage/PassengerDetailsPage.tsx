@@ -59,7 +59,12 @@ const PassengerDetailsPage = () => {
   const [nationalityList] = useState<string[]>(FALLBACK_NATIONALITIES);
   const [searchQuery, setSearchQuery] = useState(existingPassenger?.nationality || "");
   const [showDropdown, setShowDropdown] = useState(false);
+  const [focusedIndex, setFocusedIndex] = useState(-1);
   const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    setFocusedIndex(-1);
+  }, [showDropdown, searchQuery]);
 
   // Filter nationality list options based on user search
   const filteredNationalities = useMemo(() => {
@@ -78,6 +83,29 @@ const PassengerDetailsPage = () => {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
+
+  const handleNationalityKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (!showDropdown) return;
+
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      setFocusedIndex((prev) => Math.min(prev + 1, filteredNationalities.length - 1));
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      setFocusedIndex((prev) => Math.max(prev - 1, 0));
+    } else if (e.key === "Enter") {
+      if (focusedIndex >= 0 && focusedIndex < filteredNationalities.length) {
+        e.preventDefault();
+        const selected = filteredNationalities[focusedIndex];
+        setNationality(selected);
+        setSearchQuery(selected);
+        setShowDropdown(false);
+        setFocusedIndex(-1);
+      }
+    } else if (e.key === "Escape") {
+      setShowDropdown(false);
+    }
+  };
 
   const handleFirstNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value;
@@ -275,6 +303,7 @@ const PassengerDetailsPage = () => {
                     setErrors((prev) => ({ ...prev, nationality: "" }));
                   }}
                   onFocus={() => setShowDropdown(true)}
+                  onKeyDown={handleNationalityKeyDown}
                   placeholder="Type to search nationality..."
                   maxLength={100}
                 />
@@ -283,7 +312,7 @@ const PassengerDetailsPage = () => {
                     {filteredNationalities.length === 0 ? (
                       <div className="px-3 py-2 text-xs text-slate-400 italic">No nationalities found</div>
                     ) : (
-                      filteredNationalities.map((option) => (
+                      filteredNationalities.map((option, index) => (
                         <button
                           key={option}
                           type="button"
@@ -293,7 +322,9 @@ const PassengerDetailsPage = () => {
                             setShowDropdown(false);
                             setErrors((prev) => ({ ...prev, nationality: "" }));
                           }}
-                          className="flex w-full items-center px-3 py-2 text-left text-sm hover:bg-[#EAF0F7] hover:text-slate-800 text-slate-700"
+                          className={`flex w-full items-center px-3 py-2 text-left text-sm hover:bg-[#EAF0F7] hover:text-slate-800 text-slate-700 transition-colors duration-150 ${
+                            focusedIndex === index ? "bg-[#EAF0F7] text-slate-800 font-medium" : ""
+                          }`}
                         >
                           {option}
                         </button>
