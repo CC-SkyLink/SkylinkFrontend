@@ -1,6 +1,6 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { Plane, ChevronRight, BookOpen } from "lucide-react";
+import { Plane, ChevronLeft, ChevronRight, BookOpen } from "lucide-react";
 import { ROUTES } from "@/constants/routes";
 import {
   loadManageBookings,
@@ -74,6 +74,20 @@ const ManageBookingsPage = () => {
     [activeTab, bookingsData],
   );
 
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5;
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [activeTab]);
+
+  const totalPages = Math.ceil(bookings.length / itemsPerPage);
+
+  const paginatedBookings = useMemo(() => {
+    const start = (currentPage - 1) * itemsPerPage;
+    return bookings.slice(start, start + itemsPerPage);
+  }, [bookings, currentPage]);
+
   const tabs: { id: ManageBookingStatus; label: string }[] = [
     { id: "upcoming", label: "Upcoming" },
     { id: "past", label: "Past" },
@@ -141,7 +155,7 @@ const ManageBookingsPage = () => {
             </>
           ) : (
             <>
-              {bookings.map((booking: ManageBooking) => {
+              {paginatedBookings.map((booking: ManageBooking) => {
                 const statusLabel = getStatusLabel(booking.status);
 
                 const badgeClass =
@@ -225,6 +239,49 @@ const ManageBookingsPage = () => {
               {bookings.length === 0 && (
                 <div className="rounded-2xl border border-dashed border-slate-200 bg-white p-10 text-center text-sm text-slate-500">
                   No bookings found in this category.
+                </div>
+              )}
+
+              {/* Pagination Controls */}
+              {totalPages > 1 && (
+                <div className="mt-6 flex items-center justify-center gap-2 animate-fade-in">
+                  <button
+                    type="button"
+                    onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+                    disabled={currentPage === 1}
+                    className="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 shadow-sm transition hover:bg-slate-50 hover:text-slate-800 disabled:opacity-50 disabled:hover:bg-white disabled:hover:text-slate-600 disabled:cursor-not-allowed"
+                    aria-label="Previous Page"
+                  >
+                    <ChevronLeft className="h-4 w-4" />
+                  </button>
+
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => {
+                    const isActive = page === currentPage;
+                    return (
+                      <button
+                        key={page}
+                        type="button"
+                        onClick={() => setCurrentPage(page)}
+                        className={`flex h-9 w-9 items-center justify-center rounded-lg border text-sm font-semibold transition ${
+                          isActive
+                            ? "border-[#5D7FA7] bg-[#5D7FA7] text-white shadow-md shadow-[#5D7FA7]/20"
+                            : "border-slate-200 bg-white text-slate-600 hover:bg-slate-50 hover:text-slate-800"
+                        }`}
+                      >
+                        {page}
+                      </button>
+                    );
+                  })}
+
+                  <button
+                    type="button"
+                    onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
+                    disabled={currentPage === totalPages}
+                    className="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 shadow-sm transition hover:bg-slate-50 hover:text-slate-800 disabled:opacity-50 disabled:hover:bg-white disabled:hover:text-slate-600 disabled:cursor-not-allowed"
+                    aria-label="Next Page"
+                  >
+                    <ChevronRight className="h-4 w-4" />
+                  </button>
                 </div>
               )}
             </>
