@@ -165,9 +165,10 @@ const ExplorePage = () => {
     staleTime: 30 * 60 * 1000,
   });
   const isLoading = promosLoading || flightsLoading || airportsLoading;
+  const dataReady = !flightsLoading && !airportsLoading;
 
   const destinations = useMemo(() => {
-    if (airportsLoading || flightsLoading) return [];
+    if (!dataReady) return [];
     const seen = new Set<string>();
     const dests: Destination[] = [];
     (flights || []).forEach((flight) => {
@@ -194,7 +195,7 @@ const ExplorePage = () => {
         .toLowerCase()
         .includes(query),
     );
-  }, [flights, search]);
+  }, [flights, airports, search, dataReady]);
 
   const deals = useMemo(() => {
     const query = search.trim().toLowerCase();
