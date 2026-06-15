@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect } from "react";
-import { FileSpreadsheet, FileText } from "lucide-react";
+import { FileSpreadsheet, FileText, ChevronLeft, ChevronRight } from "lucide-react";
 import { ArrowUpRight, ArrowDownRight } from "lucide-react";
 import DataTable, { type TableColumn } from "@/pages/_shared/components/ui/DataTable";
 import { cn } from "@/utils/cn";
@@ -20,6 +20,12 @@ const RevenueSummary = ({ dateRange, dateRangeLabel, onToast, customStartDate, c
   const [reportData_api, setReportData_api] = useState<BookingReport | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [hoveredPoint, setHoveredPoint] = useState<number | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5;
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [reportData_api]);
   const [showForecast, setShowForecast] = useState(false);
   const [forecastData, setForecastData] = useState<RevenueForecastPoint[]>([]);
   const [anomalyData, setAnomalyData] = useState<RevenueAnomalyPoint[]>([]);
@@ -111,6 +117,12 @@ const RevenueSummary = ({ dateRange, dateRangeLabel, onToast, customStartDate, c
       };
     });
   }, [reportData_api]);
+
+  const totalPages = Math.ceil(reportData.length / itemsPerPage);
+  const paginatedReportData = useMemo(() => {
+    const start = (currentPage - 1) * itemsPerPage;
+    return reportData.slice(start, start + itemsPerPage);
+  }, [reportData, currentPage]);
 
   const chartPoints = useMemo(() => {
     if (reportData.length === 0) return [];
@@ -356,12 +368,57 @@ const RevenueSummary = ({ dateRange, dateRangeLabel, onToast, customStartDate, c
               <div className="animate-spin size-8 border-4 border-[#496B92] border-t-transparent rounded-full" />
             </div>
           ) : (
-            <DataTable
-              columns={columns}
-              rows={reportData}
-              rowKey={(r) => r.period}
-              emptyState={<div className="py-16 text-center text-slate-400 font-medium">No data available.</div>}
-            />
+            <div className="space-y-4">
+              <DataTable
+                columns={columns}
+                rows={paginatedReportData}
+                rowKey={(r) => r.period}
+                emptyState={<div className="py-16 text-center text-slate-400 font-medium">No data available.</div>}
+              />
+              
+              {totalPages > 1 && (
+                <div className="flex items-center justify-center gap-2 py-4">
+                  <button
+                    type="button"
+                    onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+                    disabled={currentPage === 1}
+                    className="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 shadow-sm transition hover:bg-slate-50 hover:text-slate-800 disabled:opacity-50 disabled:hover:bg-white disabled:hover:text-slate-600 disabled:cursor-not-allowed cursor-pointer"
+                    aria-label="Previous Page"
+                  >
+                    <ChevronLeft className="h-4 w-4" />
+                  </button>
+
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => {
+                    const isActive = page === currentPage;
+                    return (
+                      <button
+                        key={page}
+                        type="button"
+                        onClick={() => setCurrentPage(page)}
+                        className={cn(
+                          "flex h-9 w-9 items-center justify-center rounded-lg border text-sm font-semibold transition cursor-pointer",
+                          isActive
+                            ? "border-[#496B92] bg-[#496B92] text-white shadow-md shadow-[#496B92]/20"
+                            : "border-slate-200 bg-white text-slate-600 hover:bg-slate-50 hover:text-slate-800"
+                        )}
+                      >
+                        {page}
+                      </button>
+                    );
+                  })}
+
+                  <button
+                    type="button"
+                    onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
+                    disabled={currentPage === totalPages}
+                    className="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 shadow-sm transition hover:bg-slate-50 hover:text-slate-800 disabled:opacity-50 disabled:hover:bg-white disabled:hover:text-slate-600 disabled:cursor-not-allowed cursor-pointer"
+                    aria-label="Next Page"
+                  >
+                    <ChevronRight className="h-4 w-4" />
+                  </button>
+                </div>
+              )}
+            </div>
           )}
         </div>
       </section>
