@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { useNavigate, useParams } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -23,7 +24,6 @@ const AdminEditFlightPage = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [serverError, setServerError] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
 
   const {
     register,
@@ -38,36 +38,23 @@ const AdminEditFlightPage = () => {
   const selectedCabinClass = watch("cabinClass");
   const showBusinessFare = selectedCabinClass === "business" || selectedCabinClass === "first";
 
-  useEffect(() => {
-    const fetchFlight = async () => {
-      if (!id) return;
-      try {
-        const flight = await getFlightById(id);
-                if (!flight) {
-          setServerError("Flight not found.");
-          setIsLoading(false);
-          return;
-        }
-        // Format dates for datetime-local input (YYYY-MM-DDTHH:mm)
-        const departureTime = flight.departureTime ? new Date(flight.departureTime).toISOString().slice(0, 16) : "";
-        const arrivalTime = flight.arrivalTime ? new Date(flight.arrivalTime).toISOString().slice(0, 16) : "";
-        
-        reset({
-          ...flight,
-          departureTime,
-          arrivalTime,
-        } as any);
-      } catch (err) {
-        console.error("Failed to fetch flight", err);
-        setServerError("Failed to load flight details.");
-      } finally {
-        setIsLoading(false);
+  const { isLoading } = useQuery({
+    queryKey: ["flight", id],
+    queryFn: async () => {
+      if (!id) return null;
+      const flight = await getFlightById(id);
+      if (!flight) {
+        setServerError("Flight not found.");
+        return null;
       }
-    };
-
-    fetchFlight();
-  }, [id, reset]);
-
+      const departureTime = flight.departureTime ? new Date(flight.departureTime).toISOString().slice(0, 16) : "";
+      const arrivalTime = flight.arrivalTime ? new Date(flight.arrivalTime).toISOString().slice(0, 16) : "";
+      reset({ ...flight, departureTime, arrivalTime } as any);
+      return flight;
+    },
+    enabled: !!id,
+    staleTime: 5 * 60 * 1000,
+  });
   const onSubmit = async (data: FlightFormValues) => {
     if (!id) return;
     setServerError(null);
