@@ -6,9 +6,9 @@ import type { ExportRequest, ReportResult, ReportQuery, RouteReport, Cancellatio
  * Admin: Get Booking Report
  * GET /api/v1/admin/reports
  */
-export async function generateReport(query?: ReportQuery): Promise<ReportResult> {
+export async function generateReport(): Promise<ReportResult> {
   try {
-    const res = await axiosClient.get("/admin/reports", { params: query });
+    const res = await axiosClient.get("/admin/reports");
     return res.data as ReportResult;
   } catch (err) {
     handleApiError(err);
