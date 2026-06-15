@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import DataTable, { type TableColumn } from "@/pages/_shared/components/ui/DataTable";
 import { exportCSV, exportPDF } from "../__docs/export";
 import type { DateRange, RouteDataRow } from "./types";
-import type { RouteBookingPoint } from "@/types/report.types";
+import type { RawRouteEntry } from "@/types/report.types";
 import { getRouteReport } from "@/api/reports.api";
 
 interface Props {
@@ -15,57 +15,55 @@ interface Props {
   customEndDate?: string;
 }
 
-const getDateParams = (dateRange: DateRange, customStartDate?: string, customEndDate?: string) => {
+const filterRaw = (raw: RawRouteEntry[], dateRange: DateRange, customStartDate?: string, customEndDate?: string): RawRouteEntry[] => {
   const now = new Date();
-  if (dateRange === "custom") {
-    if (!customStartDate || !customEndDate) return {};
-    return {
-      date_from: new Date(customStartDate + "T00:00:00.000Z").toISOString(),
-      date_to: new Date(customEndDate + "T23:59:59.999Z").toISOString(),
-    };
-  }
-  const endOfToday = new Date(now); endOfToday.setHours(23, 59, 59, 999);
+  const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0);
+  const todayEnd = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
+  let from: Date | null = null;
+  let to: Date | null = null;
 
-  if (dateRange === "today") {
-    const start = new Date(now); start.setHours(0, 0, 0, 0);
-    return { date_from: start.toISOString(), date_to: endOfToday.toISOString() };
+  if (dateRange === "today") { from = todayStart; to = todayEnd; }
+  else if (dateRange === "week") { from = new Date(todayStart); from.setDate(from.getDate() - 7); to = todayEnd; }
+  else if (dateRange === "month") { from = new Date(todayStart); from.setMonth(from.getMonth() - 1); to = todayEnd; }
+  else if (dateRange === "3months") { from = new Date(todayStart); from.setMonth(from.getMonth() - 3); to = todayEnd; }
+  else if (dateRange === "custom" && customStartDate && customEndDate) {
+    from = new Date(customStartDate + "T00:00:00.000Z");
+    to = new Date(customEndDate + "T23:59:59.999Z");
   }
-  if (dateRange === "week") {
-    const start = new Date(now); start.setHours(0, 0, 0, 0); start.setDate(now.getDate() - 7);
-    return { date_from: start.toISOString(), date_to: endOfToday.toISOString() };
+
+  if (!from && !to) return raw;
+  return raw.filter((r) => { const d = new Date(r.booked_at); return (!from || d >= from) && (!to || d <= to); });
+};
+
+const aggregateRaw = (raw: RawRouteEntry[]) => {
+  const map: Record<string, { bookings: number; revenue: number }> = {};
+  for (const r of raw) {
+    if (!map[r.route]) map[r.route] = { bookings: 0, revenue: 0 };
+    map[r.route].bookings += 1;
+    if (r.status !== "cancelled") map[r.route].revenue += r.revenue;
   }
-  if (dateRange === "month") {
-    const start = new Date(now); start.setHours(0, 0, 0, 0); start.setMonth(now.getMonth() - 1);
-    return { date_from: start.toISOString(), date_to: endOfToday.toISOString() };
-  }
-  if (dateRange === "3months") {
-    const start = new Date(now); start.setHours(0, 0, 0, 0); start.setMonth(now.getMonth() - 3);
-    return { date_from: start.toISOString(), date_to: endOfToday.toISOString() };
-  }
-  return {};
+  return Object.entries(map)
+    .map(([route, v]) => ({ route, bookings: v.bookings, revenue: v.revenue }))
+    .sort((a, b) => b.bookings - a.bookings);
 };
 
 const BookingsRoute = ({ dateRange, dateRangeLabel, onToast, customStartDate, customEndDate }: Props) => {
-  const dateParams = useMemo(
-    () => getDateParams(dateRange, customStartDate, customEndDate),
-    [dateRange, customStartDate, customEndDate]
-  );
-
-  const { data, isLoading } = useQuery({
-    queryKey: ["route-report", dateParams],
+  const { data: rawData, isLoading } = useQuery({
+    queryKey: ["route-report-raw"],
     queryFn: async () => {
-      const res = await getRouteReport(Object.keys(dateParams).length ? (dateParams as any) : undefined);
-      return (res?.routes ?? []) as RouteBookingPoint[];
+      const res = await getRouteReport();
+      return (res?.raw ?? []) as RawRouteEntry[];
     },
     staleTime: 5 * 60 * 1000,
   });
 
-  const routes = data ?? [];
-
-  const maxBookings = useMemo(() => Math.max(...routes.map(r => r.bookings), 1), [routes]);
-
+  const routes = useMemo(
+    () => aggregateRaw(filterRaw(rawData ?? [], dateRange, customStartDate, customEndDate)),
+    [rawData, dateRange, customStartDate, customEndDate]
+  );
+  const maxBookings = useMemo(() => Math.max(...routes.map((r) => r.bookings), 1), [routes]);
   const tableRows: RouteDataRow[] = useMemo(() =>
-    routes.map(r => ({
+    routes.map((r) => ({
       route: r.route,
       bookings: r.bookings,
       revenue: `₱${Number(r.revenue).toLocaleString()}`,
