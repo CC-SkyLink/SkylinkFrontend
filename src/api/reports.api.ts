@@ -1,6 +1,6 @@
 import axiosClient from "./axiosClient";
 import { handleApiError } from "./api.helpers";
-import type { ExportRequest, ReportResult, ReportQuery, RouteReport, CancellationReport, UserGrowthReport, ActivityLogList, RevenueForecast, DemandForecast, CancellationRisk, RevenueAnomalies, PricingSuggestions } from "@/types";
+import type { ExportRequest, ReportResult, RouteReport, CancellationReport, UserGrowthReport, ActivityLogList, RevenueForecast, DemandForecast, CancellationRisk, RevenueAnomalies, PricingSuggestions } from "@/types";
 
 /**
  * Admin: Get Booking Report
