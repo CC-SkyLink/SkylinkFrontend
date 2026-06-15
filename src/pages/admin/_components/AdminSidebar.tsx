@@ -14,7 +14,7 @@ import {
   X,
   Tag,
 } from "lucide-react";
-import logos1 from "@/assets/logos/Logos-1.png";
+import logos1 from "@/assets/logos/Vector.png";
 import { useState } from "react";
 import Toast from "@/pages/_shared/components/ui/Toast";
 import { MapPin } from "lucide-react";
@@ -85,7 +85,7 @@ const AdminSidebar = ({ isOpen, onClose }: AdminSidebarProps) => {
           {/* Header */}
           <div className="flex items-center justify-between px-6 py-6 lg:py-8">
             <Link to={ROUTES.ADMIN_DASHBOARD} className="flex items-center gap-3">
-              <img src={logos1} alt="SkyLink" className="size-10 brightness-0 invert" />
+              <img src={logos1} alt="SkyLink" className="size-10" />
               <div>
                 <h1 className="text-xl font-bold tracking-tight text-white">SkyLink</h1>
                 <p className="text-[10px] uppercase tracking-widest text-slate-300 font-bold opacity-70">Admin Portal</p>

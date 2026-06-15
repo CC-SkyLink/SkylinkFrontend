@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect } from "react";
-import { FileSpreadsheet, FileText } from "lucide-react";
+import { FileSpreadsheet, FileText, ChevronLeft, ChevronRight } from "lucide-react";
 import { ArrowUpRight, ArrowDownRight } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import DataTable, { type TableColumn } from "@/pages/_shared/components/ui/DataTable";
@@ -54,14 +54,6 @@ const filterMonthlyRevenue = <T extends { month: string; year: number }>(
 };
 
 const RevenueSummary = ({ dateRange, dateRangeLabel, onToast, customStartDate, customEndDate }: Props) => {
-  const [hoveredPoint, setHoveredPoint] = useState<number | null>(null);
-  const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 5;
-
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [reportData_api]);
-  const [showForecast, setShowForecast] = useState(false);
   const { data: reportData_api, isLoading } = useQuery({
     queryKey: ["revenue-report"],
     queryFn: async (): Promise<BookingReport> => {
@@ -70,6 +62,16 @@ const RevenueSummary = ({ dateRange, dateRangeLabel, onToast, customStartDate, c
     },
     staleTime: 30 * 60 * 1000,
   });
+
+  const [hoveredPoint, setHoveredPoint] = useState<number | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5;
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [reportData_api]);
+
+  const [showForecast, setShowForecast] = useState(false);
   const { data: forecastResult, isLoading: forecastLoading } = useQuery({
     queryKey: ["revenue-forecast"],
     queryFn: () => Promise.all([getRevenueForecast(6), getRevenueAnomalies()]),
@@ -98,7 +100,13 @@ const RevenueSummary = ({ dateRange, dateRangeLabel, onToast, customStartDate, c
         changeValue,
       };
     });
-  }, [reportData_api]);
+  }, [reportData_api, dateRange, customStartDate, customEndDate]);
+
+  const totalPages = Math.ceil(reportData.length / itemsPerPage);
+  const paginatedReportData = useMemo(() => {
+    const start = (currentPage - 1) * itemsPerPage;
+    return reportData.slice(start, start + itemsPerPage);
+  }, [reportData, currentPage]);
 
   const chartPoints = useMemo(() => {
     if (reportData.length === 0) return [];
