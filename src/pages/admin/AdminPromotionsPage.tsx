@@ -1,6 +1,7 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { useForm, type SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getPromotions, createPromotion, deletePromotion } from "@/api/promotions.api";
 import AdminLayout from "./_components/AdminLayout";
 import DataTable, { type TableColumn } from "@/pages/_shared/components/ui/DataTable";
@@ -13,11 +14,9 @@ import { promotionSchema, type PromotionFormValues } from "@/validation/promotio
 import { cn } from "@/utils/cn";
 
 const AdminPromotionsPage = () => {
-  const [promotions, setPromotions] = useState<Promotion[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const queryClient = useQueryClient();
   const [searchQuery, setSearchQuery] = useState("");
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  const [isDeleting, setIsDeleting] = useState(false);
 
   const {
     register,
@@ -35,52 +34,44 @@ const AdminPromotionsPage = () => {
     },
   });
 
-  const fetchPromotions = async () => {
-    setIsLoading(true);
-    try {
-      const data = await getPromotions();
-      setPromotions(data);
-    } catch (err) {
-      console.error("Failed to fetch promotions", err);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  // Query
+  const { data: promotions = [], isLoading } = useQuery({
+    queryKey: ["admin-promotions"],
+    queryFn: getPromotions,
+    staleTime: 5 * 60 * 1000,
+  });
 
-  useEffect(() => {
-    fetchPromotions();
-  }, []);
-
-  const onSubmit: SubmitHandler<PromotionFormValues> = async (data) => {
-    try {
-      await createPromotion(data as CreatePromotionPayload);
+  // Mutations
+  const createMutation = useMutation({
+    mutationFn: (data: CreatePromotionPayload) => createPromotion(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin-promotions"] });
       setIsAddModalOpen(false);
       reset();
-      fetchPromotions();
-    } catch (err) {
-      console.error("Failed to create promotion", err);
-    }
+    },
+    onError: (err) => console.error("Failed to create promotion", err),
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => deletePromotion(id),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["admin-promotions"] }),
+    onError: (err) => console.error("Failed to delete promotion", err),
+  });
+
+  const onSubmit: SubmitHandler<PromotionFormValues> = (data) => {
+    createMutation.mutate(data as CreatePromotionPayload);
   };
 
-  const handleDelete = useCallback(async (id: string) => {
+  const handleDelete = (id: string) => {
     if (!confirm("Are you sure you want to delete this promotion?")) return;
-    setIsDeleting(true);
-    try {
-      await deletePromotion(id);
-      fetchPromotions();
-    } catch (err) {
-      console.error("Failed to delete promotion", err);
-    } finally {
-      setIsDeleting(false);
-    }
-  }, []);
+    deleteMutation.mutate(id);
+  };
 
-  const filteredPromotions = useMemo(() => {
-    return promotions.filter((p) =>
+  const filteredPromotions = useMemo(() =>
+    promotions.filter((p) =>
       p.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       (p.destination_code ?? "").toLowerCase().includes(searchQuery.toLowerCase())
-    );
-  }, [promotions, searchQuery]);
+    ), [promotions, searchQuery]);
 
   const columns: TableColumn<Promotion>[] = useMemo(() => [
     {
@@ -154,14 +145,14 @@ const AdminPromotionsPage = () => {
       cell: (row) => (
         <button
           onClick={() => handleDelete(row.id)}
-          disabled={isDeleting}
+          disabled={deleteMutation.isPending}
           className="p-2 text-rose-600 hover:bg-rose-50 rounded-lg transition-colors border border-rose-100 disabled:opacity-50"
         >
           <Trash2 size={16} />
         </button>
       ),
     },
-  ], [handleDelete, isDeleting]);
+  ], [deleteMutation.isPending]);
 
   return (
     <AdminLayout>
@@ -224,9 +215,10 @@ const AdminPromotionsPage = () => {
               </div>
             }
           />
-          
           <div className="flex items-center justify-between px-6 py-4 border-t border-slate-50 bg-slate-50/30">
-            <p className="text-sm font-medium text-slate-500">Showing 1-{filteredPromotions.length} of {filteredPromotions.length}</p>
+            <p className="text-sm font-medium text-slate-500">
+              Showing 1-{filteredPromotions.length} of {filteredPromotions.length}
+            </p>
             <div className="flex items-center gap-2">
               <button disabled className="p-2 rounded-lg border border-slate-200 text-slate-400 opacity-50 cursor-not-allowed">
                 <Plus size={16} className="rotate-45" />
@@ -240,11 +232,7 @@ const AdminPromotionsPage = () => {
         </div>
       </div>
 
-      <Modal
-        isOpen={isAddModalOpen}
-        onClose={() => setIsAddModalOpen(false)}
-        title="Create New Promotion"
-      >
+      <Modal isOpen={isAddModalOpen} onClose={() => setIsAddModalOpen(false)} title="Create New Promotion">
         <form onSubmit={handleSubmit(onSubmit)} className="py-4 space-y-4">
           <Input
             label="Promotion Title *"
@@ -252,7 +240,6 @@ const AdminPromotionsPage = () => {
             error={errors.title?.message}
             {...register("title")}
           />
-          
           <div className="grid grid-cols-2 gap-4">
             <Input
               label="Sale Price (₱) *"
@@ -269,11 +256,10 @@ const AdminPromotionsPage = () => {
               {...register("original_price", { valueAsNumber: true })}
             />
           </div>
-
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
               <label className="text-[13px] font-bold text-slate-500 uppercase tracking-widest ml-1">Category *</label>
-              <select 
+              <select
                 className="w-full h-12 rounded-xl bg-slate-50 border border-slate-200 px-4 text-sm font-medium outline-none focus:ring-2 focus:ring-[#496B92]/10 focus:border-[#496B92]/20 transition-all"
                 {...register("category")}
               >
@@ -291,7 +277,6 @@ const AdminPromotionsPage = () => {
               {...register("destination_code")}
             />
           </div>
-
           <div className="grid grid-cols-2 gap-4">
             <Input
               label="Destination City *"
@@ -306,27 +291,20 @@ const AdminPromotionsPage = () => {
               {...register("valid_until")}
             />
           </div>
-
           <Input
             label="Background Image URL"
             placeholder="https://images.unsplash.com/..."
             error={errors.image_url?.message}
             {...register("image_url")}
           />
-
           <div className="flex gap-3 pt-4">
-            <Button
-              variant="secondary"
-              className="flex-1 rounded-xl h-12"
-              onClick={() => setIsAddModalOpen(false)}
-              type="button"
-            >
+            <Button variant="secondary" className="flex-1 rounded-xl h-12" onClick={() => setIsAddModalOpen(false)} type="button">
               Cancel
             </Button>
             <Button
               type="submit"
               className="flex-1 bg-[#496B92] hover:bg-[#3B5470] text-white h-12 rounded-xl font-bold"
-              loading={isSubmitting}
+              loading={isSubmitting || createMutation.isPending}
             >
               Create Promo
             </Button>

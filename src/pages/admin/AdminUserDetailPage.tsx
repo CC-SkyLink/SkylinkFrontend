@@ -123,16 +123,14 @@ const AdminUserDetailPage = () => {
       ];
     }
 
-    return bookings.map((booking) => ({
+    return bookings.map((booking: any) => ({
       id: booking.id,
-      pnr: booking.pnr ?? booking.id.toUpperCase(),
-      origin: booking.flight?.origin ?? "MNL",
-      destination: booking.flight?.destination ?? "CEB",
-      flight_number: booking.flight?.flightNumber ?? "N/A",
-      date:
-        booking.flight?.departureTime?.split("T")[0] ??
-        booking.createdAt.split("T")[0],
-      amount: `₱${booking.totalPrice.toLocaleString("en-US")}`,
+      pnr: booking.pnr ?? booking.id.slice(0, 8).toUpperCase(),
+      origin: booking.flight?.origin_airport?.iata_code ?? booking.flight?.origin ?? "—",
+      destination: booking.flight?.destination_airport?.iata_code ?? booking.flight?.destination ?? "—",
+      flight_number: booking.flight?.flight_number ?? booking.flight?.flightNumber ?? "—",
+      date: booking.flight?.departure_time?.split("T")[0] ?? booking.booked_at?.split("T")[0] ?? booking.createdAt?.split("T")[0] ?? "—",
+      amount: `₱${Number(booking.total_price ?? booking.totalPrice ?? 0).toLocaleString("en-US")}`,
       status: booking.status,
     }));
   }, [data?.bookings]);

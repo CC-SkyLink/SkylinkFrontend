@@ -14,12 +14,11 @@ export function useReports() {
   const [isExporting, setIsExporting] = useState(false);
   const [exportError, setExportError] = useState<APIError | null>(null);
 
-  const runReport = useCallback(async (query: ReportQuery) => {
+  const runReport = useCallback(async (_query?: ReportQuery) => {
     setIsLoading(true);
     setError(null);
-
     try {
-      const result = await generateReport(query);
+      const result = await generateReport();
       setData(result);
       return result;
     } catch (err) {

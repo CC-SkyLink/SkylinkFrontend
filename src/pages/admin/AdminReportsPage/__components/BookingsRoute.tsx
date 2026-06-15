@@ -1,9 +1,10 @@
-import { useState, useEffect, useMemo } from "react";
+import { useMemo } from "react";
 import { FileSpreadsheet, FileText } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
 import DataTable, { type TableColumn } from "@/pages/_shared/components/ui/DataTable";
 import { exportCSV, exportPDF } from "../__docs/export";
-import type { DateRange, RouteDataRow } from "./types"; 
-import type { RouteBookingPoint } from "@/types/report.types";
+import type { DateRange, RouteDataRow } from "./types";
+import type { RawRouteEntry } from "@/types/report.types";
 import { getRouteReport } from "@/api/reports.api";
 
 interface Props {
@@ -14,88 +15,64 @@ interface Props {
   customEndDate?: string;
 }
 
+const filterRaw = (raw: RawRouteEntry[], dateRange: DateRange, customStartDate?: string, customEndDate?: string): RawRouteEntry[] => {
+  const now = new Date();
+  const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0);
+  const todayEnd = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
+  let from: Date | null = null;
+  let to: Date | null = null;
+
+  if (dateRange === "today") { from = todayStart; to = todayEnd; }
+  else if (dateRange === "week") { from = new Date(todayStart); from.setDate(from.getDate() - 7); to = todayEnd; }
+  else if (dateRange === "month") { from = new Date(todayStart); from.setMonth(from.getMonth() - 1); to = todayEnd; }
+  else if (dateRange === "3months") { from = new Date(todayStart); from.setMonth(from.getMonth() - 3); to = todayEnd; }
+  else if (dateRange === "custom" && customStartDate && customEndDate) {
+    from = new Date(customStartDate + "T00:00:00.000Z");
+    to = new Date(customEndDate + "T23:59:59.999Z");
+  }
+
+  if (!from && !to) return raw;
+  return raw.filter((r) => { const d = new Date(r.booked_at); return (!from || d >= from) && (!to || d <= to); });
+};
+
+const aggregateRaw = (raw: RawRouteEntry[]) => {
+  const map: Record<string, { bookings: number; revenue: number }> = {};
+  for (const r of raw) {
+    if (!map[r.route]) map[r.route] = { bookings: 0, revenue: 0 };
+    map[r.route].bookings += 1;
+    if (r.status !== "cancelled") map[r.route].revenue += r.revenue;
+  }
+  return Object.entries(map)
+    .map(([route, v]) => ({ route, bookings: v.bookings, revenue: v.revenue }))
+    .sort((a, b) => b.bookings - a.bookings);
+};
+
 const BookingsRoute = ({ dateRange, dateRangeLabel, onToast, customStartDate, customEndDate }: Props) => {
-  const [routes, setRoutes] = useState<RouteBookingPoint[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const { data: rawData, isLoading } = useQuery({
+    queryKey: ["route-report-raw"],
+    queryFn: async () => {
+      const res = await getRouteReport();
+      return (res?.raw ?? []) as RawRouteEntry[];
+    },
+    staleTime: 30 * 60 * 1000,
+  });
 
-  useEffect(() => {
-    const now = new Date();
-    let date_from: string | undefined;
-    let date_to: string | undefined = now.toISOString();
-
-    if (dateRange === "custom") {
-      if (customStartDate && customEndDate) {
-        date_from = new Date(customStartDate + "T00:00:00.000Z").toISOString();
-        date_to = new Date(customEndDate + "T23:59:59.999Z").toISOString();
-      } else {
-        date_from = undefined;
-        date_to = undefined;
-      }
-    } else if (dateRange === "today") {
-      const start = new Date(now); start.setHours(0, 0, 0, 0);
-      date_from = start.toISOString();
-    } else if (dateRange === "week") {
-      const start = new Date(now); start.setDate(now.getDate() - 7);
-      date_from = start.toISOString();
-    } else if (dateRange === "month") {
-      const start = new Date(now); start.setMonth(now.getMonth() - 1);
-      date_from = start.toISOString();
-    } else if (dateRange === "3months") {
-      const start = new Date(now); start.setMonth(now.getMonth() - 3);
-      date_from = start.toISOString();
-    } else {
-      date_from = undefined;
-      date_to = undefined;
-    }
-
-    const fetch = async () => {
-      setIsLoading(true);
-      try {
-        const data = await getRouteReport(
-          date_from !== undefined
-            ? ({ date_from, date_to } as any)
-            : undefined
-        );
-        setRoutes(data.routes ?? []);
-      } catch (err) {
-        console.error("Failed to load route report:", err);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetch();
-  }, [dateRange, customStartDate, customEndDate]);
-
-  // Chart: horizontal bar chart — top routes by bookings
-  const maxBookings = useMemo(() => Math.max(...routes.map(r => r.bookings), 1), [routes]);
-
-  
-  const tableRows: RouteDataRow[] = useMemo(() => 
-    routes.map(r => ({
+  const routes = useMemo(
+    () => aggregateRaw(filterRaw(rawData ?? [], dateRange, customStartDate, customEndDate)),
+    [rawData, dateRange, customStartDate, customEndDate]
+  );
+  const maxBookings = useMemo(() => Math.max(...routes.map((r) => r.bookings), 1), [routes]);
+  const tableRows: RouteDataRow[] = useMemo(() =>
+    routes.map((r) => ({
       route: r.route,
       bookings: r.bookings,
       revenue: `₱${Number(r.revenue).toLocaleString()}`,
-    })),
-    [routes]
-  );
+    })), [routes]);
 
-  const columns: TableColumn<RouteDataRow>[] = [ 
-    {
-      key: "route", 
-      header: "ROUTE",
-      cell: (row) => <span className="font-bold text-slate-800">{row.route}</span>, 
-    },
-    {
-      key: "bookings", 
-      header: "BOOKINGS",
-      cell: (row) => <span className="font-bold text-slate-900">{row.bookings.toLocaleString()}</span>,
-    },
-    {
-      key: "revenue", 
-      header: "REVENUE",
-      cell: (row) => <span className="font-bold text-slate-900">{row.revenue}</span>,
-    },
+  const columns: TableColumn<RouteDataRow>[] = [
+    { key: "route", header: "ROUTE", cell: (row) => <span className="font-bold text-slate-800">{row.route}</span> },
+    { key: "bookings", header: "BOOKINGS", cell: (row) => <span className="font-bold text-slate-900">{row.bookings.toLocaleString()}</span> },
+    { key: "revenue", header: "REVENUE", cell: (row) => <span className="font-bold text-slate-900">{row.revenue}</span> },
   ];
 
   return (
@@ -123,7 +100,6 @@ const BookingsRoute = ({ dateRange, dateRangeLabel, onToast, customStartDate, cu
           </div>
         </div>
 
-        {/* Horizontal Bar Chart */}
         <div className="relative min-h-[200px] flex items-center justify-center">
           {isLoading ? (
             <div className="animate-spin size-8 border-4 border-[#496B92] border-t-transparent rounded-full" />

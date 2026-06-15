@@ -48,8 +48,16 @@ export interface RouteBookingPoint {
   revenue: number;
 }
 
+export interface RawRouteEntry {
+  route: string;
+  revenue: number;
+  booked_at: string;
+  status: string;
+}
+
 export interface RouteReport {
   routes: RouteBookingPoint[];
+  raw: RawRouteEntry[];
   date_from?: string | null;
   date_to?: string | null;
 }

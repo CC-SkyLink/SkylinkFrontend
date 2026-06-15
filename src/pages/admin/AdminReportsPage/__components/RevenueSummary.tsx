@@ -1,12 +1,14 @@
 import { useState, useMemo, useEffect } from "react";
-import { FileSpreadsheet, FileText, ChevronLeft, ChevronRight } from "lucide-react";
+import { FileSpreadsheet, FileText } from "lucide-react";
 import { ArrowUpRight, ArrowDownRight } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
 import DataTable, { type TableColumn } from "@/pages/_shared/components/ui/DataTable";
 import { cn } from "@/utils/cn";
 import { generateReport, getRevenueForecast, getRevenueAnomalies } from "@/api/reports.api";
 import type { RevenueForecastPoint, RevenueAnomalyPoint } from "@/types";
 import { exportCSV, exportPDF } from "../__docs/export";
-import type { DateRange, BookingReport, ReportDataRow } from "./types";
+import type { DateRange, ReportDataRow } from "./types";
+import type { BookingReport } from "./types";
 
 interface Props {
   dateRange: DateRange;
@@ -16,9 +18,42 @@ interface Props {
   customEndDate?: string;
 }
 
+const filterMonthlyRevenue = <T extends { month: string; year: number }>(
+  points: T[],
+  dateRange: DateRange,
+  customStartDate?: string,
+  customEndDate?: string,
+): T[] => {
+  const now = new Date();
+  let from: Date | null = null;
+  let to: Date | null = null;
+
+  if (dateRange === "today") {
+    from = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    to = now;
+  } else if (dateRange === "week") {
+    from = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 7);
+    to = now;
+  } else if (dateRange === "month") {
+    from = new Date(now.getFullYear(), now.getMonth() - 1, now.getDate());
+    to = now;
+  } else if (dateRange === "3months") {
+    from = new Date(now.getFullYear(), now.getMonth() - 3, now.getDate());
+    to = now;
+  } else if (dateRange === "custom" && customStartDate && customEndDate) {
+    from = new Date(customStartDate);
+    to = new Date(customEndDate);
+  }
+
+  if (!from && !to) return points;
+  return points.filter((p) => {
+    const pointDate = new Date(`${p.year}-${String(new Date(`${p.month} 1`).getMonth() + 1).padStart(2, "0")}-01`);
+    return (!from || pointDate >= new Date(from.getFullYear(), from.getMonth(), 1))
+      && (!to || pointDate <= new Date(to.getFullYear(), to.getMonth(), 1));
+  });
+};
+
 const RevenueSummary = ({ dateRange, dateRangeLabel, onToast, customStartDate, customEndDate }: Props) => {
-  const [reportData_api, setReportData_api] = useState<BookingReport | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
   const [hoveredPoint, setHoveredPoint] = useState<number | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
@@ -27,84 +62,31 @@ const RevenueSummary = ({ dateRange, dateRangeLabel, onToast, customStartDate, c
     setCurrentPage(1);
   }, [reportData_api]);
   const [showForecast, setShowForecast] = useState(false);
-  const [forecastData, setForecastData] = useState<RevenueForecastPoint[]>([]);
-  const [anomalyData, setAnomalyData] = useState<RevenueAnomalyPoint[]>([]);
-  const [forecastLoading, setForecastLoading] = useState(false);
-  const [forecastConfidence, setForecastConfidence] = useState<string | null>(null);
+  const { data: reportData_api, isLoading } = useQuery({
+    queryKey: ["revenue-report"],
+    queryFn: async (): Promise<BookingReport> => {
+      const res = await generateReport();
+      return res as unknown as BookingReport;
+    },
+    staleTime: 30 * 60 * 1000,
+  });
+  const { data: forecastResult, isLoading: forecastLoading } = useQuery({
+    queryKey: ["revenue-forecast"],
+    queryFn: () => Promise.all([getRevenueForecast(6), getRevenueAnomalies()]),
+    enabled: showForecast,
+    staleTime: 60 * 60 * 1000,
+  });
 
-  useEffect(() => {
-    const now = new Date();
-    let date_from: string | undefined;
-    let date_to: string | undefined = now.toISOString();
+  const forecastData: RevenueForecastPoint[] = forecastResult?.[0]?.forecast ?? [];
+  const forecastConfidence: string | null = forecastResult?.[0]?.confidence ?? null;
+  const anomalyData: RevenueAnomalyPoint[] = forecastResult?.[1]?.monthly?.filter((m: RevenueAnomalyPoint) => m.is_anomaly) ?? [];
 
-    if (dateRange === "custom") {
-      if (customStartDate && customEndDate) {
-        date_from = new Date(customStartDate + "T00:00:00.000Z").toISOString();
-        date_to = new Date(customEndDate + "T23:59:59.999Z").toISOString();
-      } else {
-        date_from = undefined;
-        date_to = undefined;
-      }
-    } else if (dateRange === "today") {
-      const start = new Date(now); start.setHours(0, 0, 0, 0);
-      date_from = start.toISOString();
-    } else if (dateRange === "week") {
-      const start = new Date(now); start.setDate(now.getDate() - 7);
-      date_from = start.toISOString();
-    } else if (dateRange === "month") {
-      const start = new Date(now); start.setMonth(now.getMonth() - 1);
-      date_from = start.toISOString();
-    } else if (dateRange === "3months") {
-      const start = new Date(now); start.setMonth(now.getMonth() - 3);
-      date_from = start.toISOString();
-    } else {
-      date_from = undefined;
-      date_to = undefined;
-    }
 
-    const fetch = async () => {
-      setIsLoading(true);
-      try {
-        const data = await generateReport(
-          date_from !== undefined
-            ? ({ date_from: date_from as string, date_to: date_to as string } as any)
-            : undefined
-        );
-        setReportData_api(data as unknown as BookingReport);
-      } catch (err) {
-        console.error("Failed to load revenue report:", err);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    fetch();
-  }, [dateRange, customStartDate, customEndDate]);
-
-  useEffect(() => {
-    if (!showForecast) return;
-    const fetchForecast = async () => {
-      setForecastLoading(true);
-      try {
-        const [forecast, anomalies] = await Promise.all([
-          getRevenueForecast(6),
-          getRevenueAnomalies(),
-        ]);
-        setForecastData(forecast.forecast);
-        setForecastConfidence(forecast.confidence);
-        setAnomalyData(anomalies.monthly.filter((m) => m.is_anomaly));
-      } catch (err) {
-        console.error("Failed to load forecast:", err);
-      } finally {
-        setForecastLoading(false);
-      }
-    };
-    fetchForecast();
-  }, [showForecast]);
-
-  // @ts-ignore
   const reportData: ReportDataRow[] = useMemo(() => {
-    if (!reportData_api?.monthly_revenue?.length) return [];
-    return reportData_api.monthly_revenue.map((m, idx, arr) => {
+    const allMonths = (reportData_api as BookingReport)?.monthly_revenue ?? [];
+    const filtered = filterMonthlyRevenue(allMonths, dateRange, customStartDate, customEndDate);
+    if (!filtered.length) return [];
+    return filtered.map((m, idx, arr) => {
       const prev = arr[idx - 1];
       const changeValue = prev
         ? parseFloat((((m.revenue - prev.revenue) / prev.revenue) * 100).toFixed(1))
@@ -117,12 +99,6 @@ const RevenueSummary = ({ dateRange, dateRangeLabel, onToast, customStartDate, c
       };
     });
   }, [reportData_api]);
-
-  const totalPages = Math.ceil(reportData.length / itemsPerPage);
-  const paginatedReportData = useMemo(() => {
-    const start = (currentPage - 1) * itemsPerPage;
-    return reportData.slice(start, start + itemsPerPage);
-  }, [reportData, currentPage]);
 
   const chartPoints = useMemo(() => {
     if (reportData.length === 0) return [];
@@ -160,8 +136,7 @@ const RevenueSummary = ({ dateRange, dateRangeLabel, onToast, customStartDate, c
     return forecastData.map((f, i) => {
       const idx = reportData.length + i;
       const x = count === 1 ? (xStart + xEnd) / 2 : xStart + (idx / (count - 1)) * (xEnd - xStart);
-      const val = f.revenue;
-      return { x, y: 260 - (val / maxY) * 200, value: val, period: `${f.month} ${f.year}` };
+      return { x, y: 260 - (f.revenue / maxY) * 200, value: f.revenue, period: `${f.month} ${f.year}` };
     });
   }, [showForecast, forecastData, chartPoints, reportData]);
 
@@ -214,29 +189,27 @@ const RevenueSummary = ({ dateRange, dateRangeLabel, onToast, customStartDate, c
               <button
                 onClick={() => setShowForecast((p) => !p)}
                 className={cn(
-                "flex items-center gap-2 border px-4 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer",
-                showForecast
-                  ? "border-[#496B92] bg-[#496B92]/10 text-[#496B92]"
-                  : "border-slate-200 bg-white text-slate-600 hover:border-[#496B92]/50"
-              )}
-            >
-              {forecastLoading ? (
-                <span className="animate-spin size-3 border-2 border-[#496B92] border-t-transparent rounded-full" />
-              ) : (
-                "📈"
-              )}
-              {showForecast ? "Hide Forecast" : "Show Forecast"}
-              {showForecast && forecastConfidence && (
-                <span className={cn(
-                  "ml-1 rounded-full px-2 py-0.5 text-[10px] font-bold",
-                  forecastConfidence === "high" ? "bg-emerald-100 text-emerald-700" :
-                  forecastConfidence === "medium" ? "bg-amber-100 text-amber-700" :
-                  "bg-slate-100 text-slate-500"
-                )}>
-                  {forecastConfidence}
-                </span>
-              )}
-            </button>
+                  "flex items-center gap-2 border px-4 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer",
+                  showForecast
+                    ? "border-[#496B92] bg-[#496B92]/10 text-[#496B92]"
+                    : "border-slate-200 bg-white text-slate-600 hover:border-[#496B92]/50"
+                )}
+              >
+                {forecastLoading ? (
+                  <span className="animate-spin size-3 border-2 border-[#496B92] border-t-transparent rounded-full" />
+                ) : "📈"}
+                {showForecast ? "Hide Forecast" : "Show Forecast"}
+                {showForecast && forecastConfidence && (
+                  <span className={cn(
+                    "ml-1 rounded-full px-2 py-0.5 text-[10px] font-bold",
+                    forecastConfidence === "high" ? "bg-emerald-100 text-emerald-700" :
+                    forecastConfidence === "medium" ? "bg-amber-100 text-amber-700" :
+                    "bg-slate-100 text-slate-500"
+                  )}>
+                    {forecastConfidence}
+                  </span>
+                )}
+              </button>
               <div className="absolute right-0 top-full mt-2 z-50 hidden group-hover/forecast:flex w-64 rounded-xl bg-slate-900 text-white p-3 shadow-xl pointer-events-none">
                 <p className="text-[11px] text-slate-300 leading-relaxed">Shows predicted revenue for the next 6 months based on your past bookings. Colored dots mark months where revenue was unusually high or low compared to your average.</p>
               </div>
@@ -273,7 +246,6 @@ const RevenueSummary = ({ dateRange, dateRangeLabel, onToast, customStartDate, c
                 const maxVal = Math.max(...chartPoints.map(p => p.value), 100);
                 const step = Math.ceil(maxVal / 4);
                 const labelInterval = Math.ceil(chartPoints.length / 6);
-
                 return (
                   <>
                     {Array.from({ length: 5 }).map((_, idx) => {
@@ -309,7 +281,6 @@ const RevenueSummary = ({ dateRange, dateRangeLabel, onToast, customStartDate, c
                   <circle cx={pt.x} cy={pt.y} r={hoveredPoint === idx ? "7" : "5"} fill="#496B92" stroke="#ffffff" strokeWidth={hoveredPoint === idx ? "3" : "2"} className="transition-all duration-150" />
                 </g>
               ))}
-              {/* Anomaly markers */}
               {showForecast && anomalyData.map((a, idx) => {
                 const pt = chartPoints.find(p => p.period === `${a.month} ${a.year}`);
                 if (!pt) return null;
@@ -322,11 +293,9 @@ const RevenueSummary = ({ dateRange, dateRangeLabel, onToast, customStartDate, c
                   />
                 );
               })}
-              {/* Forecast dashed line */}
               {showForecast && forecastSmoothPath && (
                 <path d={forecastSmoothPath} fill="none" stroke="#496B92" strokeWidth="2.5" strokeDasharray="6 4" strokeLinecap="round" opacity="0.7" />
               )}
-              {/* Forecast dots */}
               {showForecast && forecastChartPoints.map((pt, idx) => (
                 <g key={`forecast-${idx}`} className="cursor-pointer">
                   <circle cx={pt.x} cy={pt.y} r="15" fill="transparent" onMouseEnter={() => setHoveredPoint(1000 + idx)} onMouseLeave={() => setHoveredPoint(null)} />
@@ -337,23 +306,21 @@ const RevenueSummary = ({ dateRange, dateRangeLabel, onToast, customStartDate, c
               <line x1="80" y1="60" x2="80" y2="260" stroke="#cbd5e1" strokeWidth="1" />
             </svg>
           )}
-          {hoveredPoint !== null && (
-            (() => {
-              const isForecast = hoveredPoint >= 1000;
-              const pt = isForecast ? forecastChartPoints[hoveredPoint - 1000] : chartPoints[hoveredPoint];
-              if (!pt) return null;
-              return (
-                <div
-                  className="absolute bg-slate-900/95 text-white text-xs font-bold px-3 py-2 rounded-xl shadow-lg border border-slate-700 pointer-events-none flex flex-col gap-0.5"
-                  style={{ left: `${(pt.x / 800) * 100}%`, top: `${((pt.y - 55) / 300) * 100}%`, transform: "translateX(-50%)" }}
-                >
-                  {isForecast && <span className="text-[#93c5fd] text-[10px] font-semibold">Forecast</span>}
-                  <span className="text-slate-400 font-semibold">{pt.period}</span>
-                  <span className="text-white text-sm">₱{pt.value.toLocaleString()}</span>
-                </div>
-              );
-            })()
-          )}
+          {hoveredPoint !== null && (() => {
+            const isForecast = hoveredPoint >= 1000;
+            const pt = isForecast ? forecastChartPoints[hoveredPoint - 1000] : chartPoints[hoveredPoint];
+            if (!pt) return null;
+            return (
+              <div
+                className="absolute bg-slate-900/95 text-white text-xs font-bold px-3 py-2 rounded-xl shadow-lg border border-slate-700 pointer-events-none flex flex-col gap-0.5"
+                style={{ left: `${(pt.x / 800) * 100}%`, top: `${((pt.y - 55) / 300) * 100}%`, transform: "translateX(-50%)" }}
+              >
+                {isForecast && <span className="text-[#93c5fd] text-[10px] font-semibold">Forecast</span>}
+                <span className="text-slate-400 font-semibold">{pt.period}</span>
+                <span className="text-white text-sm">₱{pt.value.toLocaleString()}</span>
+              </div>
+            );
+          })()}
         </div>
       </div>
 

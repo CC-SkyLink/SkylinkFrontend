@@ -1,10 +1,11 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useMemo } from "react";
 import { FileSpreadsheet, FileText } from "lucide-react";
 import { ArrowUpRight, ArrowDownRight } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
 import DataTable, { type TableColumn } from "@/pages/_shared/components/ui/DataTable";
 import { cn } from "@/utils/cn";
 import { exportCSV, exportPDF } from "../__docs/export";
-import type { DateRange, CancellationDataRow  } from "./types";
+import type { DateRange, CancellationDataRow } from "./types";
 import type { MonthlyCancellationPoint } from "@/types/report.types";
 import { getCancellationReport } from "@/api/reports.api";
 
@@ -16,61 +17,58 @@ interface Props {
   customEndDate?: string;
 }
 
+const filterMonthlyPoints = <T extends { month: string; year: number }>(
+  points: T[],
+  dateRange: DateRange,
+  customStartDate?: string,
+  customEndDate?: string,
+): T[] => {
+  const now = new Date();
+  let from: Date | null = null;
+  let to: Date | null = null;
+
+  if (dateRange === "today") {
+    from = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    to = now;
+  } else if (dateRange === "week") {
+    from = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 7);
+    to = now;
+  } else if (dateRange === "month") {
+    from = new Date(now.getFullYear(), now.getMonth() - 1, now.getDate());
+    to = now;
+  } else if (dateRange === "3months") {
+    from = new Date(now.getFullYear(), now.getMonth() - 3, now.getDate());
+    to = now;
+  } else if (dateRange === "custom" && customStartDate && customEndDate) {
+    from = new Date(customStartDate);
+    to = new Date(customEndDate);
+  }
+
+  if (!from && !to) return points;
+  return points.filter((p) => {
+    const pointDate = new Date(`${p.year}-${String(new Date(`${p.month} 1`).getMonth() + 1).padStart(2, "0")}-01`);
+    return (!from || pointDate >= new Date(from.getFullYear(), from.getMonth(), 1))
+      && (!to || pointDate <= new Date(to.getFullYear(), to.getMonth(), 1));
+  });
+};
+
 const CancellationRate = ({ dateRange, dateRangeLabel, onToast, customStartDate, customEndDate }: Props) => {
-  const [data, setData] = useState<MonthlyCancellationPoint[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-
-  useEffect(() => {
-    const now = new Date();
-    let date_from: string | undefined;
-    let date_to: string | undefined = now.toISOString();
-
-    if (dateRange === "custom") {
-      if (customStartDate && customEndDate) {
-        date_from = new Date(customStartDate + "T00:00:00.000Z").toISOString();
-        date_to = new Date(customEndDate + "T23:59:59.999Z").toISOString();
-      } else {
-        date_from = undefined;
-        date_to = undefined;
-      }
-    } else if (dateRange === "today") {
-      const start = new Date(now); start.setHours(0, 0, 0, 0);
-      date_from = start.toISOString();
-    } else if (dateRange === "week") {
-      const start = new Date(now); start.setDate(now.getDate() - 7);
-      date_from = start.toISOString();
-    } else if (dateRange === "month") {
-      const start = new Date(now); start.setMonth(now.getMonth() - 1);
-      date_from = start.toISOString();
-    } else if (dateRange === "3months") {
-      const start = new Date(now); start.setMonth(now.getMonth() - 3);
-      date_from = start.toISOString();
-    } else {
-      date_from = undefined;
-      date_to = undefined;
-    }
-
-    const fetch = async () => {
-      setIsLoading(true);
-      try {
-        const res = await getCancellationReport(
-          date_from !== undefined
-            ? ({ date_from, date_to } as any)
-            : undefined
-        );
-        setData(res.monthly_cancellations ?? []);
-      } catch (err) {
-        console.error("Failed to load cancellation report:", err);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetch();
-  }, [dateRange, customStartDate, customEndDate]);
+  const [hoveredPoint, setHoveredPoint] = useState<number | null>(null);
+  const { data, isLoading } = useQuery({
+    queryKey: ["cancellation-report"],
+    queryFn: async () => {
+      const res = await getCancellationReport();
+      return (res?.monthly_cancellations ?? []) as MonthlyCancellationPoint[];
+    },
+    staleTime: 30 * 60 * 1000,
+  });
+  const points = useMemo(
+    () => filterMonthlyPoints(data ?? [], dateRange, customStartDate, customEndDate),
+    [data, dateRange, customStartDate, customEndDate]
+  );
 
   const tableRows: CancellationDataRow[] = useMemo(() =>
-    data.map((d, idx, arr) => {
+    points.map((d, idx, arr) => {
       const prev = arr[idx - 1];
       const changeValue = prev
         ? parseFloat((d.cancellation_rate - prev.cancellation_rate).toFixed(1))
@@ -81,27 +79,24 @@ const CancellationRate = ({ dateRange, dateRangeLabel, onToast, customStartDate,
         change: changeValue !== undefined ? `${changeValue > 0 ? "+" : ""}${changeValue}%` : "—",
         changeValue,
       };
-    }),
-    [data]
-  );
+    }), [points]);
 
-  // Chart: same smooth line as RevenueSummary but for cancellation rate
   const chartPoints = useMemo(() => {
-    if (data.length === 0) return [];
-    const count = data.length;
+    if (points.length === 0) return [];
+    const count = points.length;
     const xStart = 120, xEnd = 660;
-    const xCoords = data.map((_, i) =>
+    const xCoords = points.map((_, i) =>
       count === 1 ? (xStart + xEnd) / 2 : xStart + (i / (count - 1)) * (xEnd - xStart)
     );
-    const maxVal = Math.max(...data.map(d => d.cancellation_rate), 1);
+    const maxVal = Math.max(...points.map(d => d.cancellation_rate), 1);
     const maxY = Math.min(Math.ceil(maxVal * 1.3), 100);
-    return data.map((d, idx) => ({
+    return points.map((d, idx) => ({
       x: xCoords[idx],
       y: 260 - (d.cancellation_rate / maxY) * 200,
       value: d.cancellation_rate,
       period: `${d.month} ${d.year}`,
     }));
-  }, [data]);
+  }, [points]);
 
   const chartSmoothPath = useMemo(() => {
     if (chartPoints.length === 0) return "";
@@ -119,17 +114,9 @@ const CancellationRate = ({ dateRange, dateRangeLabel, onToast, customStartDate,
     return `${chartSmoothPath} L ${chartPoints[chartPoints.length - 1].x},260 L ${chartPoints[0].x},260 Z`;
   }, [chartSmoothPath, chartPoints]);
 
-  const [hoveredPoint, setHoveredPoint] = useState<number | null>(null);
-
   const columns: TableColumn<CancellationDataRow>[] = [
-    {
-      key: "period", header: "PERIOD",
-      cell: (row) => <span className="font-bold text-slate-800">{row.period}</span>,
-    },
-    {
-      key: "value", header: "RATE",
-      cell: (row) => <span className="font-bold text-slate-900">{row.value}%</span>,
-    },
+    { key: "period", header: "PERIOD", cell: (row) => <span className="font-bold text-slate-800">{row.period}</span> },
+    { key: "value", header: "RATE", cell: (row) => <span className="font-bold text-slate-900">{row.value}%</span> },
     {
       key: "change", header: "CHANGE",
       cell: (row) => {
@@ -170,7 +157,6 @@ const CancellationRate = ({ dateRange, dateRangeLabel, onToast, customStartDate,
           </div>
         </div>
 
-        {/* Line Chart */}
         <div className="relative pt-6 min-h-[320px] flex items-center justify-center bg-slate-50/20 rounded-2xl border border-slate-100/50">
           {isLoading ? (
             <div className="animate-spin size-8 border-4 border-[#496B92] border-t-transparent rounded-full" />

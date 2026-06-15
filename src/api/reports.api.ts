@@ -1,14 +1,14 @@
 import axiosClient from "./axiosClient";
 import { handleApiError } from "./api.helpers";
-import type { ExportRequest, ReportResult, ReportQuery, RouteReport, CancellationReport, UserGrowthReport, ActivityLogList, RevenueForecast, DemandForecast, CancellationRisk, RevenueAnomalies, PricingSuggestions } from "@/types";
+import type { ExportRequest, ReportResult, RouteReport, CancellationReport, UserGrowthReport, ActivityLogList, RevenueForecast, DemandForecast, CancellationRisk, RevenueAnomalies, PricingSuggestions } from "@/types";
 
 /**
  * Admin: Get Booking Report
  * GET /api/v1/admin/reports
  */
-export async function generateReport(query?: ReportQuery): Promise<ReportResult> {
+export async function generateReport(): Promise<ReportResult> {
   try {
-    const res = await axiosClient.get("/admin/reports", { params: query });
+    const res = await axiosClient.get("/admin/reports");
     return res.data as ReportResult;
   } catch (err) {
     handleApiError(err);
@@ -38,9 +38,9 @@ export async function getRevenueByRoute(): Promise<{ route: string; revenue: num
  * Admin: Get Route Booking Report
  * GET /api/v1/admin/reports/routes
  */
-export async function getRouteReport(query?: ReportQuery): Promise<RouteReport> {
+export async function getRouteReport(): Promise<RouteReport> {
   try {
-    const res = await axiosClient.get("/admin/reports/routes", { params: query });
+    const res = await axiosClient.get("/admin/reports/routes");
     return res.data as RouteReport;
   } catch (err) {
     handleApiError(err);
@@ -51,9 +51,9 @@ export async function getRouteReport(query?: ReportQuery): Promise<RouteReport> 
  * Admin: Get Cancellation Report
  * GET /api/v1/admin/reports/cancellations
  */
-export async function getCancellationReport(query?: ReportQuery): Promise<CancellationReport> {
+export async function getCancellationReport(): Promise<CancellationReport> {
   try {
-    const res = await axiosClient.get("/admin/reports/cancellations", { params: query });
+    const res = await axiosClient.get("/admin/reports/cancellations");
     return res.data as CancellationReport;
   } catch (err) {
     handleApiError(err);
@@ -64,9 +64,9 @@ export async function getCancellationReport(query?: ReportQuery): Promise<Cancel
  * Admin: Get User Growth Report
  * GET /api/v1/admin/reports/user-growth
  */
-export async function getUserGrowthReport(query?: ReportQuery): Promise<UserGrowthReport> {
+export async function getUserGrowthReport(): Promise<UserGrowthReport> {
   try {
-    const res = await axiosClient.get("/admin/reports/user-growth", { params: query });
+    const res = await axiosClient.get("/admin/reports/user-growth");
     return res.data as UserGrowthReport;
   } catch (err) {
     handleApiError(err);
