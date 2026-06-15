@@ -167,12 +167,13 @@ const ExplorePage = () => {
   const isLoading = promosLoading || flightsLoading || airportsLoading;
 
   const destinations = useMemo(() => {
+    if (airportsLoading || flightsLoading) return [];
     const seen = new Set<string>();
     const dests: Destination[] = [];
     (flights || []).forEach((flight) => {
       if (flight.destination && !seen.has(flight.destination)) {
         seen.add(flight.destination);
-        const airport = airports.find((a) => a.iata_code === flight.destination); // <-- use airport image
+        const airport = airports.find((a) => a.iata_code === flight.destination);
         dests.push({
           id: flight.id,
           code: flight.destination,
