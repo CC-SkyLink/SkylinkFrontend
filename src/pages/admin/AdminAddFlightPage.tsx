@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -10,13 +11,10 @@ import Input from "@/pages/_shared/components/ui/Input";
 import Button from "@/pages/_shared/components/ui/Button";
 import { ChevronLeft, Save, Plane, Tag } from "lucide-react";
 import { flightSchema, type FlightFormValues } from "@/validation/flight.schemas";
-import type { Aircraft } from "@/types/destinations.types";
 
 const AdminAddFlightPage = () => {
   const navigate = useNavigate();
   const [serverError, setServerError] = useState<string | null>(null);
-  const [aircraftList, setAircraftList] = useState<Aircraft[]>([]);
-  const [isLoadingAircraft, setIsLoadingAircraft] = useState(true);
 
   const {
     register,
@@ -38,38 +36,22 @@ const AdminAddFlightPage = () => {
     name: "seat_pricing",
   });
 
+  const { data: aircraftList = [], isLoading: isLoadingAircraft } = useQuery({
+    queryKey: ["aircraft"],
+    queryFn: () => getAircraft(),
+    staleTime: 30 * 60 * 1000,
+  });
   const selectedAircraftId = watch("aircraftId");
-
-  // Fetch aircraft on mount
-  useEffect(() => {
-    const fetchAircraft = async () => {
-      try {
-        const data = await getAircraft();
-        setAircraftList(data);
-      } catch (err) {
-        console.error("Failed to fetch aircraft", err);
-      } finally {
-        setIsLoadingAircraft(false);
-      }
-    };
-    fetchAircraft();
-  }, []);
-
-  // Update dynamic pricing fields when aircraft changes
   useEffect(() => {
     if (selectedAircraftId) {
       const aircraft = aircraftList.find(a => a.id === Number(selectedAircraftId));
       if (aircraft && aircraft.seats) {
-        // Get unique seat classes from the aircraft's seats
         const uniqueClasses = Array.from(new Set(aircraft.seats.map(s => s.seat_class_id)));
-        const initialPricing = uniqueClasses.map(classId => ({
-          seat_class_id: classId,
-          price: 0,
-        }));
-        replace(initialPricing);
+        replace(uniqueClasses.map(classId => ({ seat_class_id: classId, price: 0 })));
       }
     }
   }, [selectedAircraftId, aircraftList, replace]);
+
 
   const onSubmit = async (data: FlightFormValues) => {
     setServerError(null);
@@ -86,9 +68,6 @@ const AdminAddFlightPage = () => {
   };
 
   const getClassName = (classId: number) => {
-    // This assumes we have a way to map ID to Name. 
-    // In a real app, we'd fetch SeatClasses or have them in the aircraft object.
-    // For now, let's look at the first seat matching the ID in the selected aircraft.
     const aircraft = aircraftList.find(a => a.id === Number(selectedAircraftId));
     const seat = aircraft?.seats?.find(s => s.seat_class_id === classId);
     return seat?.seat_class?.name || (classId === 1 ? "Economy" : "Business");
