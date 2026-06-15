@@ -38,9 +38,9 @@ export async function getRevenueByRoute(): Promise<{ route: string; revenue: num
  * Admin: Get Route Booking Report
  * GET /api/v1/admin/reports/routes
  */
-export async function getRouteReport(query?: ReportQuery): Promise<RouteReport> {
+export async function getRouteReport(): Promise<RouteReport> {
   try {
-    const res = await axiosClient.get("/admin/reports/routes", { params: query });
+    const res = await axiosClient.get("/admin/reports/routes");
     return res.data as RouteReport;
   } catch (err) {
     handleApiError(err);
