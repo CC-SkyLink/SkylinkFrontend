@@ -54,7 +54,7 @@ const BookingsRoute = ({ dateRange, dateRangeLabel, onToast, customStartDate, cu
       const res = await getRouteReport();
       return (res?.raw ?? []) as RawRouteEntry[];
     },
-    staleTime: 5 * 60 * 1000,
+    staleTime: 30 * 60 * 1000,
   });
 
   const routes = useMemo(

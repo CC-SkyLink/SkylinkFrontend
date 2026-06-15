@@ -778,7 +778,7 @@ function AdminAccountsTab() {
       const users = await getUsers();
       return users.filter((u: any) => u.role_id === 1) as AdminUser[];
     },
-    staleTime: 5 * 60 * 1000,
+    staleTime: 15 * 60 * 1000,
   });
 
   const onSubmit = async (data: AdminAccountValues) => {
