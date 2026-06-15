@@ -64,9 +64,9 @@ export async function getCancellationReport(): Promise<CancellationReport> {
  * Admin: Get User Growth Report
  * GET /api/v1/admin/reports/user-growth
  */
-export async function getUserGrowthReport(query?: ReportQuery): Promise<UserGrowthReport> {
+export async function getUserGrowthReport(): Promise<UserGrowthReport> {
   try {
-    const res = await axiosClient.get("/admin/reports/user-growth", { params: query });
+    const res = await axiosClient.get("/admin/reports/user-growth");
     return res.data as UserGrowthReport;
   } catch (err) {
     handleApiError(err);
