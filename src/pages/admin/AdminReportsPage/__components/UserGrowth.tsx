@@ -61,7 +61,7 @@ const UserGrowth = ({ dateRange, dateRangeLabel, onToast, customStartDate, custo
       const res = await getUserGrowthReport();
       return (res?.monthly_growth ?? []) as MonthlyUserGrowthPoint[];
     },
-    staleTime: 5 * 60 * 1000,
+    staleTime: 30 * 60 * 1000,
   });
   const points = useMemo(
     () => filterMonthlyPoints(data ?? [], dateRange, customStartDate, customEndDate),

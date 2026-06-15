@@ -62,13 +62,13 @@ const RevenueSummary = ({ dateRange, dateRangeLabel, onToast, customStartDate, c
       const res = await generateReport();
       return res as unknown as BookingReport;
     },
-    staleTime: 5 * 60 * 1000,
+    staleTime: 30 * 60 * 1000,
   });
   const { data: forecastResult, isLoading: forecastLoading } = useQuery({
     queryKey: ["revenue-forecast"],
     queryFn: () => Promise.all([getRevenueForecast(6), getRevenueAnomalies()]),
     enabled: showForecast,
-    staleTime: 10 * 60 * 1000,
+    staleTime: 60 * 60 * 1000,
   });
 
   const forecastData: RevenueForecastPoint[] = forecastResult?.[0]?.forecast ?? [];

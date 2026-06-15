@@ -60,7 +60,7 @@ const CancellationRate = ({ dateRange, dateRangeLabel, onToast, customStartDate,
       const res = await getCancellationReport();
       return (res?.monthly_cancellations ?? []) as MonthlyCancellationPoint[];
     },
-    staleTime: 5 * 60 * 1000,
+    staleTime: 30 * 60 * 1000,
   });
   const points = useMemo(
     () => filterMonthlyPoints(data ?? [], dateRange, customStartDate, customEndDate),

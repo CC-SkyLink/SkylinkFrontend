@@ -27,7 +27,7 @@ const DemandForecast = ({ dateRangeLabel, onToast }: Props) => {
       const result = await getDemandForecast();
       return result.routes as DemandForecastRoute[];
     },
-    staleTime: 10 * 60 * 1000,
+    staleTime: 60 * 60 * 1000,
   });
 
   const maxPredicted = Math.max(...data.map((r) => r.predicted_bookings_next_30_days), 1);
