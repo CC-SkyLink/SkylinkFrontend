@@ -165,14 +165,16 @@ const ExplorePage = () => {
     staleTime: 30 * 60 * 1000,
   });
   const isLoading = promosLoading || flightsLoading || airportsLoading;
+  const dataReady = !flightsLoading && !airportsLoading;
 
   const destinations = useMemo(() => {
+    if (!dataReady) return [];
     const seen = new Set<string>();
     const dests: Destination[] = [];
     (flights || []).forEach((flight) => {
       if (flight.destination && !seen.has(flight.destination)) {
         seen.add(flight.destination);
-        const airport = airports.find((a) => a.iata_code === flight.destination); // <-- use airport image
+        const airport = airports.find((a) => a.iata_code === flight.destination);
         dests.push({
           id: flight.id,
           code: flight.destination,
@@ -193,7 +195,7 @@ const ExplorePage = () => {
         .toLowerCase()
         .includes(query),
     );
-  }, [flights, search]);
+  }, [flights, airports, search, dataReady]);
 
   const deals = useMemo(() => {
     const query = search.trim().toLowerCase();
