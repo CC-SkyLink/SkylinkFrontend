@@ -80,8 +80,21 @@ const HomePage = () => {
 
 {/* Bento Grid — real airport data */}
           {escapes.length === 0 ? (
-            <div className="h-64 flex items-center justify-center text-slate-400 font-medium">
-              Loading destinations...
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 max-w-6xl w-full animate-pulse">
+              {/* Left Column Featured Skeleton */}
+              <div className="rounded-[16px] md:rounded-[24px] bg-slate-200 aspect-square w-full" />
+              
+              {/* Right Column Skeleton */}
+              <div className="grid grid-rows-2 gap-4 md:gap-6">
+                {/* Top Row Skeleton */}
+                <div className="rounded-[16px] md:rounded-[24px] bg-slate-200 h-full w-full min-h-[120px]" />
+                
+                {/* Bottom Row Skeleton (2 columns) */}
+                <div className="grid grid-cols-2 gap-4 md:gap-6 h-full">
+                  <div className="rounded-[16px] md:rounded-[24px] bg-slate-200 aspect-square md:aspect-auto w-full h-full" />
+                  <div className="rounded-[16px] md:rounded-[24px] bg-slate-200 aspect-square md:aspect-auto w-full h-full" />
+                </div>
+              </div>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 max-w-6xl">
