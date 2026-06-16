@@ -1,6 +1,7 @@
 
 import { useState } from "react";
 import { ChevronDown, ChevronUp } from "lucide-react";
+import { FaFacebook, FaTwitter, FaInstagram, FaYoutube } from "react-icons/fa";
 import Global from "@/assets/logos/Vector.png";
 
 const footerSections = [
@@ -20,6 +21,13 @@ const footerSections = [
     title: "Legal",
     links: ["Terms", "Privacy", "Cookies", "Refund Policy"],
   },
+];
+
+const socialLinks = [
+  { icon: FaFacebook, url: "https://facebook.com", label: "Facebook" },
+  { icon: FaTwitter, url: "https://twitter.com", label: "Twitter" },
+  { icon: FaInstagram, url: "https://instagram.com", label: "Instagram" },
+  { icon: FaYoutube, url: "https://youtube.com", label: "YouTube" },
 ];
 
 export default function Footer() {
@@ -49,18 +57,17 @@ export default function Footer() {
 
             {/* Social icons */}
             <div className="flex gap-3">
-              {[
-                "/SocialMediaIcons/Icon.png",
-                "/SocialMediaIcons/Icon-1.png",
-                "/SocialMediaIcons/Icon-2.png",
-                "/SocialMediaIcons/Icon-3.png",
-              ].map((iconSrc) => (
-                <div
-                  key={iconSrc}
-                  className="flex h-9 w-9 items-center justify-center rounded-full bg-white/10"
+              {socialLinks.map(({ icon: Icon, url, label }) => (
+                <a
+                  key={label}
+                  href={url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={label}
+                  className="flex h-9 w-9 items-center justify-center rounded-full bg-white/10 hover:bg-white/20 text-white/80 hover:text-white transition-all cursor-pointer"
                 >
-                  <img src={iconSrc} alt="" className="h-4 w-4" />
-                </div>
+                  <Icon size={16} />
+                </a>
               ))}
             </div>
           </div>
