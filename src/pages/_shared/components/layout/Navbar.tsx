@@ -9,6 +9,11 @@ import {
   BookOpen,
   ChevronDown,
   LayoutDashboard,
+  Compass,
+  Menu,
+  X,
+  Plane,
+  Clock,
 } from "lucide-react";
 import logos1 from "@/assets/logos/Logos-1.png";
 import { colors, typography } from "@/constants/theme";
@@ -23,6 +28,7 @@ const Navbar = () => {
   const isAdmin = user?.role_id === 1;
 
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [showLogoutToast, setShowLogoutToast] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -31,6 +37,13 @@ const Navbar = () => {
     { label: "Explore", path: ROUTES.EXPLORE },
     { label: "Flight Status", path: ROUTES.PNR_STATUS },
     { label: "Manage", path: ROUTES.MANAGE },
+  ];
+
+  const bottomNavLinks = [
+    { label: "Book", path: ROUTES.BOOK, icon: Plane },
+    { label: "Explore", path: ROUTES.EXPLORE, icon: Compass },
+    { label: "Flight Status", path: ROUTES.PNR_STATUS, icon: Clock },
+    { label: "Manage", path: ROUTES.MANAGE, icon: BookOpen },
   ];
 
   const isActive = (path: string) => {
@@ -103,7 +116,7 @@ const Navbar = () => {
         </div>
 
         {/* Right side Actions */}
-        <div className="flex items-center gap-6">
+        <div className="flex items-center gap-4 md:gap-6">
           {!isAuthenticated ? (
             <Link
               to={ROUTES.LOGIN}
@@ -187,8 +200,85 @@ const Navbar = () => {
               )}
             </div>
           )}
+
+          {/* Hamburger Menu Button (Tablet only) */}
+          <button
+            onClick={() => setIsDrawerOpen(true)}
+            className="hidden sm:flex md:hidden items-center justify-center p-2 rounded-lg text-slate-500 hover:bg-slate-50 hover:text-slate-800 transition-colors cursor-pointer"
+            aria-label="Open menu"
+          >
+            <Menu size={24} />
+          </button>
         </div>
       </nav>
+
+      {/* Drawer Overlay & Content (Tablet only) */}
+      {isDrawerOpen && (
+        <div
+          className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm transition-opacity md:hidden animate-in fade-in duration-200"
+          onClick={() => setIsDrawerOpen(false)}
+        />
+      )}
+      <div
+        className={cn(
+          "fixed inset-y-0 right-0 z-50 w-64 bg-white shadow-[0_0_40px_rgba(0,0,0,0.15)] p-6 flex flex-col gap-6 transform transition-transform duration-300 ease-in-out md:hidden",
+          isDrawerOpen ? "translate-x-0" : "translate-x-full"
+        )}
+      >
+        <button
+          onClick={() => setIsDrawerOpen(false)}
+          className="self-end p-2 text-slate-400 hover:text-slate-600 transition-colors cursor-pointer"
+          aria-label="Close menu"
+        >
+          <X size={24} />
+        </button>
+
+        <div className="flex flex-col gap-4 mt-4">
+          <p className="text-xs font-bold text-slate-400 uppercase tracking-widest px-1">Navigation</p>
+          {navLinks.map((link) => (
+            <Link
+              key={link.label}
+              to={link.path}
+              onClick={() => setIsDrawerOpen(false)}
+              className={cn(
+                "text-[16px] font-semibold px-3 py-2 rounded-xl transition-all",
+                isActive(link.path)
+                  ? "bg-primary-10/40 text-[#496B92]"
+                  : "text-slate-600 hover:bg-slate-50 hover:text-slate-950"
+              )}
+            >
+              {link.label}
+            </Link>
+          ))}
+        </div>
+      </div>
+
+      {/* Fixed Bottom Navigation (Mobile only) */}
+      <div className="fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-slate-100 flex justify-around items-center py-2 px-2 sm:hidden shadow-[0_-4px_20px_rgba(0,0,0,0.05)]">
+        {bottomNavLinks.map((link) => {
+          const Icon = link.icon;
+          const active = isActive(link.path);
+          return (
+            <Link
+              key={link.label}
+              to={link.path}
+              className={cn(
+                "flex flex-col items-center justify-center flex-1 py-1 gap-1 text-[10px] font-bold transition-all duration-150 cursor-pointer",
+                active ? "text-[#496B92]" : "text-slate-400 hover:text-slate-600"
+              )}
+            >
+              <Icon
+                size={20}
+                className={cn(
+                  "transition-transform duration-150 active:scale-95",
+                  active ? "text-[#496B92]" : "text-slate-400"
+                )}
+              />
+              <span className="tracking-tight">{link.label}</span>
+            </Link>
+          );
+        })}
+      </div>
     </header>
   );
 };
