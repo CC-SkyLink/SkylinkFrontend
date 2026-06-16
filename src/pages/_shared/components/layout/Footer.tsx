@@ -79,7 +79,7 @@ export default function Footer() {
               return (
                 <div
                   key={title}
-                  className="relative w-28 self-start"
+                  className="w-full self-start"
                   onMouseEnter={() => setHovered(title)}
                   onMouseLeave={() => setHovered(null)}
                 >
@@ -96,7 +96,7 @@ export default function Footer() {
                   </button>
 
                   {isActive && (
-                    <div className="absolute top-full left-0 z-10 pt-3 pb-1 flex flex-col gap-3 bg-[#171A1C]">
+                    <div className="pt-3 pb-1 flex flex-col gap-3">
                       {links.map((link) => (
                         <a
                           key={link}
