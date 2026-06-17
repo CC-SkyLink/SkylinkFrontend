@@ -71,7 +71,7 @@ const AppContent = () => {
   return (
     <>
       {!isAdminRoute && <Navbar />}
-      <main>
+      <main className={isAdminRoute ? "admin-main" : ""}>
         <Routes>
           {/* Public Routes */}
           <Route path={ROUTES.HOME} element={<HomePage />} />

@@ -141,11 +141,11 @@ const AdminTopHeader = ({ onMenuClick }: AdminTopHeaderProps) => {
         </button>
 
         {/* Search Bar */}
-        <div ref={dropdownRef} className="relative hidden max-w-md flex-1 md:block">
+        <div ref={dropdownRef} className="relative max-w-md flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
           <input
             type="text"
-            placeholder="Search pages or features (e.g. settings, flights, logs)..."
+            placeholder="Search pages or features..."
             value={searchQuery}
             onChange={(e) => {
               setSearchQuery(e.target.value);
