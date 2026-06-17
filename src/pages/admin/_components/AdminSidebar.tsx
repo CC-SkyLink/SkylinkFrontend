@@ -18,6 +18,7 @@ import logos1 from "@/assets/logos/Vector.png";
 import { useState } from "react";
 import Toast from "@/pages/_shared/components/ui/Toast";
 import { MapPin } from "lucide-react";
+import { useAdminSearch } from "./AdminLayout";
 
 
 type AdminSidebarProps = {
@@ -29,6 +30,7 @@ const AdminSidebar = ({ isOpen, onClose }: AdminSidebarProps) => {
   const location = useLocation();
   const navigate = useNavigate();
   const { signOut } = useAuth();
+  const { setSearchQuery } = useAdminSearch();
   const [showLogoutToast, setShowLogoutToast] = useState(false);
 
   const handleLogout = () => {
@@ -84,7 +86,11 @@ const AdminSidebar = ({ isOpen, onClose }: AdminSidebarProps) => {
         <div className="flex h-full flex-col">
           {/* Header */}
           <div className="flex items-center justify-between px-6 py-6 lg:py-8">
-            <Link to={ROUTES.ADMIN_DASHBOARD} className="flex items-center gap-3">
+            <Link
+              to={ROUTES.ADMIN_DASHBOARD}
+              onClick={() => setSearchQuery("")}
+              className="flex items-center gap-3"
+            >
               <img src={logos1} alt="SkyLink" className="size-10" />
               <div>
                 <h1 className="text-xl font-bold tracking-tight text-white">SkyLink</h1>
@@ -102,6 +108,7 @@ const AdminSidebar = ({ isOpen, onClose }: AdminSidebarProps) => {
               <div key={item.label}>
                 <Link
                   to={item.path}
+                  onClick={() => setSearchQuery("")}
                   className={cn(
                     "group flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium transition-colors",
                     isActive(item.path)
@@ -118,6 +125,7 @@ const AdminSidebar = ({ isOpen, onClose }: AdminSidebarProps) => {
                       <Link
                         key={sub.label}
                         to={sub.path}
+                        onClick={() => setSearchQuery("")}
                         className={cn(
                           "flex items-center gap-3 rounded-lg px-4 py-2 text-[13px] font-medium transition-colors",
                           isActive(sub.path)

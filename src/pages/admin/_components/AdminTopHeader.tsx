@@ -1,5 +1,6 @@
 import { Menu, Search } from "lucide-react";
 import { useAdminSearch } from "./AdminLayout";
+import { useNavigate, useLocation } from "react-router-dom";
 
 type AdminTopHeaderProps = {
   onMenuClick: () => void;
@@ -7,6 +8,29 @@ type AdminTopHeaderProps = {
 
 const AdminTopHeader = ({ onMenuClick }: AdminTopHeaderProps) => {
   const { searchQuery, setSearchQuery } = useAdminSearch();
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const handleSearchSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!searchQuery.trim()) return;
+
+    const searchPages = [
+      "/admin/flights",
+      "/admin/bookings",
+      "/admin/users",
+      "/admin/destinations",
+      "/admin/promotions"
+    ];
+
+    const isCurrentlyOnSearchPage = searchPages.some(page => 
+      location.pathname.startsWith(page)
+    );
+
+    if (!isCurrentlyOnSearchPage) {
+      navigate("/admin/bookings");
+    }
+  };
 
   return (
     <header className="sticky top-0 z-30 flex h-20 items-center justify-between border-b border-slate-200 bg-white px-6">
@@ -19,7 +43,7 @@ const AdminTopHeader = ({ onMenuClick }: AdminTopHeaderProps) => {
         </button>
 
         {/* Search Bar */}
-        <div className="relative hidden max-w-md flex-1 md:block">
+        <form onSubmit={handleSearchSubmit} className="relative hidden max-w-md flex-1 md:block">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
           <input
             type="text"
@@ -28,7 +52,7 @@ const AdminTopHeader = ({ onMenuClick }: AdminTopHeaderProps) => {
             onChange={(e) => setSearchQuery(e.target.value)}
             className="h-11 w-full rounded-xl bg-slate-50 pl-10 pr-4 text-sm outline-none transition-all focus:bg-white focus:ring-2 focus:ring-blue-500/10 border border-transparent focus:border-blue-500/20"
           />
-        </div>
+        </form>
       </div>
 
       <div className="flex items-center gap-5">

@@ -25,7 +25,17 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
   const location = useLocation();
 
   useEffect(() => {
-    setSearchQuery("");
+    const searchPages = [
+      "/admin/flights",
+      "/admin/bookings",
+      "/admin/users",
+      "/admin/destinations",
+      "/admin/promotions"
+    ];
+    const isSearchPage = searchPages.some(page => location.pathname.startsWith(page));
+    if (!isSearchPage) {
+      setSearchQuery("");
+    }
   }, [location.pathname]);
 
   return (
