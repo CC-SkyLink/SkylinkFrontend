@@ -168,7 +168,7 @@ const SearchResultsPage = () => {
   };
 
   return (
-    <main className="min-h-[calc(100vh-160px)] bg-[#F3F5F7]">
+    <div className="min-h-[calc(100vh-160px)] bg-[#F3F5F7]">
       <section className="border-b border-slate-200 bg-white">
         <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-4 sm:px-6 py-4 text-sm text-slate-500">
           <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:gap-3">
@@ -272,7 +272,7 @@ const SearchResultsPage = () => {
           </div>
         </div>
       </section>
-    </main>
+    </div>
   );
 };
 

@@ -95,7 +95,7 @@ const ManageBookingsPage = () => {
   ];
 
   return (
-    <main className="min-h-[calc(100vh-160px)] bg-[#F3F5F7]">
+    <div className="min-h-[calc(100vh-160px)] bg-[#F3F5F7]">
       {/* HEADER SECTION */}
       <section className="border-b border-slate-200 bg-white">
         <div className="mx-auto w-full max-w-5xl px-4 py-6 md:px-8">
@@ -300,7 +300,7 @@ const ManageBookingsPage = () => {
           )}
         </div>
       </section>
-    </main>
+    </div>
   );
 };
 

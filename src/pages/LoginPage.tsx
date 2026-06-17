@@ -157,9 +157,14 @@ const LoginPage = ({ defaultTab = "login" }: LoginPageProps) => {
   return (
     <section className="relative min-h-[calc(100vh-80px)] flex items-center justify-center overflow-hidden px-4 py-12 md:px-6 bg-[#FDFBF8]">
       {/* Background decoration */}
-      <div className="absolute inset-0 z-0 bg-[#5E83AE]">
-        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-white/10 blur-[80px]" />
-        <div className="absolute bottom-[10%] right-[-5%] w-[35%] h-[35%] rounded-full bg-white/10 blur-[60px]" />
+      <div className="absolute inset-0 z-0 bg-[#5E83AE] overflow-hidden">
+        {/* Top-left overlapping vector circles */}
+        <div className="absolute -top-[15%] -left-[10%] w-[40vw] min-w-[300px] aspect-square rounded-full bg-white/6" />
+        <div className="absolute -top-[5%] -left-[20%] w-[35vw] min-w-[250px] aspect-square rounded-full bg-white/4" />
+        
+        {/* Bottom-right overlapping vector circles */}
+        <div className="absolute -bottom-[20%] -right-[10%] w-[50vw] min-w-[350px] aspect-square rounded-full bg-white/6" />
+        <div className="absolute -bottom-[10%] -right-[20%] w-[40vw] min-w-[300px] aspect-square rounded-full bg-white/4" />
       </div>
       <div className="relative z-10 w-full max-w-[500px]">
         <div className="bg-white rounded-[32px] shadow-[0_32px_64px_-16px_rgba(0,0,0,0.1)] overflow-hidden border border-slate-100">
