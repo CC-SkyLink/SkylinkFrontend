@@ -247,7 +247,7 @@
 }
 
 @media (max-width: 639px) {
-  main > :first-child {
+  main {
     padding-bottom: 5.5rem;
   }
 }

@@ -170,25 +170,28 @@ const SearchResultsPage = () => {
   return (
     <main className="min-h-[calc(100vh-160px)] bg-[#F3F5F7]">
       <section className="border-b border-slate-200 bg-white">
-        <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-6 py-4 text-sm text-slate-500">
-          <div className="flex items-center gap-2">
-            <Link
-              to={ROUTES.HOME}
-              className="text-slate-500 hover:text-slate-800"
-            >
-              Home
-            </Link>
-            <span>/</span>
-            <span className="font-semibold text-slate-900">
-              {fromLabel} to {toLabel}
-            </span>
-            <span className="text-xs text-slate-400">
-              {dateLabel} | {paxParam} pax - {cabinParam}
+        <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-4 sm:px-6 py-4 text-sm text-slate-500">
+          <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:gap-3">
+            <div className="flex items-center gap-2 text-xs sm:text-sm">
+              <Link
+                to={ROUTES.HOME}
+                className="text-slate-500 hover:text-slate-800 transition-colors"
+              >
+                Home
+              </Link>
+              <span className="text-slate-300">/</span>
+              <span className="font-semibold text-slate-900">
+                {fromLabel} to {toLabel}
+              </span>
+            </div>
+            <span className="hidden sm:inline text-slate-300">|</span>
+            <span className="text-[11px] font-medium text-slate-400 sm:text-xs">
+              {dateLabel} • {paxParam} {Number(paxParam) === 1 ? "pax" : "pax"} • {cabinParam}
             </span>
           </div>
           <Link
             to={ROUTES.BOOK}
-            className="rounded-full border border-slate-200 px-3 py-1 text-xs font-semibold text-slate-600 hover:border-slate-300"
+            className="rounded-full border border-slate-200 px-3 py-1 text-xs font-semibold text-slate-600 hover:border-slate-300 whitespace-nowrap"
           >
             Edit Search
           </Link>
