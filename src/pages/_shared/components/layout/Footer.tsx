@@ -32,7 +32,6 @@ const socialLinks = [
 
 export default function Footer() {
   const [clickedOpen, setClickedOpen] = useState<Record<string, boolean>>({});
-  const [hovered, setHovered] = useState<string | null>(null);
 
   const toggle = (title: string) => {
     setClickedOpen((prev) => ({ ...prev, [title]: !prev[title] }));
@@ -75,38 +74,37 @@ export default function Footer() {
           {/* RIGHT LINKS */}
           <div className="grid grid-cols-2 gap-x-12 gap-y-6 md:grid-cols-4 items-start">
             {footerSections.map(({ title, links }) => {
-              const isActive = !!clickedOpen[title] || hovered === title;
+              const isOpenOnMobile = !!clickedOpen[title];
               return (
-                <div
-                  key={title}
-                  className="w-full self-start"
-                  onMouseEnter={() => setHovered(title)}
-                  onMouseLeave={() => setHovered(null)}
-                >
+                <div key={title} className="w-full self-start">
                   <button
                     onClick={() => toggle(title)}
-                    className="flex items-center gap-1 text-xs font-semibold uppercase tracking-wide cursor-pointer select-none hover:text-white/80 transition-colors duration-150"
+                    className="flex w-full items-center justify-between md:justify-start gap-1 text-xs font-semibold uppercase tracking-wide cursor-pointer select-none hover:text-white/80 transition-colors duration-150"
                   >
-                    {title}
-                    {isActive ? (
-                      <ChevronUp size={13} />
-                    ) : (
-                      <ChevronDown size={13} />
-                    )}
+                    <span>{title}</span>
+                    <span className="md:hidden">
+                      {isOpenOnMobile ? (
+                        <ChevronUp size={13} />
+                      ) : (
+                        <ChevronDown size={13} />
+                      )}
+                    </span>
                   </button>
 
-                  {isActive && (
-                    <div className="pt-3 pb-1 flex flex-col gap-3">
-                      {links.map((link) => (
-                        <a
-                          key={link}
-                          className="text-sm text-[#75808A] cursor-pointer hover:text-white transition-colors duration-150 whitespace-nowrap"
-                        >
-                          {link}
-                        </a>
-                      ))}
-                    </div>
-                  )}
+                  <div
+                    className={`${
+                      isOpenOnMobile ? "flex" : "hidden md:flex"
+                    } pt-3 pb-1 flex-col gap-3`}
+                  >
+                    {links.map((link) => (
+                      <a
+                        key={link}
+                        className="text-sm text-[#75808A] cursor-pointer hover:text-white transition-colors duration-150 whitespace-nowrap"
+                      >
+                        {link}
+                      </a>
+                    ))}
+                  </div>
                 </div>
               );
             })}
