@@ -714,18 +714,21 @@ function NavItem({
       type="button"
       onClick={onClick}
       className={cn(
-        "flex w-full items-center justify-between rounded-xl px-5 py-3.5 text-sm font-semibold transition-colors text-left",
+        "flex items-center justify-between rounded-xl px-4 py-2.5 text-xs sm:text-sm font-semibold transition-all whitespace-nowrap cursor-pointer select-none text-left w-auto",
+        "lg:w-full lg:px-5 lg:py-3.5 lg:text-sm",
         active
-          ? "bg-[#EEF3F8] text-[#5E83AE]"
+          ? "bg-[#EEF3F8] text-[#5E83AE] shadow-sm shadow-[#5E83AE]/5"
           : "text-slate-600 hover:bg-slate-50 hover:text-slate-900",
       )}
     >
       <span>{label}</span>
-      {active ? (
-        <ChevronDown size={16} className="text-[#5E83AE]" />
-      ) : (
-        <ChevronRight size={16} className="text-slate-400" />
-      )}
+      <span className="hidden lg:inline-flex ml-2">
+        {active ? (
+          <ChevronDown size={16} className="text-[#5E83AE]" />
+        ) : (
+          <ChevronRight size={16} className="text-slate-400" />
+        )}
+      </span>
     </button>
   );
 }
@@ -1008,10 +1011,10 @@ const AdminSettingsPage = () => {
         <div className="flex flex-col gap-6 lg:flex-row lg:items-start">
           {/* Sidebar nav */}
           <nav
-            className="w-full shrink-0 rounded-2xl border border-slate-100 bg-white p-2 shadow-sm lg:w-[220px]"
+            className="w-full shrink-0 rounded-2xl border border-slate-100 bg-white p-2 shadow-sm lg:w-[220px] overflow-hidden"
             aria-label="Settings sections"
           >
-            <div className="space-y-1">
+            <div className="flex flex-row gap-1.5 overflow-x-auto pb-1.5 lg:flex-col lg:space-y-1 lg:overflow-x-visible lg:pb-0 scrollbar-none">
               {TABS.map((tab) => (
                 <NavItem
                   key={tab.id}
