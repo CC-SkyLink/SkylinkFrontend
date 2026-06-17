@@ -12,14 +12,12 @@ import {
 } from "@/api/destinations.api";
 import type { Airport, Aircraft, SeatClass, SeatConfiguration } from "@/types/destinations.types";
 
-import { useAdminSearch } from "./_components/AdminLayout";
-
 type Tab = "airports" | "aircraft" | "seat-classes";
 
 const AdminDestinationsPage = () => {
   const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState<Tab>("airports");
-  const { searchQuery, setSearchQuery } = useAdminSearch();
+  const [searchQuery, setSearchQuery] = useState("");
   const [addModalOpen, setAddModalOpen] = useState(false);
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);

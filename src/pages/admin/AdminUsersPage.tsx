@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { ROUTES } from "@/constants/routes";
@@ -9,12 +9,10 @@ import StatusBadge from "@/pages/_shared/components/ui/StatusBadge";
 import { Search, Eye, Ban, CheckCircle, ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "@/utils/cn";
 
-import { useAdminSearch } from "./_components/AdminLayout";
-
 const AdminUsersPage = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const { searchQuery, setSearchQuery } = useAdminSearch();
+  const [searchQuery, setSearchQuery] = useState("");
 
   // Query
   const { data: users = [], isLoading } = useQuery({

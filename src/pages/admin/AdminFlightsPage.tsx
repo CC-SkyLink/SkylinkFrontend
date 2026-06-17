@@ -14,12 +14,10 @@ import type { Flight, PricingSuggestions } from "@/types";
 import { getPricingSuggestions } from "@/api/reports.api";
 import { cn } from "@/utils/cn";
 
-import { useAdminSearch } from "./_components/AdminLayout";
-
 const AdminFlightsPage = () => {
   const navigate = useNavigate();
   const { data: flights, isLoading, invalidate } = useFlights({ pageSize: 100 });
-  const { searchQuery, setSearchQuery } = useAdminSearch();
+  const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
   const [searchParams, setSearchParams] = useSearchParams();
   const sortBy = searchParams.get("sort") ?? "";

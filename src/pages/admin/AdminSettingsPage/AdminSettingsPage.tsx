@@ -1,4 +1,5 @@
 import { useState, useRef } from "react";
+import { useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -973,7 +974,12 @@ const TABS: { id: SettingsTab; label: string }[] = [
 ];
 
 const AdminSettingsPage = () => {
-  const [activeTab, setActiveTab] = useState<SettingsTab>("general");
+  const [searchParams, setSearchParams] = useSearchParams();
+  const tabParam = searchParams.get("tab") as SettingsTab;
+  const activeTab = TABS.some((t) => t.id === tabParam) ? tabParam : "general";
+  const setActiveTab = (tab: SettingsTab) => {
+    setSearchParams({ tab });
+  };
   const [showToast, setShowToast] = useState(false);
 
   const handleSave = () => {
