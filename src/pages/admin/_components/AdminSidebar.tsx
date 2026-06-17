@@ -97,7 +97,7 @@ const AdminSidebar = ({ isOpen, onClose }: AdminSidebarProps) => {
           </div>
 
           {/* Navigation */}
-          <nav className="flex-1 space-y-1 px-3">
+          <nav className="flex-1 overflow-y-auto space-y-1 px-3">
             {menuItems.map((item) => (
               <div key={item.label}>
                 <Link

@@ -10,7 +10,7 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   return (
-    <div className="flex min-h-screen bg-[#F3F5F7]">
+    <div className="flex h-screen overflow-hidden bg-[#F3F5F7]">
       <AdminSidebar
         isOpen={isSidebarOpen}
         onClose={() => setIsSidebarOpen(false)}
