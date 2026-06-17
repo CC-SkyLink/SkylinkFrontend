@@ -1,10 +1,13 @@
 import { Menu, Search } from "lucide-react";
+import { useAdminSearch } from "./AdminLayout";
 
 type AdminTopHeaderProps = {
   onMenuClick: () => void;
 };
 
 const AdminTopHeader = ({ onMenuClick }: AdminTopHeaderProps) => {
+  const { searchQuery, setSearchQuery } = useAdminSearch();
+
   return (
     <header className="sticky top-0 z-30 flex h-20 items-center justify-between border-b border-slate-200 bg-white px-6">
       <div className="flex flex-1 items-center gap-4">
@@ -21,6 +24,8 @@ const AdminTopHeader = ({ onMenuClick }: AdminTopHeaderProps) => {
           <input
             type="text"
             placeholder="Search..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
             className="h-11 w-full rounded-xl bg-slate-50 pl-10 pr-4 text-sm outline-none transition-all focus:bg-white focus:ring-2 focus:ring-blue-500/10 border border-transparent focus:border-blue-500/20"
           />
         </div>

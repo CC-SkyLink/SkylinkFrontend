@@ -15,9 +15,11 @@ const getPaymentMethod = (booking?: any) => {
   return booking?.payment?.payment_method_type ?? "—";
 };
 
+import { useAdminSearch } from "../_components/AdminLayout";
+
 const AdminBookingsPage = () => {
   const [selectedBookingId, setSelectedBookingId] = useState<string | null>(null); 
-  const [searchQuery, setSearchQuery] = useState("");
+  const { searchQuery, setSearchQuery } = useAdminSearch();
   const [statusFilter, setStatusFilter] = useState("");
   const [dateFilter, setDateFilter] = useState("");
   const [currentPage, setCurrentPage] = useState(1);

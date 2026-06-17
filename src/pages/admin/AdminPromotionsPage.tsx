@@ -13,9 +13,11 @@ import type { Promotion, CreatePromotionPayload } from "@/types/promotion.types"
 import { promotionSchema, type PromotionFormValues } from "@/validation/promotion.schemas";
 import { cn } from "@/utils/cn";
 
+import { useAdminSearch } from "./_components/AdminLayout";
+
 const AdminPromotionsPage = () => {
   const queryClient = useQueryClient();
-  const [searchQuery, setSearchQuery] = useState("");
+  const { searchQuery, setSearchQuery } = useAdminSearch();
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
   const {
