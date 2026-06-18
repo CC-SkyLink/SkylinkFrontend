@@ -5,6 +5,8 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getPromotions, createPromotion, deletePromotion } from "@/api/promotions.api";
 import AdminLayout from "./_components/AdminLayout";
 import DataTable, { type TableColumn } from "@/pages/_shared/components/ui/DataTable";
+import TableSkeleton from "@/pages/_shared/components/ui/TableSkeleton";
+import Select from "@/pages/_shared/components/ui/Select";
 import Button from "@/pages/_shared/components/ui/Button";
 import Modal from "@/pages/_shared/components/ui/Modal";
 import Input from "@/pages/_shared/components/ui/Input";
@@ -28,34 +30,36 @@ const AdminPromotionsPage = () => {
     defaultValues: {
       category: "promo",
       image_url: "",
-      title: "",
-      destination_code: "",
-      destination_city: "",
+      sale_price: 0,
+      original_price: 0,
     },
   });
 
   // Query
   const { data: promotions = [], isLoading } = useQuery({
     queryKey: ["admin-promotions"],
-    queryFn: getPromotions,
+    queryFn: async () => {
+      const res = await getPromotions();
+      return res as Promotion[];
+    },
     staleTime: 5 * 60 * 1000,
   });
 
   // Mutations
   const createMutation = useMutation({
-    mutationFn: (data: CreatePromotionPayload) => createPromotion(data),
+    mutationFn: createPromotion,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["admin-promotions"] });
+      void queryClient.invalidateQueries({ queryKey: ["admin-promotions"] });
       setIsAddModalOpen(false);
       reset();
     },
-    onError: (err) => console.error("Failed to create promotion", err),
   });
 
   const deleteMutation = useMutation({
-    mutationFn: (id: string) => deletePromotion(id),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["admin-promotions"] }),
-    onError: (err) => console.error("Failed to delete promotion", err),
+    mutationFn: deletePromotion,
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ["admin-promotions"] });
+    },
   });
 
   const onSubmit: SubmitHandler<PromotionFormValues> = (data) => {
@@ -67,11 +71,29 @@ const AdminPromotionsPage = () => {
     deleteMutation.mutate(id);
   };
 
-  const filteredPromotions = useMemo(() =>
-    promotions.filter((p) =>
+  const [categoryFilter, setCategoryFilter] = useState("");
+  const [sortBy, setSortBy] = useState("");
+
+  const filteredPromotions = useMemo(() => {
+    let result = promotions.filter((p) =>
       p.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       (p.destination_code ?? "").toLowerCase().includes(searchQuery.toLowerCase())
-    ), [promotions, searchQuery]);
+    );
+
+    if (categoryFilter === "domestic") {
+      result = result.filter(p => ["MNL", "CEB", "DVO", "PPS", "MPH", "ILO"].includes(p.destination_code ?? ""));
+    } else if (categoryFilter === "international") {
+      result = result.filter(p => !["MNL", "CEB", "DVO", "PPS", "MPH", "ILO"].includes(p.destination_code ?? ""));
+    }
+
+    if (sortBy === "price") {
+      result = [...result].sort((a, b) => a.sale_price - b.sale_price);
+    } else if (sortBy === "date") {
+      result = [...result].sort((a, b) => new Date(a.valid_until).getTime() - new Date(b.valid_until).getTime());
+    }
+
+    return result;
+  }, [promotions, searchQuery, categoryFilter, sortBy]);
 
   const columns: TableColumn<Promotion>[] = useMemo(() => [
     {
@@ -156,80 +178,87 @@ const AdminPromotionsPage = () => {
 
   return (
     <AdminLayout>
-      <div className="space-y-6">
-        <div className="flex items-center justify-between">
+      <div className="space-y-6 text-left">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h2 className="text-2xl font-bold text-slate-900">Promotions</h2>
-            <p className="text-sm font-medium text-slate-500">{filteredPromotions.length} active deals found</p>
+            <p className="text-sm font-medium text-slate-500">{filteredPromotions.length} active promotions</p>
           </div>
-          <button
+          <Button
             onClick={() => setIsAddModalOpen(true)}
-            className="flex flex-row items-center gap-2 bg-[#496B92] hover:bg-[#3B5470] text-white px-5 py-2.5 rounded-xl font-bold transition-all shadow-lg shadow-[#496B92]/20 whitespace-nowrap"
+            className="bg-[#496B92] hover:bg-[#3B5470] text-white px-5 py-2.5 rounded-xl font-bold transition-all shadow-lg shadow-[#496B92]/10 flex items-center justify-center gap-2 self-start sm:self-auto"
           >
-            <Plus size={20} className="shrink-0" />
-            <span className="text-sm">Add Promotion</span>
-          </button>
+            <Plus size={18} />
+            Create Promo
+          </Button>
         </div>
 
-        <div className="p-5 bg-white rounded-2xl border border-slate-100 shadow-sm flex flex-col md:flex-row md:items-center gap-4">
-          <div className="relative flex-1">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3 p-5 bg-white rounded-2xl border border-slate-100 shadow-sm">
+          <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
             <input
               type="text"
-              placeholder="Search promos by title or destination..."
+              placeholder="Search by title or destination..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="h-11 w-full rounded-xl bg-slate-50 pl-10 pr-4 text-sm outline-none border border-transparent focus:border-[#496B92]/20 focus:bg-white focus:ring-2 focus:ring-[#496B92]/10 transition-all"
+              className="h-11 w-full rounded-xl bg-slate-50 pl-10 pr-4 text-sm outline-none border border-transparent focus:border-[#496B92]/20 focus:bg-white focus:ring-2 focus:ring-[#496B92]/10 transition-all placeholder:text-slate-400"
             />
           </div>
-          <div className="flex gap-3">
-            <select className="h-11 px-4 rounded-xl bg-slate-50 text-sm font-medium border border-transparent focus:border-[#496B92]/20 outline-none min-w-[140px]">
-              <option value="">Category</option>
-              <option value="flash">Flash Sale</option>
-              <option value="weekend">Weekend</option>
-              <option value="international">International</option>
-            </select>
-            <select className="h-11 px-4 rounded-xl bg-slate-50 text-sm font-medium border border-transparent focus:border-[#496B92]/20 outline-none min-w-[140px]">
-              <option value="">Sort By</option>
-              <option value="price">Price</option>
-              <option value="date">Date</option>
-            </select>
-          </div>
+          <Select
+            value={categoryFilter}
+            onChange={(val) => setCategoryFilter(val)}
+            options={[
+              { value: "", label: "All Categories" },
+              { value: "domestic", label: "Domestic" },
+              { value: "international", label: "International" },
+            ]}
+            triggerClassName="h-11 bg-slate-50 text-slate-600 border-transparent text-sm font-medium hover:border-slate-200"
+          />
+          <Select
+            value={sortBy}
+            onChange={(val) => setSortBy(val)}
+            options={[
+              { value: "", label: "Sort By" },
+              { value: "price", label: "Price" },
+              { value: "date", label: "Date" },
+            ]}
+            triggerClassName="h-11 bg-slate-50 text-slate-600 border-transparent text-sm font-medium hover:border-slate-200"
+          />
         </div>
 
-        <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
-          <DataTable
-            columns={columns}
-            rows={filteredPromotions}
-            rowKey={(row) => row.id}
-            emptyState={
-              <div className="py-20 text-center">
-                {isLoading ? (
-                  <div className="animate-spin size-8 border-4 border-[#496B92] border-t-transparent rounded-full mx-auto" />
-                ) : (
+        {isLoading ? (
+          <TableSkeleton columns={6} rows={5} />
+        ) : (
+          <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden animate-fade-in">
+            <DataTable
+              columns={columns}
+              rows={filteredPromotions}
+              rowKey={(row) => row.id}
+              emptyState={
+                <div className="py-20 text-center">
                   <div className="flex flex-col items-center gap-2">
                     <Tag className="text-slate-300" size={40} />
                     <p className="text-slate-500 font-medium">No promotions found.</p>
                   </div>
-                )}
+                </div>
+              }
+            />
+            <div className="flex items-center justify-between px-6 py-4 border-t border-slate-50 bg-slate-50/30">
+              <p className="text-sm font-medium text-slate-500">
+                Showing 1-{filteredPromotions.length} of {filteredPromotions.length}
+              </p>
+              <div className="flex items-center gap-2">
+                <button disabled className="p-2 rounded-lg border border-slate-200 text-slate-400 opacity-50 cursor-not-allowed">
+                  <Plus size={16} className="rotate-45" />
+                </button>
+                <button className="size-9 rounded-lg bg-[#496B92] text-white font-bold text-sm">1</button>
+                <button disabled className="p-2 rounded-lg border border-slate-200 text-slate-400 opacity-50 cursor-not-allowed">
+                  <Plus size={16} className="-rotate-45" />
+                </button>
               </div>
-            }
-          />
-          <div className="flex items-center justify-between px-6 py-4 border-t border-slate-50 bg-slate-50/30">
-            <p className="text-sm font-medium text-slate-500">
-              Showing 1-{filteredPromotions.length} of {filteredPromotions.length}
-            </p>
-            <div className="flex items-center gap-2">
-              <button disabled className="p-2 rounded-lg border border-slate-200 text-slate-400 opacity-50 cursor-not-allowed">
-                <Plus size={16} className="rotate-45" />
-              </button>
-              <button className="size-9 rounded-lg bg-[#496B92] text-white font-bold text-sm">1</button>
-              <button disabled className="p-2 rounded-lg border border-slate-200 text-slate-400 opacity-50 cursor-not-allowed">
-                <Plus size={16} className="-rotate-45" />
-              </button>
             </div>
           </div>
-        </div>
+        )}
       </div>
 
       <Modal isOpen={isAddModalOpen} onClose={() => setIsAddModalOpen(false)} title="Create New Promotion">

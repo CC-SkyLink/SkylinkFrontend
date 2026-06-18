@@ -6,6 +6,7 @@ import AdminLayout from "../_components/AdminLayout";
 import DataTable, { type TableColumn } from "@/pages/_shared/components/ui/DataTable";
 import TableSkeleton from "@/pages/_shared/components/ui/TableSkeleton";
 import DatePicker from "@/pages/_shared/components/ui/DatePicker";
+import Select from "@/pages/_shared/components/ui/Select";
 import StatusBadge from "@/pages/_shared/components/ui/StatusBadge";
 import { getAllBookingsAdmin } from "@/api/bookings.api";
 import { ROUTES } from "@/constants/routes";
@@ -210,20 +211,21 @@ const AdminBookingsPage = () => {
           </div>
 
           {/* Status dropdown */}
-          <select
+          <Select
             value={statusFilter}
-            onChange={(e) => {
-              setStatusFilter(e.target.value);
+            onChange={(val) => {
+              setStatusFilter(val);
               setCurrentPage(1);
             }}
-            className="h-11 rounded-xl bg-slate-50 border border-transparent focus:border-[#496B92]/20 focus:bg-white focus:ring-2 focus:ring-[#496B92]/10 px-4 text-sm font-medium text-slate-600 outline-none transition-all cursor-pointer"
-          >
-            <option value="">All Statuses</option>
-            <option value="confirmed">Confirmed</option>
-            <option value="boarded">Boarded</option>
-            <option value="completed">Completed</option>
-            <option value="cancelled">Cancelled</option>
-          </select>
+            options={[
+              { value: "", label: "All Statuses" },
+              { value: "confirmed", label: "Confirmed" },
+              { value: "boarded", label: "Boarded" },
+              { value: "completed", label: "Completed" },
+              { value: "cancelled", label: "Cancelled" },
+            ]}
+            triggerClassName="h-11 bg-slate-50 text-slate-600 border-transparent text-sm font-medium hover:border-slate-200"
+          />
 
           {/* Payment Method dropdown   --> MIGHT REMOVE THE WHOLE DROPDOWN
           <select

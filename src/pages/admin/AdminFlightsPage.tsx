@@ -6,6 +6,8 @@ import { useFlights } from "@/hooks/useFlights";
 import { deleteFlight } from "@/api/flights.api";
 import AdminLayout from "./_components/AdminLayout";
 import DataTable, { type TableColumn } from "@/pages/_shared/components/ui/DataTable";
+import TableSkeleton from "@/pages/_shared/components/ui/TableSkeleton";
+import Select from "@/pages/_shared/components/ui/Select";
 import StatusBadge from "@/pages/_shared/components/ui/StatusBadge";
 import Button from "@/pages/_shared/components/ui/Button";
 import Modal from "@/pages/_shared/components/ui/Modal";
@@ -257,29 +259,31 @@ const AdminFlightsPage = () => {
             />
           </div>
           <div className="flex gap-3">
-            <select 
-              className="h-11 px-4 rounded-xl bg-slate-50 text-sm font-medium border border-transparent focus:border-[#496B92]/20 outline-none min-w-[140px]"
+            <Select
               value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-            >
-              <option value="">Status</option>
-              <option value="scheduled">Scheduled</option>
-              <option value="boarding">Boarding</option>
-              <option value="on_time">On Time</option>
-              <option value="delayed">Delayed</option>
-              <option value="cancelled">Cancelled</option>
-              <option value="landed">Landed</option>
-            </select>
-            <select 
-              className="h-11 px-4 rounded-xl bg-slate-50 text-sm font-medium border border-transparent focus:border-[#496B92]/20 outline-none min-w-[140px]"
+              onChange={(val) => setStatusFilter(val)}
+              options={[
+                { value: "", label: "Status" },
+                { value: "scheduled", label: "Scheduled" },
+                { value: "boarding", label: "Boarding" },
+                { value: "on_time", label: "On Time" },
+                { value: "delayed", label: "Delayed" },
+                { value: "cancelled", label: "Cancelled" },
+                { value: "landed", label: "Landed" },
+              ]}
+              triggerClassName="h-11 bg-slate-50 text-slate-600 border-transparent text-sm font-medium hover:border-slate-200"
+            />
+            <Select
               value={sortBy}
-              onChange={(e) => setSortBy(e.target.value)}
-            >
-              <option value="">Sort By</option>
-              <option value="departure">Departure</option>
-              <option value="price">Price</option>
-              <option value="seats">Seats</option>
-            </select>
+              onChange={(val) => setSortBy(val)}
+              options={[
+                { value: "", label: "Sort By" },
+                { value: "departure", label: "Departure" },
+                { value: "price", label: "Price" },
+                { value: "seats", label: "Seats" },
+              ]}
+              triggerClassName="h-11 bg-slate-50 text-slate-600 border-transparent text-sm font-medium hover:border-slate-200"
+            />
             {(() => {
               const lowCount = (flights ?? []).filter((f) => f.hasLowSeats).length;
               return lowCount > 0 ? (
@@ -301,40 +305,40 @@ const AdminFlightsPage = () => {
         </div>
 
         {/* Flights Table */}
-        <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
-          <DataTable
-            columns={columns}
-            rows={filteredFlights}
-            rowKey={(row) => row.id}
-            emptyState={
-              <div className="py-20 text-center">
-                {isLoading ? (
-                  <div className="animate-spin size-8 border-4 border-[#496B92] border-t-transparent rounded-full mx-auto" />
-                ) : (
+        {isLoading ? (
+          <TableSkeleton columns={8} rows={5} />
+        ) : (
+          <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden animate-fade-in">
+            <DataTable
+              columns={columns}
+              rows={filteredFlights}
+              rowKey={(row) => row.id}
+              emptyState={
+                <div className="py-20 text-center">
                   <p className="text-slate-500 font-medium">No flights found matching your criteria.</p>
-                )}
-              </div>
-            }
-          />
+                </div>
+              }
+            />
 
-          {/* Pagination */}
-          <div className="flex items-center justify-between px-6 py-4 border-t border-slate-50 bg-slate-50/30">
-            <p className="text-sm font-medium text-slate-500">
-              Showing 1-{filteredFlights.length} of {filteredFlights.length}
-            </p>
-            <div className="flex items-center gap-2">
-              <button className="p-2 rounded-lg border border-slate-200 text-slate-400 hover:bg-white transition-colors disabled:opacity-50" disabled>
-                <ChevronLeft size={18} />
-              </button>
-              <div className="flex items-center gap-1">
-                <button className="size-9 rounded-lg bg-[#496B92] text-white font-bold text-sm">1</button>
+            {/* Pagination */}
+            <div className="flex items-center justify-between px-6 py-4 border-t border-slate-50 bg-slate-50/30">
+              <p className="text-sm font-medium text-slate-500">
+                Showing 1-{filteredFlights.length} of {filteredFlights.length}
+              </p>
+              <div className="flex items-center gap-2">
+                <button className="p-2 rounded-lg border border-slate-200 text-slate-400 hover:bg-white transition-colors disabled:opacity-50" disabled>
+                  <ChevronLeft size={18} />
+                </button>
+                <div className="flex items-center gap-1">
+                  <button className="size-9 rounded-lg bg-[#496B92] text-white font-bold text-sm">1</button>
+                </div>
+                <button className="p-2 rounded-lg border border-slate-200 text-slate-400 hover:bg-white transition-colors disabled:opacity-50" disabled>
+                  <ChevronRight size={18} />
+                </button>
               </div>
-              <button className="p-2 rounded-lg border border-slate-200 text-slate-400 hover:bg-white transition-colors disabled:opacity-50" disabled>
-                <ChevronRight size={18} />
-              </button>
             </div>
           </div>
-        </div>
+        )}
       </div>
 
       {/* Pricing Suggestions Modal */}
