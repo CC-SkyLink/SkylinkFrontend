@@ -19,13 +19,13 @@ interface Props {
 
 const DashboardCharts = ({ bookings, isLoading = false }: Props) => {
   const [hoveredPoint, setHoveredPoint] = useState<number | null>(null);
-  const { data: revenueByRoute = [] } = useQuery({
+  const { data: revenueByRoute = [], isLoading: loadingRevenue } = useQuery({
     queryKey: ["revenue-by-route"],
     queryFn: getRevenueByRoute,
     staleTime: 60 * 1000,
   });
 
-  if (isLoading) {
+  if (isLoading || loadingRevenue) {
     return (
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 animate-pulse">
         {/* Bookings Over Time Skeleton */}
