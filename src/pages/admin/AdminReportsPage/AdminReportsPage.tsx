@@ -4,6 +4,7 @@ import { BarChart3, ScrollText } from "lucide-react";
 import AdminLayout from "../_components/AdminLayout";
 import Toast from "@/pages/_shared/components/ui/Toast";
 import Modal from "@/pages/_shared/components/ui/Modal";
+import DatePicker from "@/pages/_shared/components/ui/DatePicker";
 import { cn } from "@/utils/cn";
 import { ROUTES } from "@/constants/routes";
 import RevenueSummary from "./__components/RevenueSummary";
@@ -166,26 +167,26 @@ const AdminReportsPage = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="flex flex-col gap-1.5 text-left">
               <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Start Date</label>
-              <input
-                type="date"
+              <DatePicker
                 value={tempStartDate}
-                onChange={(e) => {
-                  setTempStartDate(e.target.value);
+                onChange={(val) => {
+                  setTempStartDate(val);
                   setValidationError("");
                 }}
-                className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#496B92] text-sm text-slate-700 font-semibold"
+                placeholder="Start Date"
+                triggerClassName="h-11 rounded-xl bg-white border-slate-200 text-slate-700 font-semibold text-sm hover:border-[#496B92]/30"
               />
             </div>
             <div className="flex flex-col gap-1.5 text-left">
               <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">End Date</label>
-              <input
-                type="date"
+              <DatePicker
                 value={tempEndDate}
-                onChange={(e) => {
-                  setTempEndDate(e.target.value);
+                onChange={(val) => {
+                  setTempEndDate(val);
                   setValidationError("");
                 }}
-                className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#496B92] text-sm text-slate-700 font-semibold"
+                placeholder="End Date"
+                triggerClassName="h-11 rounded-xl bg-white border-slate-200 text-slate-700 font-semibold text-sm hover:border-[#496B92]/30"
               />
             </div>
           </div>

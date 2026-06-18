@@ -4,6 +4,8 @@ import { Search, Eye, Download } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import AdminLayout from "../_components/AdminLayout";
 import DataTable, { type TableColumn } from "@/pages/_shared/components/ui/DataTable";
+import TableSkeleton from "@/pages/_shared/components/ui/TableSkeleton";
+import DatePicker from "@/pages/_shared/components/ui/DatePicker";
 import StatusBadge from "@/pages/_shared/components/ui/StatusBadge";
 import { getAllBookingsAdmin } from "@/api/bookings.api";
 import { ROUTES } from "@/constants/routes";
@@ -240,87 +242,87 @@ const AdminBookingsPage = () => {
           */}
 
           {/* Departure Date */}
-          <input
-            type="date"
+          <DatePicker
             value={dateFilter}
-            onChange={(e) => {
-              setDateFilter(e.target.value);
+            onChange={(val) => {
+              setDateFilter(val);
               setCurrentPage(1);
             }}
-            className="h-11 rounded-xl bg-slate-50 border border-transparent focus:border-[#496B92]/20 focus:bg-white focus:ring-2 focus:ring-[#496B92]/10 px-4 text-sm font-medium text-slate-600 outline-none transition-all cursor-pointer"
+            placeholder="Departure Date"
+            triggerClassName="h-11 rounded-xl bg-slate-50 border-transparent text-slate-600 font-medium text-sm hover:border-slate-200"
           />
         </div>
 
         {/* Table list */}
-        <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
-          <DataTable
-            columns={columns}
-            rows={bookings}
-            rowKey={(r) => r.id}
-            emptyState={
-              <div className="py-20 text-center">
-                {isLoading ? (
-                  <div className="animate-spin size-8 border-4 border-[#496B92] border-t-transparent rounded-full mx-auto" />
-                ) : (
+        {isLoading ? (
+          <TableSkeleton columns={8} rows={5} />
+        ) : (
+          <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden animate-fade-in">
+            <DataTable
+              columns={columns}
+              rows={bookings}
+              rowKey={(r) => r.id}
+              emptyState={
+                <div className="py-20 text-center">
                   <p className="text-slate-500 font-medium">No bookings found.</p>
-                )}
-              </div>
-            }
-          />
+                </div>
+              }
+            />
 
-          {/* Pagination */}
-          {bookings.length > 0 && (
-            <div className="flex items-center justify-between px-6 py-4 border-t border-slate-50 bg-slate-50/30">
-              <p className="text-sm font-medium text-slate-500">
-                Showing {Math.min(totalBookings, (currentPage - 1) * itemsPerPage + 1)}-
-                {Math.min(totalBookings, currentPage * itemsPerPage)} of {totalBookings}
-              </p>
-              <div className="flex gap-2">
-                <button
-                  onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                  disabled={currentPage === 1}
-                  className="px-3 py-1.5 rounded-lg border border-slate-200 bg-white text-xs font-semibold text-slate-600 hover:bg-slate-50 disabled:opacity-50 transition-colors"
-                >
-                  &lt;
-                </button>
-                {(() => {
-                  const pages: (number | "...")[] = [];
-                  if (totalPages <= 7) {
-                    for (let i = 1; i <= totalPages; i++) pages.push(i);
-                  } else {
-                    pages.push(1);
-                    if (currentPage > 3) pages.push("...");
-                    for (let i = Math.max(2, currentPage - 1); i <= Math.min(totalPages - 1, currentPage + 1); i++) pages.push(i);
-                    if (currentPage < totalPages - 2) pages.push("...");
-                    pages.push(totalPages);
-                  }
-                  return pages.map((p, idx) =>
-                    p === "..." ? (
-                      <span key={`e-${idx}`} className="px-2 py-1.5 text-xs text-slate-400">…</span>
-                    ) : (
-                      <button
-                        key={p}
-                        onClick={() => setCurrentPage(p)}
-                        className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                          currentPage === p
-                            ? "bg-[#496B92] text-white"
-                            : "border border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
-                        }`}
-                      >{p}</button>
-                    )
-                  );
-                })()}
-                <button
-                  onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-                  disabled={currentPage === totalPages}
-                  className="px-3 py-1.5 rounded-lg border border-slate-200 bg-white text-xs font-semibold text-slate-600 hover:bg-slate-50 disabled:opacity-50 transition-colors"
-                >
-                  &gt;
-                </button>
+            {/* Pagination */}
+            {bookings.length > 0 && (
+              <div className="flex items-center justify-between px-6 py-4 border-t border-slate-50 bg-slate-50/30">
+                <p className="text-sm font-medium text-slate-500">
+                  Showing {Math.min(totalBookings, (currentPage - 1) * itemsPerPage + 1)}-
+                  {Math.min(totalBookings, currentPage * itemsPerPage)} of {totalBookings}
+                </p>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                    disabled={currentPage === 1}
+                    className="px-3 py-1.5 rounded-lg border border-slate-200 bg-white text-xs font-semibold text-slate-600 hover:bg-slate-50 disabled:opacity-50 transition-colors"
+                  >
+                    &lt;
+                  </button>
+                  {(() => {
+                    const pages: (number | "...")[] = [];
+                    if (totalPages <= 7) {
+                      for (let i = 1; i <= totalPages; i++) pages.push(i);
+                    } else {
+                      pages.push(1);
+                      if (currentPage > 3) pages.push("...");
+                      for (let i = Math.max(2, currentPage - 1); i <= Math.min(totalPages - 1, currentPage + 1); i++) pages.push(i);
+                      if (currentPage < totalPages - 2) pages.push("...");
+                      pages.push(totalPages);
+                    }
+                    return pages.map((p, idx) =>
+                      p === "..." ? (
+                        <span key={`e-${idx}`} className="px-2 py-1.5 text-xs text-slate-400">…</span>
+                      ) : (
+                        <button
+                          key={p}
+                          onClick={() => setCurrentPage(p)}
+                          className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                            currentPage === p
+                              ? "bg-[#496B92] text-white"
+                              : "border border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
+                          }`}
+                        >{p}</button>
+                      )
+                    );
+                  })()}
+                  <button
+                    onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                    disabled={currentPage === totalPages}
+                    className="px-3 py-1.5 rounded-lg border border-slate-200 bg-white text-xs font-semibold text-slate-600 hover:bg-slate-50 disabled:opacity-50 transition-colors"
+                  >
+                    &gt;
+                  </button>
+                </div>
               </div>
-            </div>
-          )}
-        </div>
+            )}
+          </div>
+        )}
       </div>
       <AdminBookingDrawer
         bookingId={selectedBookingId}

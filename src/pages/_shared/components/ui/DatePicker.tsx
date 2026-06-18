@@ -10,6 +10,8 @@ type DatePickerProps = {
   max?: string;
   placeholder?: string;
   onChange?: (value: string) => void;
+  className?: string;
+  triggerClassName?: string;
 };
 
 const DatePicker: React.FC<DatePickerProps> = ({
@@ -18,6 +20,8 @@ const DatePicker: React.FC<DatePickerProps> = ({
   max,
   placeholder = "Select date",
   onChange,
+  className,
+  triggerClassName,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   
@@ -122,19 +126,20 @@ const DatePicker: React.FC<DatePickerProps> = ({
   );
 
   return (
-    <div className="relative w-full" ref={containerRef}>
+    <div className={cn("relative w-full", className)} ref={containerRef}>
       {/* Input Trigger */}
       <div
         className={cn(
           "flex items-center gap-3 border rounded-[10px] px-4 h-14 cursor-pointer select-none transition-all focus-within:ring-4 focus-within:ring-primary-60/5",
-          isOpen ? "border-[#496B92] bg-white ring-4 ring-[#496B92]/5 shadow-sm" : `${colors.surface.input} border-tertiary-30 hover:border-slate-300`
+          isOpen ? "border-[#496B92] bg-white ring-4 ring-[#496B92]/5 shadow-sm" : `${colors.surface.input} border-tertiary-30 hover:border-slate-300`,
+          triggerClassName
         )}
         onClick={() => setIsOpen(!isOpen)}
       >
-        <CiCalendar size={18} className="shrink-0 text-primary-60" />
+        <CiCalendar size={18} className="shrink-0 text-primary-60 text-[#496B92]" />
         <span
           className={cn(
-            "flex-1 text-[15px] outline-none font-medium text-left",
+            "flex-1 text-[15px] outline-none font-medium text-left truncate",
             value ? "text-slate-900" : "text-slate-400"
           )}
         >

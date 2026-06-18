@@ -2,6 +2,8 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Search } from "lucide-react";
 import DataTable, { type TableColumn } from "@/pages/_shared/components/ui/DataTable";
+import TableSkeleton from "@/pages/_shared/components/ui/TableSkeleton";
+import DatePicker from "@/pages/_shared/components/ui/DatePicker";
 import type { ActivityLogItem } from "@/types/report.types";
 import { getActivityLogs } from "@/api/reports.api";
 
@@ -93,22 +95,20 @@ const ActivityLogTab = () => {
             className="h-11 w-full rounded-xl bg-slate-50 pl-10 pr-4 text-sm outline-none border border-transparent focus:border-[#496B92]/20 focus:bg-white focus:ring-2 focus:ring-[#496B92]/10 transition-all placeholder:text-slate-400"
           />
         </div>
-        <input
-          type="date"
+        <DatePicker
           value={logDateFilter}
-          onChange={(e) => handleDateFilter(e.target.value)}
-          className="h-11 rounded-xl bg-slate-50 border border-transparent focus:border-[#496B92]/20 focus:bg-white focus:ring-2 focus:ring-[#496B92]/10 px-4 text-sm font-medium text-slate-600 outline-none transition-all cursor-pointer"
+          onChange={(val) => handleDateFilter(val)}
+          placeholder="Select Timestamp"
+          triggerClassName="h-11 rounded-xl bg-slate-50 border-transparent text-slate-600 font-medium text-sm hover:border-slate-200"
         />
       </div>
 
       {/* Table */}
-      <section className="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden">
-        <div className="p-1">
-          {isLoading ? (
-            <div className="py-20 flex justify-center">
-              <div className="animate-spin size-8 border-4 border-[#496B92] border-t-transparent rounded-full" />
-            </div>
-          ) : (
+      {isLoading ? (
+        <TableSkeleton columns={4} rows={5} />
+      ) : (
+        <section className="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden animate-fade-in">
+          <div className="p-1">
             <DataTable
               columns={columns}
               rows={logs}
@@ -119,52 +119,52 @@ const ActivityLogTab = () => {
                 </div>
               }
             />
-          )}
-        </div>
-
-        {total > 0 && (
-          <div className="flex items-center justify-between px-6 py-4 border-t border-slate-50 bg-slate-50/30">
-            <p className="text-sm font-medium text-slate-500">
-              Showing {Math.min(total, (logPage - 1) * LOGS_PER_PAGE + 1)}–{Math.min(total, logPage * LOGS_PER_PAGE)} of {total} logs
-            </p>
-            <div className="flex gap-2">
-              <button
-                onClick={() => setLogPage((p) => Math.max(1, p - 1))}
-                disabled={logPage === 1}
-                className="px-3 py-1.5 rounded-lg border border-slate-200 bg-white text-xs font-semibold text-slate-600 hover:bg-slate-50 disabled:opacity-50 transition-colors"
-              >&lt;</button>
-              {(() => {
-                const pages: (number | "...")[] = [];
-                if (totalPages <= 7) {
-                  for (let i = 1; i <= totalPages; i++) pages.push(i);
-                } else {
-                  pages.push(1);
-                  if (logPage > 3) pages.push("...");
-                  for (let i = Math.max(2, logPage - 1); i <= Math.min(totalPages - 1, logPage + 1); i++) pages.push(i);
-                  if (logPage < totalPages - 2) pages.push("...");
-                  pages.push(totalPages);
-                }
-                return pages.map((p, idx) =>
-                  p === "..." ? (
-                    <span key={`ellipsis-${idx}`} className="px-2 py-1.5 text-xs text-slate-400">…</span>
-                  ) : (
-                    <button
-                      key={p}
-                      onClick={() => setLogPage(p)}
-                      className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all ${logPage === p ? "bg-[#496B92] text-white" : "border border-slate-200 bg-white text-slate-600 hover:bg-slate-50"}`}
-                    >{p}</button>
-                  )
-                );
-              })()}
-              <button
-                onClick={() => setLogPage((p) => Math.min(totalPages, p + 1))}
-                disabled={logPage === totalPages}
-                className="px-3 py-1.5 rounded-lg border border-slate-200 bg-white text-xs font-semibold text-slate-600 hover:bg-slate-50 disabled:opacity-50 transition-colors"
-              >&gt;</button>
-            </div>
           </div>
-        )}
-      </section>
+
+          {total > 0 && (
+            <div className="flex items-center justify-between px-6 py-4 border-t border-slate-50 bg-slate-50/30">
+              <p className="text-sm font-medium text-slate-500">
+                Showing {Math.min(total, (logPage - 1) * LOGS_PER_PAGE + 1)}–{Math.min(total, logPage * LOGS_PER_PAGE)} of {total} logs
+              </p>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setLogPage((p) => Math.max(1, p - 1))}
+                  disabled={logPage === 1}
+                  className="px-3 py-1.5 rounded-lg border border-slate-200 bg-white text-xs font-semibold text-slate-600 hover:bg-slate-50 disabled:opacity-50 transition-colors"
+                >&lt;</button>
+                {(() => {
+                  const pages: (number | "...")[] = [];
+                  if (totalPages <= 7) {
+                    for (let i = 1; i <= totalPages; i++) pages.push(i);
+                  } else {
+                    pages.push(1);
+                    if (logPage > 3) pages.push("...");
+                    for (let i = Math.max(2, logPage - 1); i <= Math.min(totalPages - 1, logPage + 1); i++) pages.push(i);
+                    if (logPage < totalPages - 2) pages.push("...");
+                    pages.push(totalPages);
+                  }
+                  return pages.map((p, idx) =>
+                    p === "..." ? (
+                      <span key={`ellipsis-${idx}`} className="px-2 py-1.5 text-xs text-slate-400">…</span>
+                    ) : (
+                      <button
+                        key={p}
+                        onClick={() => setLogPage(p)}
+                        className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all ${logPage === p ? "bg-[#496B92] text-white" : "border border-slate-200 bg-white text-slate-600 hover:bg-slate-50"}`}
+                      >{p}</button>
+                    )
+                  );
+                })()}
+                <button
+                  onClick={() => setLogPage((p) => Math.min(totalPages, p + 1))}
+                  disabled={logPage === totalPages}
+                  className="px-3 py-1.5 rounded-lg border border-slate-200 bg-white text-xs font-semibold text-slate-600 hover:bg-slate-50 disabled:opacity-50 transition-colors"
+                >&gt;</button>
+              </div>
+            </div>
+          )}
+        </section>
+      )}
     </div>
   );
 };
