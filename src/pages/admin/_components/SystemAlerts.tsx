@@ -6,10 +6,30 @@ import { ROUTES } from "@/constants/routes";
 interface SystemAlertsProps {
   flights: import("@/types").Flight[];
   bookings: any[];
+  isLoading?: boolean;
 }
 
-const SystemAlerts = ({ flights, bookings }: SystemAlertsProps) => {
+const SystemAlerts = ({ flights, bookings, isLoading = false }: SystemAlertsProps) => {
   const navigate = useNavigate();
+
+  if (isLoading) {
+    return (
+      <div className="space-y-4 animate-pulse">
+        <h3 className="text-lg font-bold text-slate-900 px-1">System Alerts</h3>
+        <div className="grid grid-cols-1 gap-4">
+          {Array.from({ length: 3 }).map((_, idx) => (
+            <div key={idx} className="flex items-start gap-4 rounded-2xl border border-slate-100 bg-slate-50/50 p-4">
+              <div className="size-10 rounded-xl bg-slate-200 shrink-0" />
+              <div className="flex-1 space-y-2 pt-1">
+                <div className="h-4 bg-slate-200 rounded w-1/4" />
+                <div className="h-3 bg-slate-100 rounded w-3/4" />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
   const lowSeatFlights = flights.filter((f) => f.hasLowSeats).length;
   const pendingRefunds = bookings.filter((b) => b.status === "pending_cancellation").length;
 

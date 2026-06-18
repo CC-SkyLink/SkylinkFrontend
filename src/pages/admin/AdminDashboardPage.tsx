@@ -82,7 +82,7 @@ const AdminDashboardPage = () => {
     }
   }, []);
 
-  const { data } = useAsyncValue(loader, ["admin-dashboard"], 60 * 1000);
+  const { data, isLoading } = useAsyncValue(loader, ["admin-dashboard"], 60 * 1000);
   const dashboardData = data ?? {
     bookings: [],
     flights: [],
@@ -159,6 +159,7 @@ const AdminDashboardPage = () => {
             icon={Plane}
             iconBg="bg-blue-50"
             iconColor="text-blue-600"
+            isLoading={isLoading}
           />
           <KPICard
             label="Active Bookings"
@@ -166,6 +167,7 @@ const AdminDashboardPage = () => {
             icon={Ticket}
             iconBg="bg-sky-50"
             iconColor="text-sky-600"
+            isLoading={isLoading}
           />
           <KPICard
             label="Total Users"
@@ -173,6 +175,7 @@ const AdminDashboardPage = () => {
             icon={Users}
             iconBg="bg-emerald-50"
             iconColor="text-emerald-600"
+            isLoading={isLoading}
           />
           <KPICard
             label="Revenue This Month (₱)"
@@ -182,11 +185,12 @@ const AdminDashboardPage = () => {
             icon={Banknote}
             iconBg="bg-amber-50"
             iconColor="text-amber-600"
+            isLoading={isLoading}
           />
         </div>
 
         {/* Charts */}
-        <DashboardCharts bookings={dashboardData.bookings as any[]} />
+        <DashboardCharts bookings={dashboardData.bookings as any[]} isLoading={isLoading} />
 
         {/* Bottom Section */}
         <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
@@ -204,17 +208,32 @@ const AdminDashboardPage = () => {
                   View all →
                 </Link>
               </div>
-              <DataTable
-                columns={columns}
-                rows={recentBookings}
-                rowKey={(row) => row.pnr}
-              />
+              {isLoading ? (
+                <div className="space-y-4">
+                  {Array.from({ length: 5 }).map((_, idx) => (
+                    <div key={idx} className="flex gap-4 py-3 border-b border-slate-100/50 last:border-0 items-center animate-pulse">
+                      <div className="h-4 bg-slate-200 rounded w-16 animate-pulse" />
+                      <div className="h-4 bg-slate-200 rounded w-24 animate-pulse" />
+                      <div className="h-4 bg-slate-150 rounded w-28 animate-pulse" />
+                      <div className="h-4 bg-slate-100 rounded w-20 animate-pulse" />
+                      <div className="h-5 bg-slate-150 rounded-full w-16 animate-pulse" />
+                      <div className="h-4 bg-slate-200 rounded w-16 ml-auto animate-pulse" />
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <DataTable
+                  columns={columns}
+                  rows={recentBookings}
+                  rowKey={(row) => row.pnr}
+                />
+              )}
             </div>
           </div>
 
           {/* System Alerts */}
           <div>
-            <SystemAlerts flights={dashboardData.flights} bookings={dashboardData.bookings as any[]} />
+            <SystemAlerts flights={dashboardData.flights} bookings={dashboardData.bookings as any[]} isLoading={isLoading} />
           </div>
         </div>
       </div>

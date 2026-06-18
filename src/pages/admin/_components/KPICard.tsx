@@ -9,6 +9,7 @@ type KPICardProps = {
   icon: LucideIcon;
   iconBg: string;
   iconColor: string;
+  isLoading?: boolean;
 };
 
 const KPICard = ({
@@ -19,7 +20,23 @@ const KPICard = ({
   icon: Icon,
   iconBg,
   iconColor,
+  isLoading = false,
 }: KPICardProps) => {
+  if (isLoading) {
+    return (
+      <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm animate-pulse">
+        <div className="flex items-start justify-between">
+          <div className="size-12 rounded-xl bg-slate-200" />
+          <div className="h-6 w-14 rounded-full bg-slate-100" />
+        </div>
+        <div className="mt-4 space-y-2">
+          <div className="h-4 w-24 rounded bg-slate-100" />
+          <div className="h-7 w-16 rounded bg-slate-200" />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm transition-all hover:shadow-md">
       <div className="flex items-start justify-between">
