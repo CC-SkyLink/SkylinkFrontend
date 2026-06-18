@@ -4,6 +4,7 @@ import { Search } from "lucide-react";
 import DataTable, { type TableColumn } from "@/pages/_shared/components/ui/DataTable";
 import TableSkeleton from "@/pages/_shared/components/ui/TableSkeleton";
 import DatePicker from "@/pages/_shared/components/ui/DatePicker";
+import TableEmptyState from "@/pages/_shared/components/ui/TableEmptyState";
 import type { ActivityLogItem } from "@/types/report.types";
 import { getActivityLogs } from "@/api/reports.api";
 
@@ -114,9 +115,10 @@ const ActivityLogTab = () => {
               rows={logs}
               rowKey={(r) => r.id}
               emptyState={
-                <div className="py-20 text-center">
-                  <p className="text-slate-500 font-medium">No activity logs found.</p>
-                </div>
+                <TableEmptyState
+                  title="No activity logs found"
+                  description="We couldn't find any log history matching your search query or date range."
+                />
               }
             />
           </div>

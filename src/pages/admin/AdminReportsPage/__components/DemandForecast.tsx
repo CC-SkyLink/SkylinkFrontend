@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { ArrowUpRight, ArrowDownRight } from "lucide-react";
 import { FileSpreadsheet, FileText } from "lucide-react";
 import DataTable, { type TableColumn } from "@/pages/_shared/components/ui/DataTable";
+import TableEmptyState from "@/pages/_shared/components/ui/TableEmptyState";
 import { cn } from "@/utils/cn";
 import { getDemandForecast } from "@/api/reports.api";
 import { exportCSV, exportPDF } from "../__docs/export";
@@ -127,7 +128,12 @@ const DemandForecast = ({ dateRangeLabel, onToast }: Props) => {
               columns={columns}
               rows={data}
               rowKey={(r) => r.route}
-              emptyState={<div className="py-16 text-center text-slate-400 font-medium">No data available.</div>}
+              emptyState={
+                <TableEmptyState
+                  title="No data available"
+                  description="There is no demand forecast data recorded."
+                />
+              }
             />
           )}
         </div>

@@ -2,6 +2,7 @@ import { useMemo } from "react";
 import { FileSpreadsheet, FileText } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import DataTable, { type TableColumn } from "@/pages/_shared/components/ui/DataTable";
+import TableEmptyState from "@/pages/_shared/components/ui/TableEmptyState";
 import { exportCSV, exportPDF } from "../__docs/export";
 import type { DateRange, RouteDataRow } from "./types";
 import type { RawRouteEntry } from "@/types/report.types";
@@ -139,7 +140,12 @@ const BookingsRoute = ({ dateRange, dateRangeLabel, onToast, customStartDate, cu
               columns={columns}
               rows={tableRows}
               rowKey={(r) => r.route}
-              emptyState={<div className="py-16 text-center text-slate-400 font-medium">No data available.</div>}
+              emptyState={
+                <TableEmptyState
+                  title="No data available"
+                  description="There is no route booking data recorded for the selected period."
+                />
+              }
             />
           )}
         </div>

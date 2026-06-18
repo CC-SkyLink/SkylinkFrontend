@@ -74,8 +74,39 @@ const AdminEditFlightPage = () => {
   if (isLoading) {
     return (
       <AdminLayout>
-        <div className="flex min-h-[400px] items-center justify-center">
-          <div className="animate-spin size-10 border-4 border-[#496B92] border-t-transparent rounded-full" />
+        <div className="max-w-4xl mx-auto space-y-6 animate-pulse">
+          {/* Breadcrumbs & Title Mockup */}
+          <div className="space-y-2">
+            <div className="h-4 bg-slate-200/60 rounded w-24" />
+            <div className="h-8 bg-slate-200 rounded w-48" />
+          </div>
+
+          {/* Form Sections Mockup (mimics flight information, aircraft capacity, fares/status) */}
+          {Array.from({ length: 3 }).map((_, secIdx) => (
+            <div key={secIdx} className="bg-white rounded-[24px] border border-slate-100 shadow-sm overflow-hidden">
+              <div className="px-6 py-5 border-b border-slate-50 bg-slate-50/30">
+                <div className="h-5 bg-slate-200 rounded w-1/4" />
+              </div>
+              <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <div className="h-3.5 bg-slate-100 rounded w-24 ml-1" />
+                  <div className="h-12 bg-slate-50 rounded-xl w-full" />
+                </div>
+                <div className="space-y-2">
+                  <div className="h-3.5 bg-slate-100 rounded w-24 ml-1" />
+                  <div className="h-12 bg-slate-50 rounded-xl w-full" />
+                </div>
+                <div className="space-y-2">
+                  <div className="h-3.5 bg-slate-100 rounded w-24 ml-1" />
+                  <div className="h-12 bg-slate-50 rounded-xl w-full" />
+                </div>
+                <div className="space-y-2">
+                  <div className="h-3.5 bg-slate-100 rounded w-24 ml-1" />
+                  <div className="h-12 bg-slate-50 rounded-xl w-full" />
+                </div>
+              </div>
+            </div>
+          ))}
         </div>
       </AdminLayout>
     );

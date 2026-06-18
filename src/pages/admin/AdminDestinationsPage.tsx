@@ -1,6 +1,8 @@
 import { useMemo, useState } from "react";
 import AdminLayout from "./_components/AdminLayout";
 import DataTable, { type TableColumn } from "@/pages/_shared/components/ui/DataTable";
+import TableSkeleton from "@/pages/_shared/components/ui/TableSkeleton";
+import TableEmptyState from "@/pages/_shared/components/ui/TableEmptyState";
 import Button from "@/pages/_shared/components/ui/Button";
 import Modal from "@/pages/_shared/components/ui/Modal";
 import { Search, Plus, Edit2, Trash2, MapPin, Plane, Tag } from "lucide-react";
@@ -309,13 +311,7 @@ const AdminDestinationsPage = () => {
     { key: "seat-classes", label: "Seat Classes", icon: Tag },
   ];
 
-  const emptyState = (label: string) => (
-    <div className="py-20 text-center">
-      {isLoading
-        ? <div className="animate-spin size-8 border-4 border-[#496B92] border-t-transparent rounded-full mx-auto" />
-        : <p className="text-slate-500 font-medium">No {label} found.</p>}
-    </div>
-  );
+
 
   return (
     <AdminLayout>
@@ -366,24 +362,43 @@ const AdminDestinationsPage = () => {
         </div>
 
         {/* Table */}
-        <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
-          {activeTab === "airports" && (
-            <DataTable columns={airportColumns} rows={filteredAirports} rowKey={(r) => String(r.id)} emptyState={emptyState("airports")} />
-          )}
-          {activeTab === "aircraft" && (
-            <DataTable columns={aircraftColumns} rows={filteredAircraft} rowKey={(r) => String(r.id)} emptyState={emptyState("aircraft")} />
-          )}
-          {activeTab === "seat-classes" && (
-            <DataTable columns={seatClassColumns} rows={filteredSeatClasses} rowKey={(r) => String(r.id)} emptyState={emptyState("seat classes")} />
-          )}
-          <div className="flex items-center justify-between px-6 py-4 border-t border-slate-50 bg-slate-50/30">
-            <p className="text-sm font-medium text-slate-500">
-              {activeTab === "airports" && `${filteredAirports.length} airports`}
-              {activeTab === "aircraft" && `${filteredAircraft.length} aircraft`}
-              {activeTab === "seat-classes" && `${filteredSeatClasses.length} seat classes`}
-            </p>
+        {isLoading ? (
+          <TableSkeleton columns={activeTab === "airports" ? 6 : activeTab === "aircraft" ? 4 : 3} rows={5} />
+        ) : (
+          <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden animate-fade-in">
+            {activeTab === "airports" && (
+              <DataTable
+                columns={airportColumns}
+                rows={filteredAirports}
+                rowKey={(r) => String(r.id)}
+                emptyState={<TableEmptyState title="No airports found" description="We couldn't find any airports matching your search query." />}
+              />
+            )}
+            {activeTab === "aircraft" && (
+              <DataTable
+                columns={aircraftColumns}
+                rows={filteredAircraft}
+                rowKey={(r) => String(r.id)}
+                emptyState={<TableEmptyState title="No aircraft found" description="We couldn't find any aircraft matching your search query." />}
+              />
+            )}
+            {activeTab === "seat-classes" && (
+              <DataTable
+                columns={seatClassColumns}
+                rows={filteredSeatClasses}
+                rowKey={(r) => String(r.id)}
+                emptyState={<TableEmptyState title="No seat classes found" description="We couldn't find any seat classes matching your search query." />}
+              />
+            )}
+            <div className="flex items-center justify-between px-6 py-4 border-t border-slate-50 bg-slate-50/30">
+              <p className="text-sm font-medium text-slate-500">
+                {activeTab === "airports" && `${filteredAirports.length} airports`}
+                {activeTab === "aircraft" && `${filteredAircraft.length} aircraft`}
+                {activeTab === "seat-classes" && `${filteredSeatClasses.length} seat classes`}
+              </p>
+            </div>
           </div>
-        </div>
+        )}
       </div>
 
       {/* Add Modal */}

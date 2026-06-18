@@ -8,6 +8,7 @@ import AdminLayout from "./_components/AdminLayout";
 import DataTable, { type TableColumn } from "@/pages/_shared/components/ui/DataTable";
 import TableSkeleton from "@/pages/_shared/components/ui/TableSkeleton";
 import Select from "@/pages/_shared/components/ui/Select";
+import TableEmptyState from "@/pages/_shared/components/ui/TableEmptyState";
 import StatusBadge from "@/pages/_shared/components/ui/StatusBadge";
 import Button from "@/pages/_shared/components/ui/Button";
 import Modal from "@/pages/_shared/components/ui/Modal";
@@ -314,9 +315,10 @@ const AdminFlightsPage = () => {
               rows={filteredFlights}
               rowKey={(row) => row.id}
               emptyState={
-                <div className="py-20 text-center">
-                  <p className="text-slate-500 font-medium">No flights found matching your criteria.</p>
-                </div>
+                <TableEmptyState
+                  title="No flights found"
+                  description="We couldn't find any flights matching your search query or filters."
+                />
               }
             />
 

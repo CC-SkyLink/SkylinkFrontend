@@ -5,6 +5,8 @@ import { ROUTES } from "@/constants/routes";
 import { getUsers, toggleUserStatus, type UserListItem } from "@/api/users.api";
 import AdminLayout from "./_components/AdminLayout";
 import DataTable, { type TableColumn } from "@/pages/_shared/components/ui/DataTable";
+import TableSkeleton from "@/pages/_shared/components/ui/TableSkeleton";
+import TableEmptyState from "@/pages/_shared/components/ui/TableEmptyState";
 import StatusBadge from "@/pages/_shared/components/ui/StatusBadge";
 import { Search, Eye, Ban, CheckCircle, ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "@/utils/cn";
@@ -25,7 +27,9 @@ const AdminUsersPage = () => {
   const toggleMutation = useMutation({
     mutationFn: ({ id, is_active }: { id: string; is_active: boolean }) =>
       toggleUserStatus(id, is_active),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["admin-users"] }),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ["admin-users"] });
+    },
     onError: (err) => console.error("Failed to toggle status", err),
   });
 
@@ -137,36 +141,37 @@ const AdminUsersPage = () => {
           />
         </div>
 
-        <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
-          <DataTable
-            columns={columns}
-            rows={filteredUsers}
-            rowKey={(row) => row.id}
-            emptyState={
-              <div className="py-20 text-center">
-                {isLoading ? (
-                  <div className="animate-spin size-8 border-4 border-[#496B92] border-t-transparent rounded-full mx-auto" />
-                ) : (
-                  <p className="text-slate-500 font-medium">No users found.</p>
-                )}
+        {isLoading ? (
+          <TableSkeleton columns={7} rows={5} />
+        ) : (
+          <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden animate-fade-in">
+            <DataTable
+              columns={columns}
+              rows={filteredUsers}
+              rowKey={(row) => row.id}
+              emptyState={
+                <TableEmptyState
+                  title="No users found"
+                  description="We couldn't find any users matching your search query or filters."
+                />
+              }
+            />
+            <div className="flex items-center justify-between px-6 py-4 border-t border-slate-50 bg-slate-50/30">
+              <p className="text-sm font-medium text-slate-500">
+                Showing 1-{filteredUsers.length} of {filteredUsers.length}
+              </p>
+              <div className="flex items-center gap-2">
+                <button className="p-2 rounded-lg border border-slate-200 text-slate-400 hover:bg-white transition-colors" disabled>
+                  <ChevronLeft size={18} />
+                </button>
+                <button className="size-9 rounded-lg bg-[#496B92] text-white font-bold text-sm">1</button>
+                <button className="p-2 rounded-lg border border-slate-200 text-slate-400 hover:bg-white transition-colors" disabled>
+                  <ChevronRight size={18} />
+                </button>
               </div>
-            }
-          />
-          <div className="flex items-center justify-between px-6 py-4 border-t border-slate-50 bg-slate-50/30">
-            <p className="text-sm font-medium text-slate-500">
-              Showing 1-{filteredUsers.length} of {filteredUsers.length}
-            </p>
-            <div className="flex items-center gap-2">
-              <button className="p-2 rounded-lg border border-slate-200 text-slate-400 hover:bg-white transition-colors" disabled>
-                <ChevronLeft size={18} />
-              </button>
-              <button className="size-9 rounded-lg bg-[#496B92] text-white font-bold text-sm">1</button>
-              <button className="p-2 rounded-lg border border-slate-200 text-slate-400 hover:bg-white transition-colors" disabled>
-                <ChevronRight size={18} />
-              </button>
             </div>
           </div>
-        </div>
+        )}
       </div>
     </AdminLayout>
   );

@@ -7,6 +7,7 @@ import DataTable, { type TableColumn } from "@/pages/_shared/components/ui/DataT
 import TableSkeleton from "@/pages/_shared/components/ui/TableSkeleton";
 import DatePicker from "@/pages/_shared/components/ui/DatePicker";
 import Select from "@/pages/_shared/components/ui/Select";
+import TableEmptyState from "@/pages/_shared/components/ui/TableEmptyState";
 import StatusBadge from "@/pages/_shared/components/ui/StatusBadge";
 import { getAllBookingsAdmin } from "@/api/bookings.api";
 import { ROUTES } from "@/constants/routes";
@@ -265,9 +266,10 @@ const AdminBookingsPage = () => {
               rows={bookings}
               rowKey={(r) => r.id}
               emptyState={
-                <div className="py-20 text-center">
-                  <p className="text-slate-500 font-medium">No bookings found.</p>
-                </div>
+                <TableEmptyState
+                  title="No bookings found"
+                  description="We couldn't find any bookings matching your search query or filters."
+                />
               }
             />
 

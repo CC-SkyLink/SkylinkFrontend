@@ -3,6 +3,7 @@ import { FileSpreadsheet, FileText } from "lucide-react";
 import { ArrowUpRight, ArrowDownRight } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import DataTable, { type TableColumn } from "@/pages/_shared/components/ui/DataTable";
+import TableEmptyState from "@/pages/_shared/components/ui/TableEmptyState";
 import { cn } from "@/utils/cn";
 import { exportCSV, exportPDF } from "../__docs/export";
 import type { DateRange, UserGrowthDataRow } from "./types";
@@ -235,7 +236,12 @@ const UserGrowth = ({ dateRange, dateRangeLabel, onToast, customStartDate, custo
               columns={columns}
               rows={tableRows}
               rowKey={(r) => r.period}
-              emptyState={<div className="py-16 text-center text-slate-400 font-medium">No data available.</div>}
+              emptyState={
+                <TableEmptyState
+                  title="No data available"
+                  description="There is no user growth data recorded for the selected period."
+                />
+              }
             />
           )}
         </div>

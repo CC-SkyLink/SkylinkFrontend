@@ -7,10 +7,11 @@ import AdminLayout from "./_components/AdminLayout";
 import DataTable, { type TableColumn } from "@/pages/_shared/components/ui/DataTable";
 import TableSkeleton from "@/pages/_shared/components/ui/TableSkeleton";
 import Select from "@/pages/_shared/components/ui/Select";
+import TableEmptyState from "@/pages/_shared/components/ui/TableEmptyState";
 import Button from "@/pages/_shared/components/ui/Button";
 import Modal from "@/pages/_shared/components/ui/Modal";
 import Input from "@/pages/_shared/components/ui/Input";
-import { Search, Plus, Trash2, Tag, Calendar, Image as ImageIcon, MapPin } from "lucide-react";
+import { Search, Plus, Trash2, Calendar, Image as ImageIcon, MapPin } from "lucide-react";
 import type { Promotion, CreatePromotionPayload } from "@/types/promotion.types";
 import { promotionSchema, type PromotionFormValues } from "@/validation/promotion.schemas";
 import { cn } from "@/utils/cn";
@@ -235,12 +236,10 @@ const AdminPromotionsPage = () => {
               rows={filteredPromotions}
               rowKey={(row) => row.id}
               emptyState={
-                <div className="py-20 text-center">
-                  <div className="flex flex-col items-center gap-2">
-                    <Tag className="text-slate-300" size={40} />
-                    <p className="text-slate-500 font-medium">No promotions found.</p>
-                  </div>
-                </div>
+                <TableEmptyState
+                  title="No promotions found"
+                  description="We couldn't find any promotions matching your search query or filters."
+                />
               }
             />
             <div className="flex items-center justify-between px-6 py-4 border-t border-slate-50 bg-slate-50/30">

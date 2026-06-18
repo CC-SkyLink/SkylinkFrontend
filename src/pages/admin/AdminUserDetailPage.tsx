@@ -12,6 +12,7 @@ import StatusBadge from "@/pages/_shared/components/ui/StatusBadge";
 import DataTable, {
   type TableColumn,
 } from "@/pages/_shared/components/ui/DataTable";
+import TableEmptyState from "@/pages/_shared/components/ui/TableEmptyState";
 import {
   ChevronLeft,
   Mail,
@@ -230,8 +231,80 @@ const AdminUserDetailPage = () => {
   if (isLoading) {
     return (
       <AdminLayout>
-        <div className="flex min-h-100 items-center justify-center">
-          <div className="animate-spin size-10 border-4 border-[#496B92] border-t-transparent rounded-full" />
+        <div className="max-w-7xl mx-auto space-y-6 animate-pulse">
+          {/* Breadcrumbs & Title Skeleton */}
+          <div className="space-y-2 text-left">
+            <div className="h-4 bg-slate-200/60 rounded w-24" />
+            <div className="h-8 bg-slate-200 rounded w-48" />
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Left Column Skeletons */}
+            <div className="lg:col-span-1 space-y-6">
+              {/* Profile Card Mockup */}
+              <div className="rounded-3xl border border-slate-100 bg-white p-8 space-y-6 shadow-sm flex flex-col items-center">
+                <div className="size-24 rounded-full bg-slate-200/80" />
+                <div className="space-y-2 w-full flex flex-col items-center">
+                  <div className="h-6 bg-slate-200 rounded w-2/3" />
+                  <div className="h-4.5 bg-slate-100 rounded w-1/4" />
+                </div>
+                <div className="w-full space-y-5 pt-4 text-left border-t border-slate-50">
+                  {Array.from({ length: 5 }).map((_, idx) => (
+                    <div key={idx} className="flex items-center gap-3">
+                      <div className="size-4 rounded bg-slate-200/70" />
+                      <div className="flex-1 space-y-1">
+                        <div className="h-3 bg-slate-200/50 rounded w-12" />
+                        <div className="h-4 bg-slate-150 rounded w-3/4" />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Admin Actions Card Mockup */}
+              <div className="rounded-3xl border border-slate-100 bg-white p-6 space-y-4 shadow-sm">
+                <div className="h-4 bg-slate-200 rounded w-1/3" />
+                <div className="space-y-3">
+                  <div className="h-10 bg-slate-100 rounded-xl w-full" />
+                  <div className="h-10 bg-slate-100 rounded-xl w-full" />
+                </div>
+              </div>
+
+              {/* Activity Timeline Card Mockup */}
+              <div className="rounded-3xl border border-slate-100 bg-white p-6 space-y-6 shadow-sm">
+                <div className="h-4 bg-slate-200 rounded w-1/3" />
+                <div className="space-y-6 pt-2">
+                  {Array.from({ length: 4 }).map((_, idx) => (
+                    <div key={idx} className="flex gap-4">
+                      <div className="size-10 rounded-xl bg-slate-200/70 shrink-0" />
+                      <div className="flex-1 space-y-1.5 pt-1">
+                        <div className="h-4 bg-slate-150 rounded w-5/6" />
+                        <div className="h-3 bg-slate-100 rounded w-1/3" />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Right Column - Booking History Mockup */}
+            <div className="lg:col-span-2">
+              <div className="rounded-3xl border border-slate-100 bg-white shadow-sm p-8 space-y-6 min-h-full">
+                <div className="h-6 bg-slate-200 rounded w-1/4" />
+                <div className="divide-y divide-slate-100 pt-4">
+                  {Array.from({ length: 6 }).map((_, idx) => (
+                    <div key={idx} className="py-4.5 flex gap-4 items-center">
+                      <div className="h-4 bg-slate-200 rounded w-1/6" />
+                      <div className="h-4 bg-slate-200 rounded w-1/4" />
+                      <div className="h-4 bg-slate-150 rounded w-1/6" />
+                      <div className="h-4 bg-slate-100 rounded w-1/6" />
+                      <div className="h-4 bg-slate-100 rounded w-1/12" />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </AdminLayout>
     );
@@ -424,11 +497,10 @@ const AdminUserDetailPage = () => {
                   rows={bookingRows}
                   rowKey={(row) => row.pnr}
                   emptyState={
-                    <div className="py-20 text-center">
-                      <p className="text-slate-500 font-medium">
-                        No bookings found for this user.
-                      </p>
-                    </div>
+                    <TableEmptyState
+                      title="No bookings found"
+                      description="No booking history available for this user yet."
+                    />
                   }
                 />
               </div>
