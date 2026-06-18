@@ -117,26 +117,26 @@ const AdminReportsPage = () => {
           <div className="space-y-6">
             {/* Filters */}
             <div className="grid grid-cols-1 gap-6 md:grid-cols-2 p-5 bg-white rounded-2xl border border-slate-100 shadow-sm items-center">
-              <div className="space-y-2">
+              <div className="space-y-2 text-left">
                 <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Report Type</span>
-                <div className="flex flex-wrap gap-2">
+                <div className="flex overflow-x-auto gap-2 scrollbar-none pb-1.5 -mx-1 px-1 md:-mx-0 md:px-0 md:pb-0 md:flex-wrap">
                   {(["revenue", "route", "cancellation", "growth", "demand"] as ReportType[]).map((type) => {
                     const label = type === "revenue" ? "Revenue Summary" : type === "route" ? "Bookings by Route" : type === "cancellation" ? "Cancellation Rate" : type === "growth" ? "User Growth" : "Demand Forecast";
                     return (
-                      <button key={type} onClick={() => setReportType(type)} className={cn("px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer", reportType === type ? "bg-[#496B92] text-white shadow-sm" : "bg-slate-50 hover:bg-slate-100 text-slate-600 border border-transparent hover:border-slate-200")}>
+                      <button key={type} onClick={() => setReportType(type)} className={cn("px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap", reportType === type ? "bg-[#496B92] text-white shadow-sm" : "bg-slate-50 hover:bg-slate-100 text-slate-600 border border-transparent hover:border-slate-200")}>
                         {label}
                       </button>
                     );
                   })}
                 </div>
               </div>
-              <div className="space-y-2 md:text-right">
+              <div className="space-y-2 text-left md:text-right">
                 <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block md:pr-1">Date Range</span>
-                <div className="flex flex-wrap gap-2 md:justify-end">
-                  {reportType === "demand" ? <span className="text-xs text-slate-400 font-medium italic py-2">Not applicable for demand forecast</span> : (["all", "today", "week", "month", "3months", "custom"] as DateRange[]).map((range) => {
+                <div className="flex overflow-x-auto gap-2 scrollbar-none pb-1.5 -mx-1 px-1 md:-mx-0 md:px-0 md:pb-0 md:flex-wrap md:justify-end">
+                  {reportType === "demand" ? <span className="text-xs text-slate-400 font-medium italic py-2 whitespace-nowrap">Not applicable for demand forecast</span> : (["all", "today", "week", "month", "3months", "custom"] as DateRange[]).map((range) => {
                     const label = range === "all" ? "All Time" : range === "today" ? "Today" : range === "week" ? "This Week" : range === "month" ? "This Month" : range === "3months" ? "Last 3 Months" : "Custom";
                     return (
-                      <button key={range} onClick={() => handleRangeClick(range)} className={cn("px-3.5 py-2 rounded-xl text-xs font-bold border transition-all cursor-pointer", dateRange === range ? "border-[#496B92] text-[#496B92] bg-[#496B92]/5" : "border-slate-200 text-slate-500 bg-white hover:border-[#496B92]/30")}>
+                      <button key={range} onClick={() => handleRangeClick(range)} className={cn("px-3.5 py-2 rounded-xl text-xs font-bold border transition-all cursor-pointer whitespace-nowrap", dateRange === range ? "border-[#496B92] text-[#496B92] bg-[#496B92]/5" : "border-slate-200 text-slate-500 bg-white hover:border-[#496B92]/30")}>
                         {label}
                       </button>
                     );
