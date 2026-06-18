@@ -5,6 +5,7 @@ import AdminLayout from "../_components/AdminLayout";
 import Toast from "@/pages/_shared/components/ui/Toast";
 import Modal from "@/pages/_shared/components/ui/Modal";
 import DatePicker from "@/pages/_shared/components/ui/DatePicker";
+import Select from "@/pages/_shared/components/ui/Select";
 import { cn } from "@/utils/cn";
 import { ROUTES } from "@/constants/routes";
 import RevenueSummary from "./__components/RevenueSummary";
@@ -116,10 +117,12 @@ const AdminReportsPage = () => {
         {activeTab === "reports" ? (
           <div className="space-y-6">
             {/* Filters */}
-            <div className="grid grid-cols-1 gap-6 md:grid-cols-2 p-5 bg-white rounded-2xl border border-slate-100 shadow-sm items-center">
+            <div className="grid grid-cols-1 gap-4 p-5 bg-white rounded-2xl border border-slate-100 shadow-sm md:grid-cols-2 md:items-center">
+              {/* Report Type Selector */}
               <div className="space-y-2 text-left">
                 <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Report Type</span>
-                <div className="flex overflow-x-auto gap-2 scrollbar-none pb-1.5 -mx-1 px-1 md:-mx-0 md:px-0 md:pb-0 md:flex-wrap">
+                {/* Desktop Buttons */}
+                <div className="hidden md:flex flex-wrap gap-2">
                   {(["revenue", "route", "cancellation", "growth", "demand"] as ReportType[]).map((type) => {
                     const label = type === "revenue" ? "Revenue Summary" : type === "route" ? "Bookings by Route" : type === "cancellation" ? "Cancellation Rate" : type === "growth" ? "User Growth" : "Demand Forecast";
                     return (
@@ -129,10 +132,28 @@ const AdminReportsPage = () => {
                     );
                   })}
                 </div>
+                {/* Mobile Dropdown */}
+                <div className="block md:hidden">
+                  <Select
+                    value={reportType}
+                    onChange={(val) => setReportType(val as ReportType)}
+                    options={[
+                      { value: "revenue", label: "Revenue Summary" },
+                      { value: "route", label: "Bookings by Route" },
+                      { value: "cancellation", label: "Cancellation Rate" },
+                      { value: "growth", label: "User Growth" },
+                      { value: "demand", label: "Demand Forecast" }
+                    ]}
+                    triggerClassName="h-11 bg-slate-50 text-slate-600 border-transparent text-sm font-medium hover:border-slate-200 w-full"
+                  />
+                </div>
               </div>
+
+              {/* Date Range Selector */}
               <div className="space-y-2 text-left md:text-right">
                 <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block md:pr-1">Date Range</span>
-                <div className="flex overflow-x-auto gap-2 scrollbar-none pb-1.5 -mx-1 px-1 md:-mx-0 md:px-0 md:pb-0 md:flex-wrap md:justify-end">
+                {/* Desktop Buttons */}
+                <div className="hidden md:flex flex-wrap gap-2 md:justify-end">
                   {reportType === "demand" ? <span className="text-xs text-slate-400 font-medium italic py-2 whitespace-nowrap">Not applicable for demand forecast</span> : (["all", "today", "week", "month", "3months", "custom"] as DateRange[]).map((range) => {
                     const label = range === "all" ? "All Time" : range === "today" ? "Today" : range === "week" ? "This Week" : range === "month" ? "This Month" : range === "3months" ? "Last 3 Months" : "Custom";
                     return (
@@ -141,6 +162,28 @@ const AdminReportsPage = () => {
                       </button>
                     );
                   })}
+                </div>
+                {/* Mobile Dropdown */}
+                <div className="block md:hidden">
+                  {reportType === "demand" ? (
+                    <div className="h-11 flex items-center bg-slate-50/50 rounded-xl px-4 text-xs text-slate-400 font-medium italic border border-slate-100">
+                      Not applicable for demand forecast
+                    </div>
+                  ) : (
+                    <Select
+                      value={dateRange}
+                      onChange={(val) => handleRangeClick(val as DateRange)}
+                      options={[
+                        { value: "all", label: "All Time" },
+                        { value: "today", label: "Today" },
+                        { value: "week", label: "This Week" },
+                        { value: "month", label: "This Month" },
+                        { value: "3months", label: "Last 3 Months" },
+                        { value: "custom", label: "Custom Range" }
+                      ]}
+                      triggerClassName="h-11 bg-slate-50 text-slate-600 border-transparent text-sm font-medium hover:border-slate-200 w-full"
+                    />
+                  )}
                 </div>
               </div>
             </div>

@@ -68,6 +68,32 @@ export async function exportPDF(
     });
   };
 
+  // Bezier math helper to compute smooth curves
+  const getBezierPoints = (
+    p0: { x: number; y: number },
+    p1: { x: number; y: number },
+    steps = 30
+  ): { x: number; y: number }[] => {
+    const cpX = p0.x + (p1.x - p0.x) / 2;
+    const cp1 = { x: cpX, y: p0.y };
+    const cp2 = { x: cpX, y: p1.y };
+    
+    const pts: { x: number; y: number }[] = [];
+    for (let i = 0; i <= steps; i++) {
+      const t = i / steps;
+      const mt = 1 - t;
+      const mt2 = mt * mt;
+      const mt3 = mt2 * mt;
+      const t2 = t * t;
+      const t3 = t2 * t;
+      
+      const x = mt3 * p0.x + 3 * mt2 * t * cp1.x + 3 * mt * t2 * cp2.x + t3 * p1.x;
+      const y = mt3 * p0.y + 3 * mt2 * t * cp1.y + 3 * mt * t2 * cp2.y + t3 * p1.y;
+      pts.push({ x, y });
+    }
+    return pts;
+  };
+
   let logoDataUrl = "";
   try {
     logoDataUrl = await getBase64ImageFromUrl("/favicon.png");
@@ -145,48 +171,85 @@ export async function exportPDF(
       const valRange = maxVal - minVal;
 
       let themeColor = [73, 107, 146]; // Default SkyLink Blue: #496B92
+      let fillColor = [235, 243, 250]; // Light Blue fill
       if (reportType === "cancellation") {
         themeColor = [244, 63, 94]; // Rose: #f43f5e
+        fillColor = [254, 242, 242]; // Light Rose fill
       } else if (reportType === "growth") {
         themeColor = [16, 185, 129]; // Emerald: #10b981
+        fillColor = [240, 253, 250]; // Light Emerald fill
       }
 
-      // Draw Gridlines inside bounding box
-      doc.setDrawColor(241, 245, 249);
-      doc.setLineWidth(0.3);
-      for (let i = 1; i <= 3; i++) {
-        const gridY = startY + (height / 4) * i;
-        doc.line(startX + 1, gridY, endX - 1, gridY);
-      }
-
-      // Render line graph for revenue, cancellation, and growth
+      // Render bezier line graph for revenue, cancellation, and growth
       if (reportType === "revenue" || reportType === "cancellation" || reportType === "growth") {
         const pointsCount = reportData.length;
-        // Keep horizontal padding inside the chart bounding box
-        const chartPaddingX = 15;
+        const chartPaddingX = 22; // Horizontal indent
         const graphWidth = width - chartPaddingX * 2;
         const xInterval = graphWidth / Math.max(pointsCount - 1, 1);
 
         const getX = (idx: number) => startX + chartPaddingX + idx * xInterval;
         const getY = (val: number) => endY - 6 - ((val - minVal) / (valRange || 1)) * (height - 14);
 
-        // Draw the graph path
+        // Generate bezier points for all segments
+        const allCurvePoints: { x: number; y: number }[] = [];
+        for (let i = 0; i < pointsCount - 1; i++) {
+          const p0 = { x: getX(i), y: getY(rawValues[i]) };
+          const p1 = { x: getX(i + 1), y: getY(rawValues[i + 1]) };
+          
+          const segmentPts = getBezierPoints(p0, p1, 30);
+          const limit = i === pointsCount - 2 ? segmentPts.length : segmentPts.length - 1;
+          for (let j = 0; j < limit; j++) {
+            allCurvePoints.push(segmentPts[j]);
+          }
+        }
+
+        // 1. Draw area gradient fill
+        doc.setFillColor(fillColor[0], fillColor[1], fillColor[2]);
+        for (let i = 0; i < allCurvePoints.length - 1; i++) {
+          const pt = allCurvePoints[i];
+          const nextPt = allCurvePoints[i + 1];
+          const w = nextPt.x - pt.x;
+          doc.rect(pt.x, pt.y, w + 0.1, endY - pt.y - 0.5, "F");
+        }
+
+        // 2. Draw Gridlines inside bounding box (on top of fill)
+        doc.setDrawColor(241, 245, 249);
+        doc.setLineWidth(0.3);
+        for (let i = 1; i <= 3; i++) {
+          const gridY = startY + (height / 4) * i;
+          doc.line(startX + 1, gridY, endX - 1, gridY);
+        }
+
+        // 3. Draw smooth bezier curve
         doc.setDrawColor(themeColor[0], themeColor[1], themeColor[2]);
         doc.setLineWidth(1.5);
-        for (let i = 0; i < pointsCount - 1; i++) {
-          doc.line(getX(i), getY(rawValues[i]), getX(i + 1), getY(rawValues[i + 1]));
+        for (let i = 0; i < allCurvePoints.length - 1; i++) {
+          doc.line(allCurvePoints[i].x, allCurvePoints[i].y, allCurvePoints[i + 1].x, allCurvePoints[i + 1].y);
         }
 
-        // Draw points as small circles
+        // 4. Draw data points (circles)
         doc.setFillColor(themeColor[0], themeColor[1], themeColor[2]);
         for (let i = 0; i < pointsCount; i++) {
-          doc.circle(getX(i), getY(rawValues[i]), 1.0, "F");
+          doc.circle(getX(i), getY(rawValues[i]), 1.2, "F");
         }
 
-        // Label axis ticks
+        // 5. Y-Axis Bounds (Min/Max Labels)
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(6.5);
+        doc.setTextColor(148, 163, 184); // slate-400
+        
+        let formatYLabel = (val: number) => {
+          if (reportType === "revenue") return `₱${val >= 1000 ? (val / 1000).toFixed(0) + "K" : val.toFixed(0)}`;
+          if (reportType === "cancellation") return `${val.toFixed(0)}%`;
+          return val.toFixed(0);
+        };
+        doc.text(formatYLabel(maxVal), startX + 3, startY + 6);
+        doc.text(formatYLabel(minVal), startX + 3, endY - 2);
+
+        // 6. Label axis ticks (X-Axis)
         doc.setFont("helvetica", "bold");
         doc.setFontSize(7);
-        doc.setTextColor(148, 163, 184); // slate-400
+        doc.setTextColor(148, 163, 184);
         const labelInterval = Math.ceil(pointsCount / 6);
         for (let i = 0; i < pointsCount; i++) {
           if (i % labelInterval === 0 || i === pointsCount - 1) {
