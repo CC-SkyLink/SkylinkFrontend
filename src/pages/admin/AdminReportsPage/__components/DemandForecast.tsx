@@ -3,6 +3,7 @@ import { ArrowUpRight, ArrowDownRight } from "lucide-react";
 import { FileSpreadsheet, FileText } from "lucide-react";
 import DataTable, { type TableColumn } from "@/pages/_shared/components/ui/DataTable";
 import TableEmptyState from "@/pages/_shared/components/ui/TableEmptyState";
+import TableSkeleton from "@/pages/_shared/components/ui/TableSkeleton";
 import { cn } from "@/utils/cn";
 import { getDemandForecast } from "@/api/reports.api";
 import { exportCSV, exportPDF } from "../__docs/export";
@@ -84,8 +85,18 @@ const DemandForecast = ({ dateRangeLabel, onToast }: Props) => {
         </div>
 
         {isLoading ? (
-          <div className="flex justify-center py-16">
-            <div className="animate-spin size-8 border-4 border-[#496B92] border-t-transparent rounded-full" />
+          <div className="w-full space-y-4 pt-2 animate-pulse">
+            {Array.from({ length: 5 }).map((_, idx) => (
+              <div key={idx} className="space-y-2">
+                <div className="flex justify-between">
+                  <div className="h-4 bg-slate-200 rounded w-20" />
+                  <div className="h-4 bg-slate-200 rounded w-28" />
+                </div>
+                <div className="h-3 w-full rounded-full bg-slate-100">
+                  <div className="h-full rounded-full bg-slate-200" style={{ width: idx === 0 ? "80%" : idx === 1 ? "60%" : idx === 2 ? "45%" : idx === 3 ? "30%" : "15%" }} />
+                </div>
+              </div>
+            ))}
           </div>
         ) : data.length === 0 ? (
           <p className="text-slate-400 font-medium text-sm text-center py-10">No demand forecast data available.</p>
@@ -120,9 +131,7 @@ const DemandForecast = ({ dateRangeLabel, onToast }: Props) => {
         </div>
         <div className="p-1">
           {isLoading ? (
-            <div className="py-16 flex justify-center">
-              <div className="animate-spin size-8 border-4 border-[#496B92] border-t-transparent rounded-full" />
-            </div>
+            <TableSkeleton columns={4} rows={5} />
           ) : (
             <DataTable
               columns={columns}

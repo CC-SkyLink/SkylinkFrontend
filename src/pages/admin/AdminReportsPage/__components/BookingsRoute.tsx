@@ -3,6 +3,7 @@ import { FileSpreadsheet, FileText } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import DataTable, { type TableColumn } from "@/pages/_shared/components/ui/DataTable";
 import TableEmptyState from "@/pages/_shared/components/ui/TableEmptyState";
+import TableSkeleton from "@/pages/_shared/components/ui/TableSkeleton";
 import { exportCSV, exportPDF } from "../__docs/export";
 import type { DateRange, RouteDataRow } from "./types";
 import type { RawRouteEntry } from "@/types/report.types";
@@ -101,9 +102,19 @@ const BookingsRoute = ({ dateRange, dateRangeLabel, onToast, customStartDate, cu
           </div>
         </div>
 
-        <div className="relative min-h-[200px] flex items-center justify-center">
+        <div className="relative min-h-[200px] flex items-center justify-center w-full">
           {isLoading ? (
-            <div className="animate-spin size-8 border-4 border-[#496B92] border-t-transparent rounded-full" />
+            <div className="w-full space-y-4 animate-pulse pt-2">
+              {Array.from({ length: 5 }).map((_, idx) => (
+                <div key={idx} className="flex items-center gap-4">
+                  <div className="w-28 h-4 bg-slate-200 rounded shrink-0" />
+                  <div className="flex-1 bg-slate-100 rounded-full h-4 overflow-hidden">
+                    <div className="h-4 bg-slate-200 rounded-full w-2/3" style={{ width: idx === 0 ? "85%" : idx === 1 ? "70%" : idx === 2 ? "50%" : idx === 3 ? "35%" : "20%" }} />
+                  </div>
+                  <div className="w-10 h-4 bg-slate-200 rounded shrink-0" />
+                </div>
+              ))}
+            </div>
           ) : routes.length === 0 ? (
             <p className="text-slate-400 font-medium text-sm">No data for this period.</p>
           ) : (
@@ -132,9 +143,7 @@ const BookingsRoute = ({ dateRange, dateRangeLabel, onToast, customStartDate, cu
         </div>
         <div className="p-1">
           {isLoading ? (
-            <div className="py-16 flex justify-center">
-              <div className="animate-spin size-8 border-4 border-[#496B92] border-t-transparent rounded-full" />
-            </div>
+            <TableSkeleton columns={3} rows={5} />
           ) : (
             <DataTable
               columns={columns}

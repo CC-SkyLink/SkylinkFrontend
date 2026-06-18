@@ -4,6 +4,7 @@ import { ArrowUpRight, ArrowDownRight } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import DataTable, { type TableColumn } from "@/pages/_shared/components/ui/DataTable";
 import TableEmptyState from "@/pages/_shared/components/ui/TableEmptyState";
+import TableSkeleton from "@/pages/_shared/components/ui/TableSkeleton";
 import { cn } from "@/utils/cn";
 import { exportCSV, exportPDF } from "../__docs/export";
 import type { DateRange, UserGrowthDataRow } from "./types";
@@ -160,7 +161,29 @@ const UserGrowth = ({ dateRange, dateRangeLabel, onToast, customStartDate, custo
 
         <div className="relative pt-6 min-h-[320px] flex items-center justify-center bg-slate-50/20 rounded-2xl border border-slate-100/50">
           {isLoading ? (
-            <div className="animate-spin size-8 border-4 border-[#496B92] border-t-transparent rounded-full" />
+            <div className="w-full h-[280px] p-6 flex flex-col justify-between animate-pulse">
+              <div className="flex-1 flex flex-col justify-between border-l border-b border-slate-200/60 pl-2 pb-2 relative">
+                <div className="absolute inset-0 flex flex-col justify-between pointer-events-none">
+                  {Array.from({ length: 4 }).map((_, i) => (
+                    <div key={i} className="w-full border-t border-slate-100" />
+                  ))}
+                </div>
+                <svg className="absolute inset-0 w-full h-full" viewBox="0 0 800 220" preserveAspectRatio="none">
+                  <path
+                    d="M 80,180 C 180,120 280,150 380,80 C 480,90 580,40 680,20"
+                    fill="none"
+                    stroke="#e2e8f0"
+                    strokeWidth="4"
+                    strokeLinecap="round"
+                  />
+                </svg>
+              </div>
+              <div className="flex justify-between pl-6 pt-2">
+                {Array.from({ length: 6 }).map((_, i) => (
+                  <div key={i} className="h-3 bg-slate-100 rounded w-12" />
+                ))}
+              </div>
+            </div>
           ) : chartPoints.length === 0 ? (
             <p className="text-slate-400 font-medium text-sm">No data for this period.</p>
           ) : (
@@ -228,9 +251,7 @@ const UserGrowth = ({ dateRange, dateRangeLabel, onToast, customStartDate, custo
         </div>
         <div className="p-1">
           {isLoading ? (
-            <div className="py-16 flex justify-center">
-              <div className="animate-spin size-8 border-4 border-[#496B92] border-t-transparent rounded-full" />
-            </div>
+            <TableSkeleton columns={3} rows={5} />
           ) : (
             <DataTable
               columns={columns}
