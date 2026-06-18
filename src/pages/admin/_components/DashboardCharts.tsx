@@ -25,47 +25,6 @@ const DashboardCharts = ({ bookings, isLoading = false }: Props) => {
     staleTime: 60 * 1000,
   });
 
-  if (isLoading || loadingRevenue) {
-    return (
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 animate-pulse">
-        {/* Bookings Over Time Skeleton */}
-        <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm">
-          <div className="mb-6 space-y-2">
-            <div className="h-5 bg-slate-200 rounded w-1/3" />
-            <div className="h-4 bg-slate-100 rounded w-1/4" />
-          </div>
-          <div className="h-44 bg-slate-50/50 rounded-xl relative overflow-hidden flex items-end px-4 py-2 border border-slate-100/50">
-            <div className="w-full h-24 bg-gradient-to-t from-slate-200/20 to-transparent rounded-t-xl animate-pulse" style={{ clipPath: "polygon(0% 100%, 10% 80%, 25% 90%, 40% 60%, 55% 70%, 70% 30%, 85% 40%, 100% 10%, 100% 100%)" }} />
-          </div>
-          <div className="mt-4 flex justify-between">
-            <div className="h-3 bg-slate-100 rounded w-12" />
-            <div className="h-3 bg-slate-100 rounded w-12" />
-            <div className="h-3 bg-slate-100 rounded w-12" />
-            <div className="h-3 bg-slate-100 rounded w-12" />
-          </div>
-        </div>
-
-        {/* Revenue by Route Skeleton */}
-        <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm space-y-6">
-          <div className="mb-6 space-y-2">
-            <div className="h-5 bg-slate-200 rounded w-1/3" />
-            <div className="h-4 bg-slate-100 rounded w-1/4" />
-          </div>
-          <div className="space-y-4">
-            {Array.from({ length: 5 }).map((_, idx) => (
-              <div key={idx} className="space-y-2">
-                <div className="flex justify-between">
-                  <div className="h-3 bg-slate-200 rounded w-20" />
-                  <div className="h-3 bg-slate-150 rounded w-16" />
-                </div>
-                <div className="h-4 bg-slate-100 rounded-full w-full" />
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-    );
-  }
   // --- Bookings Over Time (last 30 days, grouped by date) ---
   const bookingsByDate = useMemo(() => {
     const now = new Date();
@@ -137,6 +96,48 @@ const DashboardCharts = ({ bookings, isLoading = false }: Props) => {
     "bg-[#5D80A6]", "bg-[#7195BA]", "bg-[#86A9CD]",
     "bg-[#9CBEDE]", "bg-[#B2D2F0]",
   ];
+
+  if (isLoading || loadingRevenue) {
+    return (
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 animate-pulse">
+        {/* Bookings Over Time Skeleton */}
+        <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm">
+          <div className="mb-6 space-y-2">
+            <div className="h-5 bg-slate-200 rounded w-1/3" />
+            <div className="h-4 bg-slate-100 rounded w-1/4" />
+          </div>
+          <div className="h-44 bg-slate-50/50 rounded-xl relative overflow-hidden flex items-end px-4 py-2 border border-slate-100/50">
+            <div className="w-full h-24 bg-gradient-to-t from-slate-200/20 to-transparent rounded-t-xl animate-pulse" style={{ clipPath: "polygon(0% 100%, 10% 80%, 25% 90%, 40% 60%, 55% 70%, 70% 30%, 85% 40%, 100% 10%, 100% 100%)" }} />
+          </div>
+          <div className="mt-4 flex justify-between">
+            <div className="h-3 bg-slate-100 rounded w-12" />
+            <div className="h-3 bg-slate-100 rounded w-12" />
+            <div className="h-3 bg-slate-100 rounded w-12" />
+            <div className="h-3 bg-slate-100 rounded w-12" />
+          </div>
+        </div>
+
+        {/* Revenue by Route Skeleton */}
+        <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm space-y-6">
+          <div className="mb-6 space-y-2">
+            <div className="h-5 bg-slate-200 rounded w-1/3" />
+            <div className="h-4 bg-slate-100 rounded w-1/4" />
+          </div>
+          <div className="space-y-4">
+            {Array.from({ length: 5 }).map((_, idx) => (
+              <div key={idx} className="space-y-2">
+                <div className="flex justify-between">
+                  <div className="h-3 bg-slate-200 rounded w-20" />
+                  <div className="h-3 bg-slate-150 rounded w-16" />
+                </div>
+                <div className="h-4 bg-slate-100 rounded-full w-full" />
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
