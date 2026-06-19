@@ -505,6 +505,7 @@ function PaymentTab({ onSave, onDiscard }: { onSave: () => void; onDiscard: () =
     handleSubmit,
     reset,
     getValues,
+    control,
     formState: { errors, isDirty, isSubmitting },
   } = useForm<PaymentValues>({
     resolver: zodResolver(paymentSchema),
@@ -540,17 +541,25 @@ function PaymentTab({ onSave, onDiscard }: { onSave: () => void; onDiscard: () =
             <label className="mb-1.5 block text-sm font-semibold text-slate-700">
               Payment Gateway
             </label>
-            <select
-              {...register("gateway")}
-              id="paymentGateway"
-              className={inputCls(!!errors.gateway)}
-            >
-              <option value="">Select gateway…</option>
-              <option value="stripe">Stripe</option>
-              <option value="paypal">PayPal</option>
-              <option value="gcash_gateway">GCash Gateway</option>
-              <option value="default">Default</option>
-            </select>
+            <Controller
+              control={control}
+              name="gateway"
+              render={({ field: { value, onChange } }) => (
+                <Select
+                  value={value}
+                  onChange={onChange}
+                  options={[
+                    { value: "stripe", label: "Stripe" },
+                    { value: "paypal", label: "PayPal" },
+                    { value: "gcash_gateway", label: "GCash Gateway" },
+                    { value: "default", label: "Default" },
+                  ]}
+                  placeholder="Select gateway..."
+                  className="w-full sm:w-full"
+                  triggerClassName="h-12 rounded-xl font-normal"
+                />
+              )}
+            />
             <FieldError message={errors.gateway?.message ?? undefined} />
           </div>
 
