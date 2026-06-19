@@ -5,6 +5,8 @@ import TableSkeleton from "@/pages/_shared/components/ui/TableSkeleton";
 import TableEmptyState from "@/pages/_shared/components/ui/TableEmptyState";
 import Button from "@/pages/_shared/components/ui/Button";
 import Modal from "@/pages/_shared/components/ui/Modal";
+import Select from "@/pages/_shared/components/ui/Select";
+import { cn } from "@/utils/cn";
 import { Search, Plus, Edit2, Trash2, MapPin, Plane, Tag } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
@@ -16,6 +18,35 @@ import type { Airport, Aircraft, SeatClass, SeatConfiguration } from "@/types/de
 
 type Tab = "airports" | "aircraft" | "seat-classes";
 
+const COUNTRY_CITIES_MAP: Record<string, string[]> = {
+  "Philippines": ["Manila", "Cebu", "Davao", "Iloilo", "Kalibo", "Puerto Princesa", "Bacolod", "Cagayan de Oro"],
+  "Singapore": ["Singapore"],
+  "Hong Kong": ["Hong Kong"],
+  "Japan": ["Tokyo", "Osaka", "Kyoto", "Fukuoka", "Sapporo"],
+  "South Korea": ["Seoul", "Busan", "Jeju", "Incheon"],
+  "Malaysia": ["Kuala Lumpur", "Penang", "Kota Kinabalu", "Langkawi"],
+  "Thailand": ["Bangkok", "Phuket", "Chiang Mai", "Krabi"],
+  "United States": ["New York", "Los Angeles", "San Francisco", "Chicago", "Miami"],
+  "Australia": ["Sydney", "Melbourne", "Brisbane", "Perth"],
+  "United Kingdom": ["London", "Manchester", "Edinburgh"],
+  "United Arab Emirates": ["Dubai", "Abu Dhabi"],
+};
+
+const COUNTRY_TIMEZONE_MAP: Record<string, string> = {
+  "Philippines": "Asia/Manila",
+  "Singapore": "Asia/Singapore",
+  "Hong Kong": "Asia/Hong_Kong",
+  "Japan": "Asia/Tokyo",
+  "South Korea": "Asia/Seoul",
+  "Malaysia": "Asia/Kuala_Lumpur",
+  "Thailand": "Asia/Bangkok",
+  "United States": "America/New_York",
+  "Australia": "Australia/Sydney",
+  "United Kingdom": "Europe/London",
+  "United Arab Emirates": "Asia/Dubai",
+};
+
+
 const AdminDestinationsPage = () => {
   const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState<Tab>("airports");
@@ -26,6 +57,7 @@ const AdminDestinationsPage = () => {
   const [selectedItem, setSelectedItem] = useState<Airport | Aircraft | SeatClass | null>(null);
   const [form, setForm] = useState<Record<string, string | number>>({});
   const [seatConfigs, setSeatConfigs] = useState<SeatConfiguration[]>([]);
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
   // Queries
   const { data: airports = [], isLoading: loadingAirports } = useQuery({
@@ -106,11 +138,22 @@ const AdminDestinationsPage = () => {
   // Modal openers
   const openAdd = () => {
     setForm({});
+    setErrors({});
     setSeatConfigs([{ seat_class_id: seatClasses[0]?.id || 1, quantity: 150 }]);
     setAddModalOpen(true);
   };
-  const openEdit = (item: Airport | Aircraft | SeatClass) => { setSelectedItem(item); setForm(item as any); setEditModalOpen(true); };
-  const openDelete = (item: Airport | Aircraft | SeatClass) => { setSelectedItem(item); setDeleteModalOpen(true); };
+  
+  const openEdit = (item: Airport | Aircraft | SeatClass) => {
+    setSelectedItem(item);
+    setForm(item as any);
+    setErrors({});
+    setEditModalOpen(true);
+  };
+  
+  const openDelete = (item: Airport | Aircraft | SeatClass) => {
+    setSelectedItem(item);
+    setDeleteModalOpen(true);
+  };
 
   // Field helper
   const field = (key: string, label: string, type = "text") => (
@@ -119,11 +162,103 @@ const AdminDestinationsPage = () => {
       <input
         type={type}
         value={form[key] ?? ""}
-        onChange={(e) => setForm((f) => ({ ...f, [key]: e.target.value }))}
-        className="w-full h-12 rounded-xl bg-slate-50 border border-slate-200 px-4 text-sm outline-none focus:ring-2 focus:ring-[#496B92]/10 focus:border-[#496B92]/20 transition-all"
+        onChange={(e) => {
+          const val = key === "iata_code" ? e.target.value.toUpperCase() : e.target.value;
+          setForm((f) => ({ ...f, [key]: val }));
+          if (errors[key]) {
+            setErrors((errs) => {
+              const next = { ...errs };
+              delete next[key];
+              return next;
+            });
+          }
+        }}
+        className={cn(
+          "w-full h-12 rounded-xl bg-slate-50 border px-4 text-sm outline-none transition-all focus:ring-2",
+          errors[key]
+            ? "border-rose-400 focus:ring-rose-100 focus:border-rose-400"
+            : "border-slate-200 focus:ring-[#496B92]/10 focus:border-[#496B92]/20"
+        )}
       />
+      {errors[key] && <p className="text-xs text-rose-500 mt-1 ml-1">{errors[key]}</p>}
     </div>
   );
+
+  // Validation functions
+  const validateAirportForm = (isEdit: boolean = false) => {
+    const newErrors: Record<string, string> = {};
+
+    if (!isEdit) {
+      const iata = String(form.iata_code || "").trim();
+      if (!iata) {
+        newErrors.iata_code = "IATA Code is required";
+      } else if (!/^[A-Z]{3}$/.test(iata)) {
+        newErrors.iata_code = "IATA Code must be exactly 3 uppercase letters";
+      }
+    }
+
+    const name = String(form.name || "").trim();
+    if (!name) {
+      newErrors.name = "Airport Name is required";
+    } else if (name.length < 3) {
+      newErrors.name = "Airport Name must be at least 3 characters";
+    }
+
+    if (!form.country) {
+      newErrors.country = "Country is required";
+    }
+
+    if (!form.city) {
+      newErrors.city = "City is required";
+    }
+
+    const timezone = String(form.timezone || "").trim();
+    if (!timezone) {
+      newErrors.timezone = "Timezone is required";
+    } else if (!/^[A-Za-z0-9_-]+\/[A-Za-z0-9_+-]+$/.test(timezone)) {
+      newErrors.timezone = "Timezone must be in 'Area/Location' format (e.g., Asia/Manila)";
+    }
+
+    const imageUrl = String(form.image_url || "").trim();
+    if (imageUrl && !/^https?:\/\/.+/.test(imageUrl)) {
+      newErrors.image_url = "Image URL must start with http:// or https://";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  // Country and city options
+  const countryOptions = useMemo(() => {
+    return Object.keys(COUNTRY_CITIES_MAP).map((c) => ({ value: c, label: c }));
+  }, []);
+
+  const cityOptions = useMemo(() => {
+    const selectedCountry = form.country as string;
+    if (!selectedCountry) return [];
+    return (COUNTRY_CITIES_MAP[selectedCountry] || []).map((c) => ({ value: c, label: c }));
+  }, [form.country]);
+
+  const handleCountryChange = (selectedCountry: string) => {
+    const cities = COUNTRY_CITIES_MAP[selectedCountry] || [];
+    const defaultCity = cities.length === 1 ? cities[0] : "";
+    const defaultTimezone = COUNTRY_TIMEZONE_MAP[selectedCountry] || "";
+
+    setForm((f) => ({
+      ...f,
+      country: selectedCountry,
+      city: defaultCity,
+      ...(defaultTimezone ? { timezone: defaultTimezone } : {}),
+    }));
+
+    setErrors((errs) => {
+      const next = { ...errs };
+      delete next.country;
+      if (defaultCity) delete next.city;
+      if (defaultTimezone) delete next.timezone;
+      return next;
+    });
+  };
 
   // Columns
   const airportColumns: TableColumn<Airport>[] = [
@@ -196,8 +331,47 @@ const AdminDestinationsPage = () => {
         {field("iata_code", "IATA Code *")}
         {field("name", "Airport Name *")}
         <div className="grid grid-cols-2 gap-4">
-          {field("city", "City *")}
-          {field("country", "Country *")}
+          <div className="space-y-1.5">
+            <label className="text-[13px] font-bold text-slate-500 uppercase tracking-widest ml-1">Country *</label>
+            <Select
+              value={(form.country as string) ?? ""}
+              onChange={handleCountryChange}
+              options={countryOptions}
+              placeholder="Select Country"
+              className="w-full sm:w-full"
+              triggerClassName={cn(
+                "w-full h-12 bg-slate-50 font-normal text-slate-800 focus:ring-2 focus:ring-[#496B92]/10 focus:border-[#496B92]/20 rounded-xl shadow-none",
+                errors.country
+                  ? "border-rose-400 focus:ring-rose-100 focus:border-rose-400"
+                  : "border-slate-200"
+              )}
+            />
+            {errors.country && <p className="text-xs text-rose-500 mt-1 ml-1">{errors.country}</p>}
+          </div>
+          <div className="space-y-1.5">
+            <label className="text-[13px] font-bold text-slate-500 uppercase tracking-widest ml-1">City *</label>
+            <Select
+              value={(form.city as string) ?? ""}
+              onChange={(selectedCity) => {
+                setForm((f) => ({ ...f, city: selectedCity }));
+                setErrors((errs) => {
+                  const next = { ...errs };
+                  delete next.city;
+                  return next;
+                });
+              }}
+              options={cityOptions}
+              placeholder={form.country ? "Select City" : "Select Country first"}
+              className="w-full sm:w-full"
+              triggerClassName={cn(
+                "w-full h-12 bg-slate-50 font-normal text-slate-800 focus:ring-2 focus:ring-[#496B92]/10 focus:border-[#496B92]/20 rounded-xl shadow-none",
+                errors.city
+                  ? "border-rose-400 focus:ring-rose-100 focus:border-rose-400"
+                  : "border-slate-200"
+              )}
+            />
+            {errors.city && <p className="text-xs text-rose-500 mt-1 ml-1">{errors.city}</p>}
+          </div>
         </div>
         {field("timezone", "Timezone *")}
         {field("image_url", "Image URL")}
@@ -206,10 +380,25 @@ const AdminDestinationsPage = () => {
           <label className="text-[13px] font-bold text-slate-500 uppercase tracking-widest ml-1">About</label>
           <textarea
             value={(form["about"] as string) ?? ""}
-            onChange={(e) => setForm((f) => ({ ...f, about: e.target.value }))}
+            onChange={(e) => {
+              setForm((f) => ({ ...f, about: e.target.value }));
+              if (errors.about) {
+                setErrors((errs) => {
+                  const next = { ...errs };
+                  delete next.about;
+                  return next;
+                });
+              }
+            }}
             rows={3}
-            className="w-full rounded-xl bg-slate-50 border border-slate-200 px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-[#496B92]/10 focus:border-[#496B92]/20 transition-all resize-none"
+            className={cn(
+              "w-full rounded-xl bg-slate-50 border px-4 py-3 text-sm outline-none transition-all resize-none focus:ring-2",
+              errors.about
+                ? "border-rose-400 focus:ring-rose-100 focus:border-rose-400"
+                : "border-slate-200 focus:ring-[#496B92]/10 focus:border-[#496B92]/20"
+            )}
           />
+          {errors.about && <p className="text-xs text-rose-500 mt-1 ml-1">{errors.about}</p>}
         </div>
       </div>
     );
@@ -279,8 +468,47 @@ const AdminDestinationsPage = () => {
       <div className="space-y-4">
         {field("name", "Airport Name")}
         <div className="grid grid-cols-2 gap-4">
-          {field("city", "City")}
-          {field("country", "Country")}
+          <div className="space-y-1.5">
+            <label className="text-[13px] font-bold text-slate-500 uppercase tracking-widest ml-1">Country *</label>
+            <Select
+              value={(form.country as string) ?? ""}
+              onChange={handleCountryChange}
+              options={countryOptions}
+              placeholder="Select Country"
+              className="w-full sm:w-full"
+              triggerClassName={cn(
+                "w-full h-12 bg-slate-50 font-normal text-slate-800 focus:ring-2 focus:ring-[#496B92]/10 focus:border-[#496B92]/20 rounded-xl shadow-none",
+                errors.country
+                  ? "border-rose-400 focus:ring-rose-100 focus:border-rose-400"
+                  : "border-slate-200"
+              )}
+            />
+            {errors.country && <p className="text-xs text-rose-500 mt-1 ml-1">{errors.country}</p>}
+          </div>
+          <div className="space-y-1.5">
+            <label className="text-[13px] font-bold text-slate-500 uppercase tracking-widest ml-1">City *</label>
+            <Select
+              value={(form.city as string) ?? ""}
+              onChange={(selectedCity) => {
+                setForm((f) => ({ ...f, city: selectedCity }));
+                setErrors((errs) => {
+                  const next = { ...errs };
+                  delete next.city;
+                  return next;
+                });
+              }}
+              options={cityOptions}
+              placeholder={form.country ? "Select City" : "Select Country first"}
+              className="w-full sm:w-full"
+              triggerClassName={cn(
+                "w-full h-12 bg-slate-50 font-normal text-slate-800 focus:ring-2 focus:ring-[#496B92]/10 focus:border-[#496B92]/20 rounded-xl shadow-none",
+                errors.city
+                  ? "border-rose-400 focus:ring-rose-100 focus:border-rose-400"
+                  : "border-slate-200"
+              )}
+            />
+            {errors.city && <p className="text-xs text-rose-500 mt-1 ml-1">{errors.city}</p>}
+          </div>
         </div>
         {field("timezone", "Timezone")}
         {field("image_url", "Image URL")}
@@ -289,10 +517,25 @@ const AdminDestinationsPage = () => {
           <label className="text-[13px] font-bold text-slate-500 uppercase tracking-widest ml-1">About</label>
           <textarea
             value={(form["about"] as string) ?? ""}
-            onChange={(e) => setForm((f) => ({ ...f, about: e.target.value }))}
+            onChange={(e) => {
+              setForm((f) => ({ ...f, about: e.target.value }));
+              if (errors.about) {
+                setErrors((errs) => {
+                  const next = { ...errs };
+                  delete next.about;
+                  return next;
+                });
+              }
+            }}
             rows={3}
-            className="w-full rounded-xl bg-slate-50 border border-slate-200 px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-[#496B92]/10 focus:border-[#496B92]/20 transition-all resize-none"
+            className={cn(
+              "w-full rounded-xl bg-slate-50 border px-4 py-3 text-sm outline-none transition-all resize-none focus:ring-2",
+              errors.about
+                ? "border-rose-400 focus:ring-rose-100 focus:border-rose-400"
+                : "border-slate-200 focus:ring-[#496B92]/10 focus:border-[#496B92]/20"
+            )}
           />
+          {errors.about && <p className="text-xs text-rose-500 mt-1 ml-1">{errors.about}</p>}
         </div>
       </div>
     );
@@ -409,7 +652,12 @@ const AdminDestinationsPage = () => {
             <Button variant="secondary" className="flex-1 rounded-xl h-12" onClick={() => setAddModalOpen(false)} type="button">Cancel</Button>
             <Button
               className="flex-1 bg-[#496B92] hover:bg-[#3B5470] text-white h-12 rounded-xl font-bold"
-              onClick={() => addMutation.mutate()}
+              onClick={() => {
+                if (activeTab === "airports") {
+                  if (!validateAirportForm(false)) return;
+                }
+                addMutation.mutate();
+              }}
               loading={addMutation.isPending}
             >
               Add {tabLabel}
@@ -426,7 +674,12 @@ const AdminDestinationsPage = () => {
             <Button variant="secondary" className="flex-1 rounded-xl h-12" onClick={() => setEditModalOpen(false)} type="button">Cancel</Button>
             <Button
               className="flex-1 bg-[#496B92] hover:bg-[#3B5470] text-white h-12 rounded-xl font-bold"
-              onClick={() => editMutation.mutate()}
+              onClick={() => {
+                if (activeTab === "airports") {
+                  if (!validateAirportForm(true)) return;
+                }
+                editMutation.mutate();
+              }}
               loading={editMutation.isPending}
             >
               Save Changes
