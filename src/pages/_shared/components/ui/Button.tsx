@@ -1,4 +1,5 @@
 import React from "react";
+import { cn } from "@/utils/cn";
 
 type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {
   loading?: boolean;
@@ -6,7 +7,7 @@ type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {
 };
 
 const VARIANTS: Record<string, string> = {
-  primary: "bg-blue-600 hover:bg-blue-700 text-white",
+  primary: "bg-[#496B92] hover:bg-[#3B5470] text-white",
   secondary: "bg-gray-200 hover:bg-gray-300 text-gray-800",
 };
 
@@ -24,7 +25,7 @@ const Button: React.FC<ButtonProps> = ({
   return (
     <button
       type="button"
-      className={`${base} ${VARIANTS[variant]} ${className}`}
+      className={cn(base, VARIANTS[variant], className)}
       disabled={disabled || loading}
       {...rest}
     >

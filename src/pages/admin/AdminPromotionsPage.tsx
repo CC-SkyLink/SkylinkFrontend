@@ -394,7 +394,7 @@ const AdminPromotionsPage = () => {
               Cancel
             </Button>
             <Button
-              className="flex-1 bg-white hover:bg-rose-50 border border-rose-200 text-rose-600 h-12 rounded-xl font-bold"
+              className="flex-1 bg-rose-100 text-rose-600 h-12 rounded-xl font-bold"
               onClick={handleDeleteConfirm}
               loading={deleteMutation.isPending}
             >
