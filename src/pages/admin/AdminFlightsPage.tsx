@@ -435,7 +435,7 @@ const AdminFlightsPage = () => {
               Cancel
             </Button>
             <Button
-              className="flex-1 bg-white hover:bg-rose-50 border border-rose-200 text-rose-600 h-12 rounded-xl"
+              className="flex-1 bg-rose-600 hover:bg-rose-700 text-white h-12 rounded-xl font-bold shadow-md shadow-rose-600/10 border-transparent"
               onClick={handleDeleteConfirm}
               loading={isDeleting}
             >
