@@ -14,6 +14,7 @@ type SelectProps = {
   placeholder?: string;
   className?: string;
   triggerClassName?: string;
+  disabled?: boolean;
 };
 
 const Select: React.FC<SelectProps> = ({
@@ -23,6 +24,7 @@ const Select: React.FC<SelectProps> = ({
   placeholder = "Select option",
   className,
   triggerClassName,
+  disabled,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -52,9 +54,10 @@ const Select: React.FC<SelectProps> = ({
       {/* Trigger */}
       <button
         type="button"
-        onClick={() => setIsOpen(!isOpen)}
+        disabled={disabled}
+        onClick={() => !disabled && setIsOpen(!isOpen)}
         className={cn(
-          "flex h-11 w-full items-center justify-between gap-2 rounded-xl border border-slate-200 bg-white px-4 text-left text-sm font-semibold text-slate-700 outline-none transition-all hover:bg-slate-50 focus:border-[#496B92]/20 focus:ring-2 focus:ring-[#496B92]/10 select-none shadow-sm",
+          "flex h-11 w-full items-center justify-between gap-2 rounded-xl border border-slate-200 bg-white px-4 text-left text-sm font-semibold text-slate-700 outline-none transition-all hover:bg-slate-50 focus:border-[#496B92]/20 focus:ring-2 focus:ring-[#496B92]/10 select-none shadow-sm disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-white",
           isOpen && "border-[#496B92] bg-white ring-2 ring-[#496B92]/10",
           triggerClassName
         )}

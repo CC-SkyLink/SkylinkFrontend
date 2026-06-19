@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate, useParams } from "react-router-dom";
 import { useForm, Controller } from "react-hook-form";
@@ -105,7 +105,7 @@ const AdminEditFlightPage = () => {
   const selectedCabinClass = watch("cabinClass");
   const showBusinessFare = selectedCabinClass === "business" || selectedCabinClass === "first";
 
-  const { isLoading } = useQuery({
+  const { data: flight, isLoading } = useQuery({
     queryKey: ["flight", id],
     queryFn: async () => {
       if (!id) return null;
@@ -114,14 +114,19 @@ const AdminEditFlightPage = () => {
         setServerError("Flight not found.");
         return null;
       }
-      const departureTime = flight.departureTime ? new Date(flight.departureTime).toISOString().slice(0, 16) : "";
-      const arrivalTime = flight.arrivalTime ? new Date(flight.arrivalTime).toISOString().slice(0, 16) : "";
-      reset({ ...flight, departureTime, arrivalTime } as any);
       return flight;
     },
     enabled: !!id,
     staleTime: 5 * 60 * 1000,
   });
+
+  useEffect(() => {
+    if (flight) {
+      const departureTime = flight.departureTime ? new Date(flight.departureTime).toISOString().slice(0, 16) : "";
+      const arrivalTime = flight.arrivalTime ? new Date(flight.arrivalTime).toISOString().slice(0, 16) : "";
+      reset({ ...flight, departureTime, arrivalTime } as any);
+    }
+  }, [flight, reset]);
   const onSubmit = async (data: FlightFormValues) => {
     if (!id) return;
     setServerError(null);

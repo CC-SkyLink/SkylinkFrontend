@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
-import { useForm, useFieldArray } from "react-hook-form";
+import { useForm, useFieldArray, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { createFlight } from "@/api/flights.api";
 import { getAircraft } from "@/api/destinations.api";
@@ -9,8 +9,67 @@ import { ROUTES } from "@/constants/routes";
 import AdminLayout from "./_components/AdminLayout";
 import Input from "@/pages/_shared/components/ui/Input";
 import Button from "@/pages/_shared/components/ui/Button";
+import Select from "@/pages/_shared/components/ui/Select";
 import { ChevronLeft, Save, Plane, Tag } from "lucide-react";
-import { flightSchema, type FlightFormValues } from "@/validation/flight.schemas";
+import { type FlightFormValues } from "@/validation/flight.schemas";
+import { z } from "zod";
+
+const statusOptions = [
+  { value: "scheduled", label: "Scheduled" },
+  { value: "boarding", label: "Boarding" },
+  { value: "on_time", label: "On Time" },
+  { value: "delayed", label: "Delayed" },
+  { value: "cancelled", label: "Cancelled" },
+  { value: "landed", label: "Landed" },
+];
+
+const addFlightSchema = z.object({
+  flightNumber: z
+    .string()
+    .trim()
+    .min(1, "Flight number is required")
+    .max(10, "Flight number must be at most 10 characters")
+    .regex(/^[A-Za-z0-9\s\-]+$/, "Only letters, numbers, spaces, and dashes are allowed"),
+  airline: z
+    .string()
+    .trim()
+    .min(1, "Airline is required")
+    .max(100, "Airline must be at most 100 characters")
+    .regex(/^[A-Za-z\s\-().]+$/, "Only letters and standard text characters are allowed"),
+  origin: z
+    .string()
+    .trim()
+    .length(3, "Origin airport code must be exactly 3 characters")
+    .regex(/^[A-Za-z]+$/, "Only letters are allowed"),
+  destination: z
+    .string()
+    .trim()
+    .length(3, "Destination airport code must be exactly 3 characters")
+    .regex(/^[A-Za-z]+$/, "Only letters are allowed"),
+  departureTime: z.string().min(1, "Departure time is required"),
+  arrivalTime: z.string().min(1, "Arrival time is required"),
+  aircraftId: z.coerce
+    .number({ invalid_type_error: "Aircraft is required" })
+    .min(1, "Aircraft is required"),
+  status: z.enum(["scheduled", "boarding", "on_time", "delayed", "cancelled", "landed"]),
+  stops: z.coerce
+    .number({ invalid_type_error: "Stops must be a number" })
+    .int("Stops must be a whole number")
+    .min(0, "Stops cannot be negative"),
+  seat_pricing: z
+    .array(
+      z.object({
+        seat_class_id: z.number(),
+        price: z.coerce
+          .number({ invalid_type_error: "Price must be a number" })
+          .min(0, "Price must be non-negative"),
+      })
+    )
+    .min(1, "At least one price configuration is required"),
+}).refine((data) => data.origin.trim().toLowerCase() !== data.destination.trim().toLowerCase(), {
+  message: "Origin and destination airports must be different",
+  path: ["destination"],
+});
 
 const AdminAddFlightPage = () => {
   const navigate = useNavigate();
@@ -23,7 +82,7 @@ const AdminAddFlightPage = () => {
     control,
     formState: { errors, isSubmitting },
   } = useForm<FlightFormValues>({
-    resolver: zodResolver(flightSchema) as any,
+    resolver: zodResolver(addFlightSchema) as any,
     defaultValues: {
       status: "scheduled",
       stops: 0,
@@ -106,7 +165,17 @@ const AdminAddFlightPage = () => {
                 label="Flight Number *"
                 placeholder="e.g. PR 2191"
                 error={errors.flightNumber?.message}
-                {...register("flightNumber")}
+                {...register("flightNumber", {
+                  onChange: (e) => {
+                    e.target.value = e.target.value.toUpperCase();
+                  }
+                })}
+                onKeyPress={(e) => {
+                  if (!/[A-Za-z0-9\s\-]/.test(e.key)) {
+                    e.preventDefault();
+                  }
+                }}
+                maxLength={10}
                 className="[&>input]:rounded-xl [&>input]:h-12"
               />
               <Input
@@ -114,20 +183,46 @@ const AdminAddFlightPage = () => {
                 placeholder="e.g. Philippine Airlines"
                 error={errors.airline?.message}
                 {...register("airline")}
+                onKeyPress={(e) => {
+                  if (!/[A-Za-z\s\-().]/.test(e.key)) {
+                    e.preventDefault();
+                  }
+                }}
+                maxLength={100}
                 className="[&>input]:rounded-xl [&>input]:h-12"
               />
               <Input
                 label="Origin Airport (IATA) *"
                 placeholder="e.g. MNL"
                 error={errors.origin?.message}
-                {...register("origin")}
+                {...register("origin", {
+                  onChange: (e) => {
+                    e.target.value = e.target.value.toUpperCase();
+                  }
+                })}
+                onKeyPress={(e) => {
+                  if (!/[A-Za-z]/.test(e.key)) {
+                    e.preventDefault();
+                  }
+                }}
+                maxLength={3}
                 className="[&>input]:rounded-xl [&>input]:h-12"
               />
               <Input
                 label="Destination Airport (IATA) *"
                 placeholder="e.g. CEB"
                 error={errors.destination?.message}
-                {...register("destination")}
+                {...register("destination", {
+                  onChange: (e) => {
+                    e.target.value = e.target.value.toUpperCase();
+                  }
+                })}
+                onKeyPress={(e) => {
+                  if (!/[A-Za-z]/.test(e.key)) {
+                    e.preventDefault();
+                  }
+                }}
+                maxLength={3}
                 className="[&>input]:rounded-xl [&>input]:h-12"
               />
               <Input
@@ -156,18 +251,26 @@ const AdminAddFlightPage = () => {
               </h3>
             </div>
             <div className="p-6">
-              <div className="space-y-2">
+              <div className="space-y-2 flex flex-col justify-start">
                 <label className="text-[13px] font-bold text-slate-500 uppercase tracking-widest ml-1">Aircraft *</label>
-                <select 
-                  className="w-full h-12 rounded-xl bg-slate-50 border border-slate-200 px-4 text-sm font-medium outline-none focus:ring-2 focus:ring-[#496B92]/10 focus:border-[#496B92]/20 transition-all"
-                  {...register("aircraftId")}
-                  disabled={isLoadingAircraft}
-                >
-                  <option value="">Select an aircraft...</option>
-                  {aircraftList.map(a => (
-                    <option key={a.id} value={a.id}>{a.model} ({a.registration}) - {a.total_seats} seats</option>
-                  ))}
-                </select>
+                <Controller
+                  control={control}
+                  name="aircraftId"
+                  render={({ field: { value, onChange } }) => (
+                    <Select
+                      value={value ? String(value) : ""}
+                      onChange={(val) => onChange(val ? Number(val) : "")}
+                      options={aircraftList.map(a => ({
+                        value: String(a.id),
+                        label: `${a.model} (${a.registration}) - ${a.total_seats} seats`
+                      }))}
+                      disabled={isLoadingAircraft}
+                      placeholder="Select an aircraft..."
+                      className="w-full sm:w-full"
+                      triggerClassName="h-12 rounded-xl text-sm font-medium border-slate-200 bg-slate-50 focus:bg-white transition-all focus:ring-2 focus:ring-[#496B92]/10 focus:border-[#496B92]/20 text-left justify-between"
+                    />
+                  )}
+                />
                 {errors.aircraftId?.message && <p className="text-xs text-rose-500 ml-1">{errors.aircraftId.message}</p>}
               </div>
             </div>
@@ -204,6 +307,12 @@ const AdminAddFlightPage = () => {
                           placeholder="0.00"
                           className="w-full h-12 rounded-xl bg-slate-50 border border-slate-200 pl-8 pr-4 text-sm font-medium outline-none focus:ring-2 focus:ring-[#496B92]/10 focus:border-[#496B92]/20 transition-all"
                           {...register(`seat_pricing.${index}.price` as const)}
+                          onKeyPress={(e) => {
+                            if (!/[0-9.]/.test(e.key) || (e.key === "." && e.currentTarget.value.includes("."))) {
+                              e.preventDefault();
+                            }
+                          }}
+                          maxLength={8}
                         />
                       </div>
                       {errors.seat_pricing?.[index]?.price?.message && (
@@ -222,24 +331,37 @@ const AdminAddFlightPage = () => {
               <h3 className="font-bold text-slate-900">Status & Options</h3>
             </div>
             <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-2">
+              <div className="space-y-2 flex flex-col justify-start">
                 <label className="text-[13px] font-bold text-slate-500 uppercase tracking-widest ml-1">Status *</label>
-                <select 
-                  className="w-full h-12 rounded-xl bg-slate-50 border border-slate-200 px-4 text-sm font-medium outline-none focus:ring-2 focus:ring-[#496B92]/10 focus:border-[#496B92]/20 transition-all"
-                  {...register("status")}
-                >
-                  <option value="scheduled">Scheduled</option>
-                  <option value="boarding">Boarding</option>
-                  <option value="on_time">On Time</option>
-                  <option value="delayed">Delayed</option>
-                  <option value="cancelled">Cancelled</option>
-                </select>
+                <Controller
+                  control={control}
+                  name="status"
+                  render={({ field: { value, onChange } }) => (
+                    <Select
+                      value={value || ""}
+                      onChange={onChange}
+                      options={statusOptions}
+                      placeholder="Select status..."
+                      className="w-full sm:w-full"
+                      triggerClassName="h-12 rounded-xl text-sm font-medium border-slate-200 bg-slate-50 focus:bg-white transition-all focus:ring-2 focus:ring-[#496B92]/10 focus:border-[#496B92]/20 text-left justify-between"
+                    />
+                  )}
+                />
+                {errors.status?.message && (
+                  <p className="text-xs text-rose-500 ml-1">{errors.status.message}</p>
+                )}
               </div>
               <Input
                 label="Stops *"
                 type="number"
                 error={errors.stops?.message}
                 {...register("stops")}
+                onKeyPress={(e) => {
+                  if (!/[0-9]/.test(e.key)) {
+                    e.preventDefault();
+                  }
+                }}
+                maxLength={2}
                 className="[&>input]:rounded-xl [&>input]:h-12"
               />
             </div>
