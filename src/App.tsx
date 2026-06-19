@@ -43,6 +43,7 @@ import DeaPage from "@/pages/ExplorePagesFolder/DeaPage/DeaPage";
 import AdminDestinationsPage from "@/pages/admin/AdminDestinationsPage";
 import AdminSettingsPage from "@/pages/admin/AdminSettingsPage/AdminSettingsPage";
 import AdminBookingsPage from "@/pages/admin/AdminBookingsPage/AdminBookingsPage";
+import AdminBookingDetailPage from "@/pages/admin/AdminBookingsPage/AdminBookingDetailPage";
 import ProfileSettingsPage from "@/pages/ProfileSettingsPage/ProfileSettingsPage";
 import ForgotPasswordPage from "@/pages/ForgotPasswordPage";
 import ResetPasswordPage from "@/pages/ResetPasswordPage";
@@ -252,6 +253,10 @@ const AppContent = () => {
             <Route
               path={ROUTES.ADMIN_BOOKINGS}
               element={<AdminBookingsPage />}
+            />
+            <Route
+              path={ROUTES.ADMIN_BOOKING_DETAIL}
+              element={<AdminBookingDetailPage />}
             />
 
             <Route path={ROUTES.ADMIN_REPORTS} element={<AdminReportsPage />} />
