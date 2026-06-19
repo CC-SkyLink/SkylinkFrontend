@@ -63,8 +63,95 @@ const AdminBookingDetailPage = () => {
         </div>
 
         {bookingLoading ? (
-          <div className="flex justify-center py-40 bg-white rounded-2xl border border-slate-100 shadow-sm">
-            <div className="animate-spin size-8 border-4 border-[#496B92] border-t-transparent rounded-full" />
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 animate-pulse">
+            {/* Main Content Skeleton */}
+            <div className="lg:col-span-2 space-y-6">
+              {/* Flight Info Card Skeleton */}
+              <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm space-y-4">
+                <div className="h-4 bg-slate-200 rounded w-1/4" />
+                <div className="flex items-center justify-between py-2 px-4 bg-slate-50/50 rounded-xl h-20">
+                  <div className="space-y-2">
+                    <div className="h-6 bg-slate-200 rounded w-16" />
+                    <div className="h-3 bg-slate-200 rounded w-24" />
+                  </div>
+                  <div className="h-2 bg-slate-200 rounded w-16" />
+                  <div className="space-y-2 text-right flex flex-col items-end">
+                    <div className="h-6 bg-slate-200 rounded w-16" />
+                    <div className="h-3 bg-slate-200 rounded w-24" />
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-2">
+                  {[1, 2, 3, 4].map((n) => (
+                    <div key={n} className="space-y-2">
+                      <div className="h-3 bg-slate-200 rounded w-3/4" />
+                      <div className="h-4 bg-slate-200 rounded w-1/2" />
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Passengers Card Skeleton */}
+              <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm space-y-4">
+                <div className="h-4 bg-slate-200 rounded w-1/4" />
+                <div className="space-y-4">
+                  {[1, 2].map((n) => (
+                    <div key={n} className="p-4 bg-slate-50/50 rounded-xl border border-slate-100/50 grid grid-cols-2 sm:grid-cols-4 gap-4">
+                      {[1, 2, 3, 4].map((m) => (
+                        <div key={m} className="space-y-2">
+                          <div className="h-3 bg-slate-200 rounded w-1/2" />
+                          <div className="h-4 bg-slate-200 rounded w-3/4" />
+                        </div>
+                      ))}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Sidebar Details Skeleton */}
+            <div className="space-y-6">
+              {/* Payment Details Skeleton */}
+              <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm space-y-4">
+                <div className="h-4 bg-slate-200 rounded w-1/3" />
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center">
+                    <div className="h-4 bg-slate-200 rounded w-1/3" />
+                    <div className="h-4 bg-slate-200 rounded w-1/4" />
+                  </div>
+                  <div className="h-px bg-slate-100" />
+                  <div className="flex justify-between items-center">
+                    <div className="h-3 bg-slate-200 rounded w-1/4" />
+                    <div className="h-3 bg-slate-200 rounded w-1/3" />
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <div className="h-3 bg-slate-200 rounded w-1/4" />
+                    <div className="h-3 bg-slate-200 rounded w-1/3" />
+                  </div>
+                </div>
+              </div>
+
+              {/* Cancellation Risk Skeleton */}
+              <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm space-y-4">
+                <div className="h-4 bg-slate-200 rounded w-1/3" />
+                <div className="space-y-4">
+                  <div className="flex justify-between items-center">
+                    <div className="h-5 bg-slate-200 rounded-full w-20" />
+                    <div className="h-6 bg-slate-200 rounded w-12" />
+                  </div>
+                  <div className="grid grid-cols-2 gap-2 bg-slate-50/50 p-3 rounded-xl border border-slate-100/50">
+                    <div className="space-y-2">
+                      <div className="h-2.5 bg-slate-200 rounded w-1/2" />
+                      <div className="h-3.5 bg-slate-200 rounded w-2/3" />
+                    </div>
+                    <div className="space-y-2">
+                      <div className="h-2.5 bg-slate-200 rounded w-1/2" />
+                      <div className="h-3.5 bg-slate-200 rounded w-2/3" />
+                    </div>
+                  </div>
+                  <div className="h-10 bg-slate-100 rounded-xl w-full" />
+                </div>
+              </div>
+            </div>
           </div>
         ) : !booking ? (
           <div className="text-center py-20 bg-white rounded-2xl border border-slate-100 shadow-sm text-slate-400">
