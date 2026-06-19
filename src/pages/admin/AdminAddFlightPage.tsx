@@ -10,6 +10,7 @@ import AdminLayout from "./_components/AdminLayout";
 import Input from "@/pages/_shared/components/ui/Input";
 import Button from "@/pages/_shared/components/ui/Button";
 import Select from "@/pages/_shared/components/ui/Select";
+import DateTimePicker from "@/pages/_shared/components/ui/DateTimePicker";
 import { ChevronLeft, Save, Plane, Tag } from "lucide-react";
 import { type FlightFormValues } from "@/validation/flight.schemas";
 import { z } from "zod";
@@ -225,20 +226,40 @@ const AdminAddFlightPage = () => {
                 maxLength={3}
                 className="[&>input]:rounded-xl [&>input]:h-12"
               />
-              <Input
-                label="Departure *"
-                type="datetime-local"
-                error={errors.departureTime?.message}
-                {...register("departureTime")}
-                className="[&>input]:rounded-xl [&>input]:h-12"
-              />
-              <Input
-                label="Arrival *"
-                type="datetime-local"
-                error={errors.arrivalTime?.message}
-                {...register("arrivalTime")}
-                className="[&>input]:rounded-xl [&>input]:h-12"
-              />
+              <div className="space-y-2 flex flex-col justify-start">
+                <label className="text-[13px] font-bold text-slate-500 uppercase tracking-widest ml-1">Departure *</label>
+                <Controller
+                  control={control}
+                  name="departureTime"
+                  render={({ field: { value, onChange } }) => (
+                    <DateTimePicker
+                      value={value}
+                      onChange={onChange}
+                      placeholder="Select departure date & time"
+                    />
+                  )}
+                />
+                {errors.departureTime?.message && (
+                  <p className="text-xs text-rose-500 ml-1">{errors.departureTime.message}</p>
+                )}
+              </div>
+              <div className="space-y-2 flex flex-col justify-start">
+                <label className="text-[13px] font-bold text-slate-500 uppercase tracking-widest ml-1">Arrival *</label>
+                <Controller
+                  control={control}
+                  name="arrivalTime"
+                  render={({ field: { value, onChange } }) => (
+                    <DateTimePicker
+                      value={value}
+                      onChange={onChange}
+                      placeholder="Select arrival date & time"
+                    />
+                  )}
+                />
+                {errors.arrivalTime?.message && (
+                  <p className="text-xs text-rose-500 ml-1">{errors.arrivalTime.message}</p>
+                )}
+              </div>
             </div>
           </section>
 
