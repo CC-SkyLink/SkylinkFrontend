@@ -59,6 +59,14 @@ const AdminSidebar = ({ isOpen, onClose }: AdminSidebarProps) => {
 
   const isActive = (path: string) => location.pathname === path;
 
+  const isItemActive = (item: typeof menuItems[0]) => {
+    if (location.pathname === item.path) return true;
+    if (item.subItems) {
+      return item.subItems.some((sub) => location.pathname === sub.path);
+    }
+    return false;
+  };
+
   return (
     <>
       <Toast 
@@ -104,12 +112,12 @@ const AdminSidebar = ({ isOpen, onClose }: AdminSidebarProps) => {
                   to={item.path}
                   className={cn(
                     "group flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium transition-colors",
-                    isActive(item.path)
-                      ? "bg-[#496B92] text-white"
+                    isItemActive(item)
+                      ? "bg-[#496B92] text-white font-bold"
                       : "text-slate-300 hover:bg-[#496B92]/50 hover:text-white",
                   )}
                 >
-                  <item.icon size={20} className={cn(isActive(item.path) ? "text-white" : "text-slate-400 group-hover:text-white")} />
+                  <item.icon size={20} className={cn(isItemActive(item) ? "text-white" : "text-slate-400 group-hover:text-white")} />
                   {item.label}
                 </Link>
                 {item.subItems && (
@@ -119,13 +127,13 @@ const AdminSidebar = ({ isOpen, onClose }: AdminSidebarProps) => {
                         key={sub.label}
                         to={sub.path}
                         className={cn(
-                          "flex items-center gap-3 rounded-lg px-4 py-2 text-[13px] font-medium transition-colors",
+                          "group flex items-center gap-3 rounded-lg px-4 py-2 text-[13px] font-medium transition-all duration-150",
                           isActive(sub.path)
-                            ? "text-white"
-                            : "text-slate-400 hover:text-white",
+                            ? "bg-[#496B92]/35 text-white font-bold"
+                            : "text-slate-400 hover:bg-[#496B92]/20 hover:text-white",
                         )}
                       >
-                        <sub.icon size={16} />
+                        <sub.icon size={16} className={cn(isActive(sub.path) ? "text-white" : "text-slate-400 group-hover:text-white")} />
                         {sub.label}
                       </Link>
                     ))}
