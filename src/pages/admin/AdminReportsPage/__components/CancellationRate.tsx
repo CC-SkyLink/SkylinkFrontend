@@ -143,16 +143,16 @@ const CancellationRate = ({ dateRange, dateRangeLabel, onToast, customStartDate,
             <h3 className="text-lg font-bold text-slate-900">Cancellation Rate</h3>
             <p className="text-xs text-slate-400 font-semibold uppercase tracking-wider mt-0.5">{dateRangeLabel}</p>
           </div>
-          <div className="flex gap-2">
+          <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
             <button
               onClick={() => exportCSV("cancellation", tableRows.map(r => ({ period: r.period, value: r.value, change: r.change })), "Cancellation Rate", (msg) => onToast(msg, "success"))}
-              className="flex items-center gap-2 border border-slate-200 bg-white hover:border-[#496B92] hover:text-[#496B92] text-slate-700 px-4 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer"
+              className="flex items-center justify-center gap-2 border border-slate-200 bg-white hover:border-[#496B92] hover:text-[#496B92] text-slate-700 px-4 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer w-full sm:w-auto"
             >
               <FileSpreadsheet size={15} /> Export CSV
             </button>
             <button
               onClick={() => exportPDF("cancellation", tableRows.map(r => ({ period: r.period, value: r.value, change: r.change })), "Cancellation Rate", dateRangeLabel, (msg) => onToast(msg, "info"), (msg) => onToast(msg, "success"))}
-              className="flex items-center gap-2 bg-[#496B92] hover:bg-[#3B5470] text-white px-4 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer"
+              className="flex items-center justify-center gap-2 bg-[#496B92] hover:bg-[#3B5470] text-white px-4 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer w-full sm:w-auto"
             >
               <FileText size={15} /> Export PDF
             </button>
