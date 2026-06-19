@@ -7,6 +7,7 @@ import AdminLayout from "./_components/AdminLayout";
 import DataTable, { type TableColumn } from "@/pages/_shared/components/ui/DataTable";
 import TableSkeleton from "@/pages/_shared/components/ui/TableSkeleton";
 import Select from "@/pages/_shared/components/ui/Select";
+import DatePicker from "@/pages/_shared/components/ui/DatePicker";
 import TableEmptyState from "@/pages/_shared/components/ui/TableEmptyState";
 import Button from "@/pages/_shared/components/ui/Button";
 import Modal from "@/pages/_shared/components/ui/Modal";
@@ -27,6 +28,8 @@ const AdminPromotionsPage = () => {
     register,
     handleSubmit,
     reset,
+    setValue,
+    watch,
     formState: { errors, isSubmitting },
   } = useForm<PromotionFormValues>({
     resolver: zodResolver(promotionSchema),
@@ -199,7 +202,7 @@ const AdminPromotionsPage = () => {
           </div>
           <Button
             onClick={() => setIsAddModalOpen(true)}
-            className="bg-[#496B92] hover:bg-[#3B5470] text-white px-5 py-2.5 rounded-xl font-bold transition-all shadow-lg shadow-[#496B92]/10 flex items-center justify-center gap-2 self-start sm:self-auto"
+            className="bg-[#496B92] hover:bg-[#3B5470] text-white px-5 py-2.5 rounded-xl font-bold transition-all shadow-lg shadow-[#496B92]/10 flex items-center justify-center gap-2 self-start sm:self-auto whitespace-nowrap"
           >
             <Plus size={18} />
             Create Promo
@@ -299,15 +302,20 @@ const AdminPromotionsPage = () => {
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
               <label className="text-[13px] font-bold text-slate-500 uppercase tracking-widest ml-1">Category *</label>
-              <select
-                className="w-full h-12 rounded-xl bg-slate-50 border border-slate-200 px-4 text-sm font-medium outline-none focus:ring-2 focus:ring-[#496B92]/10 focus:border-[#496B92]/20 transition-all"
-                {...register("category")}
-              >
-                <option value="flash">Flash Sale</option>
-                <option value="weekend">Weekend Escape</option>
-                <option value="international">International</option>
-                <option value="promo">Regular Promo</option>
-              </select>
+              <Select
+                value={watch("category")}
+                onChange={(val) => setValue("category", val as any)}
+                options={[
+                  { value: "flash", label: "Flash Sale" },
+                  { value: "weekend", label: "Weekend Escape" },
+                  { value: "international", label: "International" },
+                  { value: "promo", label: "Regular Promo" },
+                ]}
+                triggerClassName="h-12 rounded-xl bg-slate-50 border border-slate-200 text-sm font-medium hover:bg-slate-100/50"
+              />
+              {errors.category?.message && (
+                <p className="text-xs text-rose-500 font-bold ml-1">{errors.category.message}</p>
+              )}
             </div>
             <Input
               label="Destination Code (IATA) *"
@@ -324,12 +332,18 @@ const AdminPromotionsPage = () => {
               error={errors.destination_city?.message}
               {...register("destination_city")}
             />
-            <Input
-              label="Valid Until *"
-              type="date"
-              error={errors.valid_until?.message}
-              {...register("valid_until")}
-            />
+            <div className="space-y-1.5">
+              <label className="text-[13px] font-bold text-slate-500 uppercase tracking-widest ml-1">Valid Until *</label>
+              <DatePicker
+                value={watch("valid_until")}
+                onChange={(val) => setValue("valid_until", val)}
+                placeholder="Select date"
+                triggerClassName="h-12 rounded-xl bg-slate-50 border border-slate-200 text-sm font-medium hover:bg-slate-100/50"
+              />
+              {errors.valid_until?.message && (
+                <p className="text-xs text-rose-500 font-bold ml-1">{errors.valid_until.message}</p>
+              )}
+            </div>
           </div>
           <Input
             label="Background Image URL"
