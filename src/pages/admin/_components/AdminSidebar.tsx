@@ -57,12 +57,19 @@ const AdminSidebar = ({ isOpen, onClose }: AdminSidebarProps) => {
     { label: "Settings", icon: Settings, path: "/admin/settings" },
   ];
 
-  const isActive = (path: string) => location.pathname === path;
+  const isPathActive = (path: string) => {
+    if (path === "/admin") {
+      return location.pathname === "/admin" || location.pathname === "/admin/";
+    }
+    return location.pathname === path || location.pathname.startsWith(path + "/");
+  };
+
+  const isActive = (path: string) => isPathActive(path);
 
   const isItemActive = (item: typeof menuItems[0]) => {
-    if (location.pathname === item.path) return true;
+    if (isPathActive(item.path)) return true;
     if (item.subItems) {
-      return item.subItems.some((sub) => location.pathname === sub.path);
+      return item.subItems.some((sub) => isPathActive(sub.path));
     }
     return false;
   };
