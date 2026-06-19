@@ -1,17 +1,19 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate, useParams } from "react-router-dom";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { getFlightById, updateFlight } from "@/api/flights.api";
 import { ROUTES } from "@/constants/routes";
 import AdminLayout from "./_components/AdminLayout";
 import Input from "@/pages/_shared/components/ui/Input";
 import Button from "@/pages/_shared/components/ui/Button";
+import Select from "@/pages/_shared/components/ui/Select";
 import { ChevronLeft, Save } from "lucide-react";
-import { flightSchema, type FlightFormValues } from "@/validation/flight.schemas";
+import { type FlightFormValues } from "@/validation/flight.schemas";
 import type { Flight } from "@/types";
 import { cn } from "@/utils/cn";
+import { z } from "zod";
 
 type EditFlightFormValues = FlightFormValues & {
   cabinClass?: string;
@@ -19,6 +21,70 @@ type EditFlightFormValues = FlightFormValues & {
   seatsAvailable?: number;
   price?: number;
 };
+
+const aircraftTypeOptions = [
+  { value: "economy", label: "Economy Only" },
+  { value: "business", label: "Business & Economy" },
+  { value: "first", label: "First, Business & Economy" },
+];
+
+const statusOptions = [
+  { value: "scheduled", label: "Scheduled" },
+  { value: "boarding", label: "Boarding" },
+  { value: "on_time", label: "On Time" },
+  { value: "delayed", label: "Delayed" },
+  { value: "cancelled", label: "Cancelled" },
+  { value: "landed", label: "Landed" },
+];
+
+const editFlightSchema = z.object({
+  flightNumber: z
+    .string()
+    .trim()
+    .min(1, "Flight number is required")
+    .max(10, "Flight number must be at most 10 characters")
+    .regex(/^[A-Za-z0-9\s\-]+$/, "Only letters, numbers, spaces, and dashes are allowed"),
+  airline: z
+    .string()
+    .trim()
+    .min(1, "Airline is required")
+    .max(100, "Airline must be at most 100 characters")
+    .regex(/^[A-Za-z\s\-().]+$/, "Only letters and standard text characters are allowed"),
+  origin: z
+    .string()
+    .trim()
+    .length(3, "Origin airport code must be exactly 3 characters")
+    .regex(/^[A-Za-z]+$/, "Only letters are allowed"),
+  destination: z
+    .string()
+    .trim()
+    .length(3, "Destination airport code must be exactly 3 characters")
+    .regex(/^[A-Za-z]+$/, "Only letters are allowed"),
+  departureTime: z.string().min(1, "Departure time is required"),
+  arrivalTime: z.string().min(1, "Arrival time is required"),
+  cabinClass: z.enum(["economy", "business", "first"]),
+  totalSeats: z.coerce
+    .number({ invalid_type_error: "Total seats must be a number" })
+    .int("Total seats must be a whole number")
+    .min(1, "At least 1 seat is required")
+    .max(1000, "Maximum 1000 seats allowed"),
+  seatsAvailable: z.coerce
+    .number({ invalid_type_error: "Seats available must be a number" })
+    .int("Seats available must be a whole number")
+    .min(0, "Seats available cannot be negative"),
+  price: z.coerce
+    .number({ invalid_type_error: "Economy Fare must be a number" })
+    .min(0, "Economy Fare cannot be negative"),
+  status: z.enum(["scheduled", "boarding", "on_time", "delayed", "cancelled", "landed"]),
+  aircraftId: z.number().optional(),
+  seat_pricing: z.array(z.any()).optional(),
+}).refine((data) => data.seatsAvailable <= data.totalSeats, {
+  message: "Available seats cannot exceed total seats",
+  path: ["seatsAvailable"],
+}).refine((data) => data.origin.trim().toLowerCase() !== data.destination.trim().toLowerCase(), {
+  message: "Origin and destination airports must be different",
+  path: ["destination"],
+});
 
 const AdminEditFlightPage = () => {
   const { id } = useParams<{ id: string }>();
@@ -30,9 +96,10 @@ const AdminEditFlightPage = () => {
     handleSubmit,
     reset,
     watch,
+    control,
     formState: { errors, isSubmitting },
   } = useForm<EditFlightFormValues>({
-    resolver: zodResolver(flightSchema) as any,
+    resolver: zodResolver(editFlightSchema) as any,
   });
 
   const selectedCabinClass = watch("cabinClass");
@@ -146,7 +213,17 @@ const AdminEditFlightPage = () => {
                 label="Flight Number *"
                 placeholder="e.g. PR 2191"
                 error={errors.flightNumber?.message}
-                {...register("flightNumber")}
+                {...register("flightNumber", {
+                  onChange: (e) => {
+                    e.target.value = e.target.value.toUpperCase();
+                  }
+                })}
+                onKeyPress={(e) => {
+                  if (!/[A-Za-z0-9\s\-]/.test(e.key)) {
+                    e.preventDefault();
+                  }
+                }}
+                maxLength={10}
                 className="[&>input]:rounded-xl [&>input]:h-12"
               />
               <Input
@@ -154,20 +231,46 @@ const AdminEditFlightPage = () => {
                 placeholder="e.g. Philippine Airlines"
                 error={errors.airline?.message}
                 {...register("airline")}
+                onKeyPress={(e) => {
+                  if (!/[A-Za-z\s\-().]/.test(e.key)) {
+                    e.preventDefault();
+                  }
+                }}
+                maxLength={100}
                 className="[&>input]:rounded-xl [&>input]:h-12"
               />
               <Input
                 label="Origin Airport (IATA) *"
                 placeholder="e.g. MNL"
                 error={errors.origin?.message}
-                {...register("origin")}
+                {...register("origin", {
+                  onChange: (e) => {
+                    e.target.value = e.target.value.toUpperCase();
+                  }
+                })}
+                onKeyPress={(e) => {
+                  if (!/[A-Za-z]/.test(e.key)) {
+                    e.preventDefault();
+                  }
+                }}
+                maxLength={3}
                 className="[&>input]:rounded-xl [&>input]:h-12"
               />
               <Input
                 label="Destination Airport (IATA) *"
                 placeholder="e.g. CEB"
                 error={errors.destination?.message}
-                {...register("destination")}
+                {...register("destination", {
+                  onChange: (e) => {
+                    e.target.value = e.target.value.toUpperCase();
+                  }
+                })}
+                onKeyPress={(e) => {
+                  if (!/[A-Za-z]/.test(e.key)) {
+                    e.preventDefault();
+                  }
+                }}
+                maxLength={3}
                 className="[&>input]:rounded-xl [&>input]:h-12"
               />
               <Input
@@ -193,16 +296,25 @@ const AdminEditFlightPage = () => {
               <h3 className="font-bold text-slate-900">Aircraft & Capacity</h3>
             </div>
             <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-2">
+              <div className="space-y-2 flex flex-col justify-start">
                 <label className="text-[13px] font-bold text-slate-500 uppercase tracking-widest ml-1">Aircraft Type *</label>
-                <select 
-                  className="w-full h-12 rounded-xl bg-slate-50 border border-slate-200 px-4 text-sm font-medium outline-none focus:ring-2 focus:ring-[#496B92]/10 focus:border-[#496B92]/20 transition-all"
-                  {...register("cabinClass")}
-                >
-                  <option value="economy">Economy Only</option>
-                  <option value="business">Business & Economy</option>
-                  <option value="first">First, Business & Economy</option>
-                </select>
+                <Controller
+                  control={control}
+                  name="cabinClass"
+                  render={({ field: { value, onChange } }) => (
+                    <Select
+                      value={value || ""}
+                      onChange={onChange}
+                      options={aircraftTypeOptions}
+                      placeholder="Select aircraft type..."
+                      className="w-full sm:w-full"
+                      triggerClassName="h-12 rounded-xl text-sm font-medium border-slate-200 bg-slate-50 focus:bg-white transition-all focus:ring-2 focus:ring-[#496B92]/10 focus:border-[#496B92]/20 text-left justify-between"
+                    />
+                  )}
+                />
+                {errors.cabinClass?.message && (
+                  <p className="text-xs text-rose-500 ml-1">{errors.cabinClass.message}</p>
+                )}
               </div>
               <Input
                 label="Total Seats *"
@@ -210,6 +322,12 @@ const AdminEditFlightPage = () => {
                 placeholder="e.g. 180"
                 error={errors.totalSeats?.message}
                 {...register("totalSeats")}
+                onKeyPress={(e) => {
+                  if (!/[0-9]/.test(e.key)) {
+                    e.preventDefault();
+                  }
+                }}
+                maxLength={4}
                 className="[&>input]:rounded-xl [&>input]:h-12"
               />
               <Input
@@ -218,6 +336,12 @@ const AdminEditFlightPage = () => {
                 placeholder="e.g. 150"
                 error={errors.seatsAvailable?.message}
                 {...register("seatsAvailable")}
+                onKeyPress={(e) => {
+                  if (!/[0-9]/.test(e.key)) {
+                    e.preventDefault();
+                  }
+                }}
+                maxLength={4}
                 className="[&>input]:rounded-xl [&>input]:h-12"
               />
             </div>
@@ -235,6 +359,12 @@ const AdminEditFlightPage = () => {
                 placeholder="₱ 0"
                 error={errors.price?.message}
                 {...register("price")}
+                onKeyPress={(e) => {
+                  if (!/[0-9.]/.test(e.key) || (e.key === "." && e.currentTarget.value.includes("."))) {
+                    e.preventDefault();
+                  }
+                }}
+                maxLength={8}
                 className="[&>input]:rounded-xl [&>input]:h-12"
               />
               <Input
@@ -244,18 +374,25 @@ const AdminEditFlightPage = () => {
                 className={cn("[&>input]:rounded-xl [&>input]:h-12", !showBusinessFare && "opacity-50")}
                 disabled={!showBusinessFare}
               />
-              <div className="space-y-2">
+              <div className="space-y-2 flex flex-col justify-start">
                 <label className="text-[13px] font-bold text-slate-500 uppercase tracking-widest ml-1">Status *</label>
-                <select 
-                  className="w-full h-12 rounded-xl bg-slate-50 border border-slate-200 px-4 text-sm font-medium outline-none focus:ring-2 focus:ring-[#496B92]/10 focus:border-[#496B92]/20 transition-all"
-                  {...register("status")}
-                >
-                  <option value="scheduled">Scheduled</option>
-                  <option value="boarding">Boarding</option>
-                  <option value="on_time">On Time</option>
-                  <option value="delayed">Delayed</option>
-                  <option value="cancelled">Cancelled</option>
-                </select>
+                <Controller
+                  control={control}
+                  name="status"
+                  render={({ field: { value, onChange } }) => (
+                    <Select
+                      value={value || ""}
+                      onChange={onChange}
+                      options={statusOptions}
+                      placeholder="Select status..."
+                      className="w-full sm:w-full"
+                      triggerClassName="h-12 rounded-xl text-sm font-medium border-slate-200 bg-slate-50 focus:bg-white transition-all focus:ring-2 focus:ring-[#496B92]/10 focus:border-[#496B92]/20 text-left justify-between"
+                    />
+                  )}
+                />
+                {errors.status?.message && (
+                  <p className="text-xs text-rose-500 ml-1">{errors.status.message}</p>
+                )}
               </div>
             </div>
           </section>

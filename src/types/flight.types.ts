@@ -41,6 +41,8 @@ export interface Flight {
   baggageAllowanceKg?: number;
   stops?: number;
   imageUrl?: string;
+  aircraftId?: number;
+  seat_pricing?: any[];
 }
 
 export interface FlightSearchParams {

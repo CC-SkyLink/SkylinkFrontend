@@ -36,6 +36,11 @@ const mapBackendFlight = (f: any): Flight => {
     airline: f.airline || "SkyLink",
     cabinClass: f.cabin_class || "economy",
     imageUrl: f.image_url || "",
+    aircraftId: f.aircraft?.id,
+    seat_pricing: f.seat_pricing?.map((p: any) => ({
+      seat_class_id: p.seat_class?.id || p.seat_class_id,
+      price: p.price
+    })) || []
   };
 };
 
@@ -59,7 +64,7 @@ async function getAirportMap(): Promise<Record<string, number>> {
 const mapFrontendToBackend = async (payload: any) => {
   const AIRPORT_MAP = await getAirportMap();
   
-  const mapped = {
+  const mapped: any = {
     flight_number: payload.flightNumber,
     origin_airport_id: AIRPORT_MAP[payload.origin?.toUpperCase() || ""],
     destination_airport_id: AIRPORT_MAP[payload.destination?.toUpperCase() || ""],
@@ -69,11 +74,14 @@ const mapFrontendToBackend = async (payload: any) => {
     airline: payload.airline,
     aircraft_id: payload.aircraftId,
     image_url: payload.imageUrl,
-    seat_pricing: payload.seat_pricing.map((p: any) => ({
-      seat_class_id: p.seat_class_id,
-      price: Number(p.price)
-    }))
   };
+
+  if (payload.seat_pricing) {
+    mapped.seat_pricing = payload.seat_pricing.map((p: any) => ({
+      seat_class_id: p.seat_class_id,
+      price: (p.seat_class_id === 1 && payload.price !== undefined) ? Number(payload.price) : Number(p.price)
+    }));
+  }
 
   console.log("Sending to backend:", mapped);
   return mapped;
