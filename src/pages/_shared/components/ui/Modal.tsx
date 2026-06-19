@@ -39,14 +39,14 @@ const Modal = ({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 px-4"
+      className="fixed inset-0 z-50 flex items-start justify-center bg-slate-900/60 px-4 py-10 overflow-y-auto"
       role="dialog"
       aria-modal="true"
       aria-label={title}
       onClick={onClose}
     >
       <div
-        className="w-full max-w-lg rounded-xl bg-white p-6 shadow-2xl relative"
+        className="w-full max-w-lg rounded-xl bg-white p-6 shadow-2xl relative my-auto"
         onClick={(event) => event.stopPropagation()}
       >
         <button
