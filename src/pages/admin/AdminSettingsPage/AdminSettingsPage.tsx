@@ -1,8 +1,9 @@
 import { useState, useRef } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import Select from "@/pages/_shared/components/ui/Select";
 import { z } from "zod";
 import {
   ChevronRight,
@@ -345,11 +346,14 @@ const TIMEZONES = [
   "Australia/Sydney (UTC+10)",
 ];
 
+const currencyOptions = CURRENCIES.map((c) => ({ value: c, label: c }));
+const timezoneOptions = TIMEZONES.map((t) => ({ value: t, label: t }));
+
 function RegionalTab({ onSave, onDiscard }: { onSave: () => void; onDiscard: () => void }) {
   const {
-    register,
     handleSubmit,
     reset,
+    control,
     formState: { errors, isDirty, isSubmitting },
   } = useForm<RegionalValues>({
     resolver: zodResolver(regionalSchema),
@@ -369,32 +373,40 @@ function RegionalTab({ onSave, onDiscard }: { onSave: () => void; onDiscard: () 
             <label className="mb-1.5 block text-sm font-semibold text-slate-700">
               Currency
             </label>
-            <select
-              {...register("currency")}
-              id="currency"
-              className={inputCls(!!errors.currency)}
-            >
-              <option value="">Select currency…</option>
-              {CURRENCIES.map((c) => (
-                <option key={c} value={c}>{c}</option>
-              ))}
-            </select>
+            <Controller
+              control={control}
+              name="currency"
+              render={({ field: { value, onChange } }) => (
+                <Select
+                  value={value}
+                  onChange={onChange}
+                  options={currencyOptions}
+                  placeholder="Select currency..."
+                  className="w-full sm:w-full"
+                  triggerClassName="h-12 rounded-xl font-normal"
+                />
+              )}
+            />
             <FieldError message={errors.currency?.message ?? undefined} />
           </div>
           <div>
             <label className="mb-1.5 block text-sm font-semibold text-slate-700">
               Timezone
             </label>
-            <select
-              {...register("timezone")}
-              id="timezone"
-              className={inputCls(!!errors.timezone)}
-            >
-              <option value="">Select timezone…</option>
-              {TIMEZONES.map((t) => (
-                <option key={t} value={t}>{t}</option>
-              ))}
-            </select>
+            <Controller
+              control={control}
+              name="timezone"
+              render={({ field: { value, onChange } }) => (
+                <Select
+                  value={value}
+                  onChange={onChange}
+                  options={timezoneOptions}
+                  placeholder="Select timezone..."
+                  className="w-full sm:w-full"
+                  triggerClassName="h-12 rounded-xl font-normal"
+                />
+              )}
+            />
             <FieldError message={errors.timezone?.message ?? undefined} />
           </div>
         </div>
