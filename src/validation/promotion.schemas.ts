@@ -10,18 +10,16 @@ export const promotionSchema = z
       .max(100, "Title cannot exceed 100 characters"),
     sale_price: z
       .number({
-        required_error: "Sale price is required",
-        invalid_type_error: "Sale price must be a valid number",
+        error: "Sale price must be a valid number",
       })
       .positive("Sale price must be greater than 0"),
     original_price: z
       .number({
-        required_error: "Original price is required",
-        invalid_type_error: "Original price must be a valid number",
+        error: "Original price must be a valid number",
       })
       .positive("Original price must be greater than 0"),
     category: z.enum(["flash", "weekend", "international", "promo"], {
-      required_error: "Category is required",
+      error: "Category is required",
     }),
     valid_until: futureOrTodayDateSchema,
     image_url: z

@@ -50,11 +50,11 @@ const addFlightSchema = z.object({
   departureTime: z.string().min(1, "Departure time is required"),
   arrivalTime: z.string().min(1, "Arrival time is required"),
   aircraftId: z.coerce
-    .number({ invalid_type_error: "Aircraft is required" })
+    .number({ error: "Aircraft is required" })
     .min(1, "Aircraft is required"),
   status: z.enum(["scheduled", "boarding", "on_time", "delayed", "cancelled", "landed"]),
   stops: z.coerce
-    .number({ invalid_type_error: "Stops must be a number" })
+    .number({ error: "Stops must be a number" })
     .int("Stops must be a whole number")
     .min(0, "Stops cannot be negative"),
   seat_pricing: z
@@ -62,7 +62,7 @@ const addFlightSchema = z.object({
       z.object({
         seat_class_id: z.number(),
         price: z.coerce
-          .number({ invalid_type_error: "Price must be a number" })
+          .number({ error: "Price must be a number" })
           .min(0, "Price must be non-negative"),
       })
     )
@@ -157,7 +157,7 @@ const AdminAddFlightPage = () => {
           )}
 
           {/* Flight Information */}
-          <section className="bg-white rounded-[24px] border border-slate-100 shadow-sm">
+          <section className="relative z-30 bg-white rounded-[24px] border border-slate-100 shadow-sm">
             <div className="px-6 py-5 border-b border-slate-50 bg-slate-50/30 rounded-t-[24px]">
               <h3 className="font-bold text-slate-900">Flight Information</h3>
             </div>
@@ -264,7 +264,7 @@ const AdminAddFlightPage = () => {
           </section>
 
           {/* Aircraft Selection */}
-          <section className="bg-white rounded-[24px] border border-slate-100 shadow-sm">
+          <section className="relative z-20 bg-white rounded-[24px] border border-slate-100 shadow-sm">
             <div className="px-6 py-5 border-b border-slate-50 bg-slate-50/30 rounded-t-[24px]">
               <h3 className="font-bold text-slate-900 flex items-center gap-2">
                 <Plane size={18} className="text-[#496B92]" />
@@ -298,7 +298,7 @@ const AdminAddFlightPage = () => {
           </section>
 
           {/* Dynamic Fares Section */}
-          <section className="bg-white rounded-[24px] border border-slate-100 shadow-sm">
+          <section className="relative z-10 bg-white rounded-[24px] border border-slate-100 shadow-sm">
             <div className="px-6 py-5 border-b border-slate-50 bg-slate-50/30 rounded-t-[24px]">
               <h3 className="font-bold text-slate-900 flex items-center gap-2">
                 <Tag size={18} className="text-[#496B92]" />
@@ -347,7 +347,7 @@ const AdminAddFlightPage = () => {
           </section>
 
           {/* Status & Options */}
-          <section className="bg-white rounded-[24px] border border-slate-100 shadow-sm">
+          <section className="relative z-0 bg-white rounded-[24px] border border-slate-100 shadow-sm">
             <div className="px-6 py-5 border-b border-slate-50 bg-slate-50/30 rounded-t-[24px]">
               <h3 className="font-bold text-slate-900">Status & Options</h3>
             </div>

@@ -1,5 +1,4 @@
 import { type ReactNode, useEffect } from "react";
-import { X } from "lucide-react";
 
 type ModalProps = {
   isOpen: boolean;

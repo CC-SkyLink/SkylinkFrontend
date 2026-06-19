@@ -65,16 +65,16 @@ const editFlightSchema = z.object({
   arrivalTime: z.string().min(1, "Arrival time is required"),
   cabinClass: z.enum(["economy", "business", "first"]),
   totalSeats: z.coerce
-    .number({ invalid_type_error: "Total seats must be a number" })
+    .number({ error: "Total seats must be a number" })
     .int("Total seats must be a whole number")
     .min(1, "At least 1 seat is required")
     .max(1000, "Maximum 1000 seats allowed"),
   seatsAvailable: z.coerce
-    .number({ invalid_type_error: "Seats available must be a number" })
+    .number({ error: "Seats available must be a number" })
     .int("Seats available must be a whole number")
     .min(0, "Seats available cannot be negative"),
   price: z.coerce
-    .number({ invalid_type_error: "Economy Fare must be a number" })
+    .number({ error: "Economy Fare must be a number" })
     .min(0, "Economy Fare cannot be negative"),
   status: z.enum(["scheduled", "boarding", "on_time", "delayed", "cancelled", "landed"]),
   aircraftId: z.number().optional(),
@@ -210,7 +210,7 @@ const AdminEditFlightPage = () => {
           )}
 
           {/* Flight Information Section */}
-          <section className="bg-white rounded-[24px] border border-slate-100 shadow-sm">
+          <section className="relative z-30 bg-white rounded-[24px] border border-slate-100 shadow-sm">
             <div className="px-6 py-5 border-b border-slate-50 bg-slate-50/30 rounded-t-[24px]">
               <h3 className="font-bold text-slate-900">Flight Information</h3>
             </div>
@@ -317,7 +317,7 @@ const AdminEditFlightPage = () => {
           </section>
 
           {/* Aircraft & Capacity Section */}
-          <section className="bg-white rounded-[24px] border border-slate-100 shadow-sm">
+          <section className="relative z-20 bg-white rounded-[24px] border border-slate-100 shadow-sm">
             <div className="px-6 py-5 border-b border-slate-50 bg-slate-50/30 rounded-t-[24px]">
               <h3 className="font-bold text-slate-900">Aircraft & Capacity</h3>
             </div>
@@ -374,7 +374,7 @@ const AdminEditFlightPage = () => {
           </section>
 
           {/* Fares & Status Section */}
-          <section className="bg-white rounded-[24px] border border-slate-100 shadow-sm">
+          <section className="relative z-10 bg-white rounded-[24px] border border-slate-100 shadow-sm">
             <div className="px-6 py-5 border-b border-slate-50 bg-slate-50/30 rounded-t-[24px]">
               <h3 className="font-bold text-slate-900">Fares & Status</h3>
             </div>
@@ -424,7 +424,7 @@ const AdminEditFlightPage = () => {
           </section>
 
           {/* Change Log Section */}
-          <section className="bg-white rounded-[24px] border border-slate-100 shadow-sm text-left">
+          <section className="relative z-0 bg-white rounded-[24px] border border-slate-100 shadow-sm text-left">
             <div className="px-6 py-5 border-b border-slate-50 bg-slate-50/30 rounded-t-[24px]">
               <h3 className="font-bold text-slate-900">Change Log</h3>
             </div>
