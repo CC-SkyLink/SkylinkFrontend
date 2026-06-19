@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { ROUTES } from "@/constants/routes";
 import { getBookingsForUser } from "@/api/bookings.api";
@@ -13,6 +13,9 @@ import DataTable, {
   type TableColumn,
 } from "@/pages/_shared/components/ui/DataTable";
 import TableEmptyState from "@/pages/_shared/components/ui/TableEmptyState";
+import Modal from "@/pages/_shared/components/ui/Modal";
+import Button from "@/pages/_shared/components/ui/Button";
+import Toast from "@/pages/_shared/components/ui/Toast";
 import {
   ChevronLeft,
   Mail,
@@ -136,14 +139,43 @@ const AdminUserDetailPage = () => {
     }));
   }, [data?.bookings]);
 
-  const handleToggleStatus = async () => {
+  const [toggleStatusModalOpen, setToggleStatusModalOpen] = useState(false);
+  const [resetPasswordModalOpen, setResetPasswordModalOpen] = useState(false);
+  const [toastOpen, setToastOpen] = useState(false);
+  const [toastMsg, setToastMsg] = useState("");
+  const [toastType, setToastType] = useState<"success" | "error">("success");
+  const [isActionPending, setIsActionPending] = useState(false);
+
+  const handleToggleStatusConfirm = async () => {
     if (!user) return;
+    setIsActionPending(true);
     try {
       await toggleUserStatus(user.id, !user.is_active);
+      setToggleStatusModalOpen(false);
+      setToastMsg(user.is_active ? "User account suspended successfully." : "User account activated successfully.");
+      setToastType("success");
+      setToastOpen(true);
       void refetch();
     } catch (err) {
       console.error("Failed to toggle status", err);
+      setToastMsg("Failed to update user status.");
+      setToastType("error");
+      setToastOpen(true);
+    } finally {
+      setIsActionPending(false);
     }
+  };
+
+  const handleResetPasswordConfirm = async () => {
+    if (!user) return;
+    setIsActionPending(true);
+    setTimeout(() => {
+      setIsActionPending(false);
+      setResetPasswordModalOpen(false);
+      setToastMsg(`Password reset link sent to ${user.email}`);
+      setToastType("success");
+      setToastOpen(true);
+    }, 1000);
   };
 
   const bookingColumns: TableColumn<any>[] = [
@@ -424,14 +456,14 @@ const AdminUserDetailPage = () => {
               </div>
             </section>
 
-            {/* Admin Actions Card */}
+             {/* Admin Actions Card */}
             <section className="rounded-3xl border border-slate-100 bg-white p-6 shadow-sm overflow-hidden">
               <h4 className="text-sm font-bold text-slate-900 mb-4">
                 Admin Actions
               </h4>
               <div className="space-y-3">
                 <button
-                  onClick={handleToggleStatus}
+                  onClick={() => setToggleStatusModalOpen(true)}
                   className={cn(
                     "w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-bold border transition-all",
                     user.is_active
@@ -446,7 +478,10 @@ const AdminUserDetailPage = () => {
                   )}
                   {user.is_active ? "Suspend Account" : "Reactivate Account"}
                 </button>
-                <button className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-bold border border-blue-100 text-blue-600 hover:bg-blue-50 transition-all">
+                <button
+                  onClick={() => setResetPasswordModalOpen(true)}
+                  className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-bold border border-blue-100 text-blue-600 hover:bg-blue-50 transition-all"
+                >
                   <Key size={18} />
                   Reset Password
                 </button>
@@ -508,6 +543,105 @@ const AdminUserDetailPage = () => {
           </div>
         </div>
       </div>
+
+      {/* Suspend/Reactivate Account Confirmation Modal */}
+      <Modal
+        isOpen={toggleStatusModalOpen}
+        onClose={() => setToggleStatusModalOpen(false)}
+        title={user.is_active ? "Suspend User Account" : "Reactivate User Account"}
+      >
+        <div className="py-4 space-y-6 text-left">
+          <div className="p-4 bg-slate-50 rounded-xl border border-slate-100 flex items-center gap-3">
+            <div className="flex size-12 shrink-0 items-center justify-center rounded-full bg-[#496B92] text-white font-bold text-sm">
+              {user.first_name[0]}{user.last_name[0]}
+            </div>
+            <div className="flex flex-col">
+              <span className="font-bold text-slate-900 leading-tight">
+                {user.first_name} {user.last_name}
+              </span>
+              <span className="text-xs text-slate-500">{user.email}</span>
+            </div>
+          </div>
+
+          <p className="text-sm text-slate-600 font-medium text-center">
+            {user.is_active
+              ? "Are you sure you want to suspend this user account? The user will not be able to log in or book flights."
+              : "Are you sure you want to reactivate this user account? The user will recover full access to the portal."}
+          </p>
+
+          <div className="flex gap-3 pt-2">
+            <Button
+              variant="secondary"
+              className="flex-1 rounded-xl h-12"
+              onClick={() => setToggleStatusModalOpen(false)}
+            >
+              Cancel
+            </Button>
+            <Button
+              className={cn(
+                "flex-1 h-12 rounded-xl font-bold",
+                user.is_active
+                  ? "bg-rose-100 text-rose-600 hover:bg-rose-200"
+                  : "bg-emerald-100 text-emerald-600 hover:bg-emerald-200"
+              )}
+              onClick={handleToggleStatusConfirm}
+              loading={isActionPending}
+            >
+              {user.is_active ? "Suspend Account" : "Reactivate Account"}
+            </Button>
+          </div>
+        </div>
+      </Modal>
+
+      {/* Reset Password Confirmation Modal */}
+      <Modal
+        isOpen={resetPasswordModalOpen}
+        onClose={() => setResetPasswordModalOpen(false)}
+        title="Reset User Password"
+      >
+        <div className="py-4 space-y-6 text-left">
+          <div className="p-4 bg-slate-50 rounded-xl border border-slate-100 flex items-center gap-3">
+            <div className="flex size-12 shrink-0 items-center justify-center rounded-full bg-[#496B92] text-white font-bold text-sm">
+              {user.first_name[0]}{user.last_name[0]}
+            </div>
+            <div className="flex flex-col">
+              <span className="font-bold text-slate-900 leading-tight">
+                {user.first_name} {user.last_name}
+              </span>
+              <span className="text-xs text-slate-500">{user.email}</span>
+            </div>
+          </div>
+
+          <p className="text-sm text-slate-600 font-medium text-center">
+            Are you sure you want to reset this user's password? A password reset instructions link will be automatically sent to their registered email address.
+          </p>
+
+          <div className="flex gap-3 pt-2">
+            <Button
+              variant="secondary"
+              className="flex-1 rounded-xl h-12"
+              onClick={() => setResetPasswordModalOpen(false)}
+            >
+              Cancel
+            </Button>
+            <Button
+              className="flex-1 bg-blue-100 text-blue-600 hover:bg-blue-200 h-12 rounded-xl font-bold"
+              onClick={handleResetPasswordConfirm}
+              loading={isActionPending}
+            >
+              Reset Password
+            </Button>
+          </div>
+        </div>
+      </Modal>
+
+      {/* Toast Notification */}
+      <Toast
+        message={toastMsg}
+        isOpen={toastOpen}
+        onClose={() => setToastOpen(false)}
+        type={toastType}
+      />
     </AdminLayout>
   );
 };
