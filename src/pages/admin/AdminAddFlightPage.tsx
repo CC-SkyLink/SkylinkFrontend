@@ -157,8 +157,8 @@ const AdminAddFlightPage = () => {
           )}
 
           {/* Flight Information */}
-          <section className="bg-white rounded-[24px] border border-slate-100 shadow-sm overflow-hidden">
-            <div className="px-6 py-5 border-b border-slate-50 bg-slate-50/30">
+          <section className="bg-white rounded-[24px] border border-slate-100 shadow-sm">
+            <div className="px-6 py-5 border-b border-slate-50 bg-slate-50/30 rounded-t-[24px]">
               <h3 className="font-bold text-slate-900">Flight Information</h3>
             </div>
             <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -264,8 +264,8 @@ const AdminAddFlightPage = () => {
           </section>
 
           {/* Aircraft Selection */}
-          <section className="bg-white rounded-[24px] border border-slate-100 shadow-sm overflow-hidden">
-            <div className="px-6 py-5 border-b border-slate-50 bg-slate-50/30">
+          <section className="bg-white rounded-[24px] border border-slate-100 shadow-sm">
+            <div className="px-6 py-5 border-b border-slate-50 bg-slate-50/30 rounded-t-[24px]">
               <h3 className="font-bold text-slate-900 flex items-center gap-2">
                 <Plane size={18} className="text-[#496B92]" />
                 Select Aircraft
@@ -298,8 +298,8 @@ const AdminAddFlightPage = () => {
           </section>
 
           {/* Dynamic Fares Section */}
-          <section className="bg-white rounded-[24px] border border-slate-100 shadow-sm overflow-hidden">
-            <div className="px-6 py-5 border-b border-slate-50 bg-slate-50/30">
+          <section className="bg-white rounded-[24px] border border-slate-100 shadow-sm">
+            <div className="px-6 py-5 border-b border-slate-50 bg-slate-50/30 rounded-t-[24px]">
               <h3 className="font-bold text-slate-900 flex items-center gap-2">
                 <Tag size={18} className="text-[#496B92]" />
                 Fare Configurations
@@ -347,8 +347,8 @@ const AdminAddFlightPage = () => {
           </section>
 
           {/* Status & Options */}
-          <section className="bg-white rounded-[24px] border border-slate-100 shadow-sm overflow-hidden">
-            <div className="px-6 py-5 border-b border-slate-50 bg-slate-50/30">
+          <section className="bg-white rounded-[24px] border border-slate-100 shadow-sm">
+            <div className="px-6 py-5 border-b border-slate-50 bg-slate-50/30 rounded-t-[24px]">
               <h3 className="font-bold text-slate-900">Status & Options</h3>
             </div>
             <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">

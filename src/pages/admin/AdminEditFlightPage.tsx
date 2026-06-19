@@ -210,8 +210,8 @@ const AdminEditFlightPage = () => {
           )}
 
           {/* Flight Information Section */}
-          <section className="bg-white rounded-[24px] border border-slate-100 shadow-sm overflow-hidden">
-            <div className="px-6 py-5 border-b border-slate-50 bg-slate-50/30">
+          <section className="bg-white rounded-[24px] border border-slate-100 shadow-sm">
+            <div className="px-6 py-5 border-b border-slate-50 bg-slate-50/30 rounded-t-[24px]">
               <h3 className="font-bold text-slate-900">Flight Information</h3>
             </div>
             <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -317,8 +317,8 @@ const AdminEditFlightPage = () => {
           </section>
 
           {/* Aircraft & Capacity Section */}
-          <section className="bg-white rounded-[24px] border border-slate-100 shadow-sm overflow-hidden">
-            <div className="px-6 py-5 border-b border-slate-50 bg-slate-50/30">
+          <section className="bg-white rounded-[24px] border border-slate-100 shadow-sm">
+            <div className="px-6 py-5 border-b border-slate-50 bg-slate-50/30 rounded-t-[24px]">
               <h3 className="font-bold text-slate-900">Aircraft & Capacity</h3>
             </div>
             <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -374,8 +374,8 @@ const AdminEditFlightPage = () => {
           </section>
 
           {/* Fares & Status Section */}
-          <section className="bg-white rounded-[24px] border border-slate-100 shadow-sm overflow-hidden">
-            <div className="px-6 py-5 border-b border-slate-50 bg-slate-50/30">
+          <section className="bg-white rounded-[24px] border border-slate-100 shadow-sm">
+            <div className="px-6 py-5 border-b border-slate-50 bg-slate-50/30 rounded-t-[24px]">
               <h3 className="font-bold text-slate-900">Fares & Status</h3>
             </div>
             <div className="p-6 grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -424,8 +424,8 @@ const AdminEditFlightPage = () => {
           </section>
 
           {/* Change Log Section */}
-          <section className="bg-white rounded-[24px] border border-slate-100 shadow-sm overflow-hidden text-left">
-            <div className="px-6 py-5 border-b border-slate-50 bg-slate-50/30">
+          <section className="bg-white rounded-[24px] border border-slate-100 shadow-sm text-left">
+            <div className="px-6 py-5 border-b border-slate-50 bg-slate-50/30 rounded-t-[24px]">
               <h3 className="font-bold text-slate-900">Change Log</h3>
             </div>
             <div className="p-6 space-y-6">
