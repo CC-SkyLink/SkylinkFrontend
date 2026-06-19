@@ -156,14 +156,20 @@ const AdminDestinationsPage = () => {
   };
 
   // Field helper
-  const field = (key: string, label: string, type = "text") => (
+  const field = (key: string, label: string, type = "text", disabled = false) => (
     <div className="space-y-1.5">
       <label className="text-[13px] font-bold text-slate-500 uppercase tracking-widest ml-1">{label}</label>
       <input
         type={type}
         value={form[key] ?? ""}
+        disabled={disabled}
         onChange={(e) => {
-          const val = key === "iata_code" ? e.target.value.toUpperCase() : e.target.value;
+          let val = e.target.value;
+          if (key === "iata_code") {
+            val = val.replace(/[^A-Za-z]/g, "").toUpperCase();
+          } else if (key === "registration") {
+            val = val.replace(/[^A-Za-z0-9-]/g, "").toUpperCase();
+          }
           setForm((f) => ({ ...f, [key]: val }));
           if (errors[key]) {
             setErrors((errs) => {
@@ -173,11 +179,23 @@ const AdminDestinationsPage = () => {
             });
           }
         }}
+        maxLength={
+          key === "iata_code" ? 3 :
+          key === "name" ? 100 :
+          key === "image_url" ? 255 :
+          key === "best_time" ? 100 :
+          key === "registration" ? 20 :
+          key === "model" ? 50 :
+          undefined
+        }
         className={cn(
-          "w-full h-12 rounded-xl bg-slate-50 border px-4 text-sm outline-none transition-all focus:ring-2",
+          "w-full h-12 rounded-xl border px-4 text-sm outline-none transition-all focus:ring-2",
+          disabled
+            ? "bg-slate-100 text-slate-400 border-slate-200 cursor-not-allowed select-none"
+            : "bg-slate-50 border-slate-200 focus:ring-[#496B92]/10 focus:border-[#496B92]/20",
           errors[key]
-            ? "border-rose-400 focus:ring-rose-100 focus:border-rose-400"
-            : "border-slate-200 focus:ring-[#496B92]/10 focus:border-[#496B92]/20"
+            ? "border-rose-400 focus:ring-rose-100 focus:border-rose-400 animate-shake"
+            : ""
         )}
       />
       {errors[key] && <p className="text-xs text-rose-500 mt-1 ml-1">{errors[key]}</p>}
@@ -373,7 +391,7 @@ const AdminDestinationsPage = () => {
             {errors.city && <p className="text-xs text-rose-500 mt-1 ml-1">{errors.city}</p>}
           </div>
         </div>
-        {field("timezone", "Timezone *")}
+        {field("timezone", "Timezone *", "text", true)}
         {field("image_url", "Image URL")}
         {field("best_time", "Best Time to Visit")}
         <div className="space-y-1.5">
@@ -439,10 +457,12 @@ const AdminDestinationsPage = () => {
                 <label className="text-[10px] font-bold text-slate-400 uppercase">Qty</label>
                 <input
                   type="number"
+                  min={0}
                   value={config.quantity}
                   onChange={(e) => {
                     const updated = [...seatConfigs];
-                    updated[idx].quantity = Number(e.target.value);
+                    updated[idx].quantity = Math.max(0, Math.floor(Number(e.target.value) || 0));
+                    setForm((f) => ({ ...f, _configDirty: Date.now() })); // Trigger re-render/dirty check
                     setSeatConfigs(updated);
                   }}
                   className="w-full h-10 px-3 bg-white border border-slate-200 rounded-lg text-sm outline-none focus:border-[#496B92]"
@@ -510,7 +530,7 @@ const AdminDestinationsPage = () => {
             {errors.city && <p className="text-xs text-rose-500 mt-1 ml-1">{errors.city}</p>}
           </div>
         </div>
-        {field("timezone", "Timezone")}
+        {field("timezone", "Timezone", "text", true)}
         {field("image_url", "Image URL")}
         {field("best_time", "Best Time to Visit")}
         <div className="space-y-1.5">
