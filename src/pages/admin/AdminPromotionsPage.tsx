@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useCallback } from "react";
 import { useForm, type SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -20,6 +20,8 @@ const AdminPromotionsPage = () => {
   const queryClient = useQueryClient();
   const [searchQuery, setSearchQuery] = useState("");
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [promoToDelete, setPromoToDelete] = useState<Promotion | null>(null);
 
   const {
     register,
@@ -67,9 +69,19 @@ const AdminPromotionsPage = () => {
     createMutation.mutate(data as CreatePromotionPayload);
   };
 
-  const handleDelete = (id: string) => {
-    if (!confirm("Are you sure you want to delete this promotion?")) return;
-    deleteMutation.mutate(id);
+  const handleOpenDelete = useCallback((promo: Promotion) => {
+    setPromoToDelete(promo);
+    setDeleteModalOpen(true);
+  }, []);
+
+  const handleDeleteConfirm = () => {
+    if (!promoToDelete) return;
+    deleteMutation.mutate(promoToDelete.id, {
+      onSuccess: () => {
+        setDeleteModalOpen(false);
+        setPromoToDelete(null);
+      },
+    });
   };
 
   const [categoryFilter, setCategoryFilter] = useState("");
@@ -167,7 +179,7 @@ const AdminPromotionsPage = () => {
       header: "ACTIONS",
       cell: (row) => (
         <button
-          onClick={() => handleDelete(row.id)}
+          onClick={() => handleOpenDelete(row)}
           disabled={deleteMutation.isPending}
           className="p-2 text-rose-600 hover:bg-rose-50 rounded-lg transition-colors border border-rose-100 disabled:opacity-50"
         >
@@ -175,7 +187,7 @@ const AdminPromotionsPage = () => {
         </button>
       ),
     },
-  ], [deleteMutation.isPending]);
+  ], [deleteMutation.isPending, handleOpenDelete]);
 
   return (
     <AdminLayout>
@@ -338,6 +350,58 @@ const AdminPromotionsPage = () => {
             </Button>
           </div>
         </form>
+      </Modal>
+
+      {/* Delete Confirmation Modal */}
+      <Modal
+        isOpen={deleteModalOpen}
+        onClose={() => {
+          setDeleteModalOpen(false);
+          setPromoToDelete(null);
+        }}
+        title="Delete Promotion"
+      >
+        <div className="py-4 space-y-6 text-left">
+          {promoToDelete && (
+            <div className="p-4 bg-slate-50 rounded-xl border border-slate-100 flex items-center gap-3">
+              {promoToDelete.image_url ? (
+                <img src={promoToDelete.image_url} className="size-12 rounded-lg object-cover border border-slate-100" alt="" />
+              ) : (
+                <div className="size-12 rounded-lg bg-slate-100 flex items-center justify-center text-slate-400">
+                  <ImageIcon size={20} />
+                </div>
+              )}
+              <div className="flex flex-col">
+                <span className="font-bold text-slate-900 leading-tight">{promoToDelete.title}</span>
+                <span className="text-xs text-slate-500">{promoToDelete.destination_city} ({promoToDelete.destination_code})</span>
+              </div>
+            </div>
+          )}
+
+          <p className="text-sm text-slate-600 font-medium text-center">
+            Are you sure you want to permanently delete this promotion? This action cannot be undone.
+          </p>
+
+          <div className="flex gap-3 pt-2">
+            <Button
+              variant="secondary"
+              className="flex-1 rounded-xl h-12"
+              onClick={() => {
+                setDeleteModalOpen(false);
+                setPromoToDelete(null);
+              }}
+            >
+              Cancel
+            </Button>
+            <Button
+              className="flex-1 bg-white hover:bg-rose-50 border border-rose-200 text-rose-600 h-12 rounded-xl font-bold"
+              onClick={handleDeleteConfirm}
+              loading={deleteMutation.isPending}
+            >
+              Confirm Delete
+            </Button>
+          </div>
+        </div>
       </Modal>
     </AdminLayout>
   );
