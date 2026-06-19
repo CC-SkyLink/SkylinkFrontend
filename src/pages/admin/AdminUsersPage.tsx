@@ -8,6 +8,8 @@ import DataTable, { type TableColumn } from "@/pages/_shared/components/ui/DataT
 import TableSkeleton from "@/pages/_shared/components/ui/TableSkeleton";
 import TableEmptyState from "@/pages/_shared/components/ui/TableEmptyState";
 import StatusBadge from "@/pages/_shared/components/ui/StatusBadge";
+import Modal from "@/pages/_shared/components/ui/Modal";
+import Button from "@/pages/_shared/components/ui/Button";
 import { Search, Eye, Ban, CheckCircle, ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "@/utils/cn";
 
@@ -15,6 +17,8 @@ const AdminUsersPage = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [searchQuery, setSearchQuery] = useState("");
+  const [confirmModalOpen, setConfirmModalOpen] = useState(false);
+  const [userToToggle, setUserToToggle] = useState<UserListItem | null>(null);
 
   // Query
   const { data: users = [], isLoading } = useQuery({
@@ -33,8 +37,22 @@ const AdminUsersPage = () => {
     onError: (err) => console.error("Failed to toggle status", err),
   });
 
-  const handleToggleStatus = (user: UserListItem) => {
-    toggleMutation.mutate({ id: user.id, is_active: !user.is_active });
+  const handleToggleStatusClick = (user: UserListItem) => {
+    setUserToToggle(user);
+    setConfirmModalOpen(true);
+  };
+
+  const handleToggleStatusConfirm = () => {
+    if (!userToToggle) return;
+    toggleMutation.mutate(
+      { id: userToToggle.id, is_active: !userToToggle.is_active },
+      {
+        onSuccess: () => {
+          setConfirmModalOpen(false);
+          setUserToToggle(null);
+        },
+      }
+    );
   };
 
   const filteredUsers = useMemo(() =>
@@ -105,7 +123,7 @@ const AdminUsersPage = () => {
             <Eye size={16} />
           </button>
           <button
-            onClick={() => handleToggleStatus(row)}
+            onClick={() => handleToggleStatusClick(row)}
             disabled={toggleMutation.isPending}
             className={cn(
               "p-2 rounded-lg transition-colors border disabled:opacity-50",
@@ -173,6 +191,63 @@ const AdminUsersPage = () => {
           </div>
         )}
       </div>
+
+      {/* Status Toggle Confirmation Modal */}
+      <Modal
+        isOpen={confirmModalOpen}
+        onClose={() => {
+          setConfirmModalOpen(false);
+          setUserToToggle(null);
+        }}
+        title={userToToggle?.is_active ? "Suspend User Account" : "Activate User Account"}
+      >
+        <div className="py-4 space-y-6 text-left">
+          {userToToggle && (
+            <div className="p-4 bg-slate-50 rounded-xl border border-slate-100 flex items-center gap-3">
+              <div className="flex size-12 shrink-0 items-center justify-center rounded-lg bg-[#496B92]/10 text-[#496B92] font-bold text-sm">
+                {userToToggle.first_name[0]}{userToToggle.last_name[0]}
+              </div>
+              <div className="flex flex-col">
+                <span className="font-bold text-slate-900 leading-tight">
+                  {userToToggle.first_name} {userToToggle.last_name}
+                </span>
+                <span className="text-xs text-slate-500">{userToToggle.email}</span>
+              </div>
+            </div>
+          )}
+
+          <p className="text-sm text-slate-600 font-medium text-center">
+            {userToToggle?.is_active
+              ? "Are you sure you want to suspend this user account? The user will not be able to log in or book flights."
+              : "Are you sure you want to reactivate this user account? The user will recover full access to the portal."}
+          </p>
+
+          <div className="flex gap-3 pt-2">
+            <Button
+              variant="secondary"
+              className="flex-1 rounded-xl h-12"
+              onClick={() => {
+                setConfirmModalOpen(false);
+                setUserToToggle(null);
+              }}
+            >
+              Cancel
+            </Button>
+            <Button
+              className={cn(
+                "flex-1 h-12 rounded-xl font-bold",
+                userToToggle?.is_active
+                  ? "bg-rose-100 text-rose-600 hover:bg-rose-200"
+                  : "bg-emerald-100 text-emerald-600 hover:bg-emerald-200"
+              )}
+              onClick={handleToggleStatusConfirm}
+              loading={toggleMutation.isPending}
+            >
+              {userToToggle?.is_active ? "Suspend Account" : "Activate Account"}
+            </Button>
+          </div>
+        </div>
+      </Modal>
     </AdminLayout>
   );
 };

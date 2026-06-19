@@ -49,15 +49,6 @@ const Modal = ({
         className="w-full max-w-lg rounded-xl bg-white p-6 shadow-2xl relative my-auto"
         onClick={(event) => event.stopPropagation()}
       >
-        <button
-          type="button"
-          onClick={onClose}
-          className="absolute right-4 top-4 rounded-lg p-1.5 text-slate-400 hover:bg-slate-50 hover:text-slate-700 transition-colors focus:outline-none focus:ring-2 focus:ring-[#496B92]/10"
-          aria-label="Close"
-        >
-          <X size={18} />
-        </button>
-
         <div className="mb-4 pr-8">
           <h2 className="text-lg font-semibold text-slate-900">{title}</h2>
           {description ? (
