@@ -12,7 +12,7 @@ import TableEmptyState from "@/pages/_shared/components/ui/TableEmptyState";
 import Button from "@/pages/_shared/components/ui/Button";
 import Modal from "@/pages/_shared/components/ui/Modal";
 import Input from "@/pages/_shared/components/ui/Input";
-import { Search, Plus, Trash2, Calendar, Image as ImageIcon, MapPin } from "lucide-react";
+import { Search, Plus, Trash2, Calendar, Image as ImageIcon, MapPin, ChevronLeft, ChevronRight } from "lucide-react";
 import type { Promotion, CreatePromotionPayload } from "@/types/promotion.types";
 import { promotionSchema, type PromotionFormValues } from "@/validation/promotion.schemas";
 import { cn } from "@/utils/cn";
@@ -262,12 +262,12 @@ const AdminPromotionsPage = () => {
                 Showing 1-{filteredPromotions.length} of {filteredPromotions.length}
               </p>
               <div className="flex items-center gap-2">
-                <button disabled className="p-2 rounded-lg border border-slate-200 text-slate-400 opacity-50 cursor-not-allowed">
-                  <Plus size={16} className="rotate-45" />
+                <button disabled className="p-2 rounded-lg border border-slate-200 text-slate-400 opacity-50 cursor-not-allowed flex items-center justify-center">
+                  <ChevronLeft size={16} />
                 </button>
-                <button className="size-9 rounded-lg bg-[#496B92] text-white font-bold text-sm">1</button>
-                <button disabled className="p-2 rounded-lg border border-slate-200 text-slate-400 opacity-50 cursor-not-allowed">
-                  <Plus size={16} className="-rotate-45" />
+                <button className="size-9 rounded-lg bg-[#496B92] text-white font-bold text-sm flex items-center justify-center">1</button>
+                <button disabled className="p-2 rounded-lg border border-slate-200 text-slate-400 opacity-50 cursor-not-allowed flex items-center justify-center">
+                  <ChevronRight size={16} />
                 </button>
               </div>
             </div>
@@ -283,7 +283,7 @@ const AdminPromotionsPage = () => {
             error={errors.title?.message}
             {...register("title")}
           />
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <Input
               label="Sale Price (₱) *"
               type="number"
@@ -299,7 +299,7 @@ const AdminPromotionsPage = () => {
               {...register("original_price", { valueAsNumber: true })}
             />
           </div>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-1.5">
               <label className="text-[13px] font-bold text-slate-500 uppercase tracking-widest ml-1">Category *</label>
               <Select
@@ -325,7 +325,7 @@ const AdminPromotionsPage = () => {
               {...register("destination_code")}
             />
           </div>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <Input
               label="Destination City *"
               placeholder="e.g. Cebu City"
@@ -339,6 +339,7 @@ const AdminPromotionsPage = () => {
                 onChange={(val) => setValue("valid_until", val)}
                 placeholder="Select date"
                 triggerClassName="h-12 rounded-xl bg-slate-50 border border-slate-200 text-sm font-medium hover:bg-slate-100/50"
+                align="right"
               />
               {errors.valid_until?.message && (
                 <p className="text-xs text-rose-500 font-bold ml-1">{errors.valid_until.message}</p>

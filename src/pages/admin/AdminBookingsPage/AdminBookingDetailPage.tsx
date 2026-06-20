@@ -293,8 +293,21 @@ const AdminBookingDetailPage = () => {
                     Cancellation Risk
                   </div>
                   {riskLoading ? (
-                    <div className="flex justify-center py-4">
-                      <div className="animate-spin size-5 border-2 border-[#496B92] border-t-transparent rounded-full" />
+                    <div className="space-y-4 animate-pulse">
+                      <div className="flex items-center justify-between">
+                        <div className="h-5 bg-slate-200 rounded-full w-20" />
+                        <div className="h-6 bg-slate-200 rounded w-12" />
+                      </div>
+                      <div className="grid grid-cols-2 gap-2 bg-slate-50 p-3 rounded-xl border border-slate-100/50">
+                        <div className="space-y-2">
+                          <div className="h-2.5 bg-slate-200 rounded w-12" />
+                          <div className="h-3.5 bg-slate-200 rounded w-20" />
+                        </div>
+                        <div className="space-y-2">
+                          <div className="h-2.5 bg-slate-200 rounded w-12" />
+                          <div className="h-3.5 bg-slate-200 rounded w-16" />
+                        </div>
+                      </div>
                     </div>
                   ) : !risk || risk.risk_level === "unknown" ? (
                     <p className="text-xs text-slate-400">No risk evaluation data available.</p>

@@ -12,6 +12,7 @@ type DatePickerProps = {
   onChange?: (value: string) => void;
   className?: string;
   triggerClassName?: string;
+  align?: "left" | "right";
 };
 
 const DatePicker: React.FC<DatePickerProps> = ({
@@ -22,6 +23,7 @@ const DatePicker: React.FC<DatePickerProps> = ({
   onChange,
   className,
   triggerClassName,
+  align = "left",
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   
@@ -149,7 +151,10 @@ const DatePicker: React.FC<DatePickerProps> = ({
 
       {/* Modern White Calendar Dropdown */}
       {isOpen && (
-        <div className="absolute top-full left-0 z-50 mt-2 w-[310px] bg-white border border-slate-100 rounded-2xl shadow-[0_16px_40px_rgba(0,0,0,0.12)] p-4 select-none animate-in fade-in slide-in-from-top-2 duration-200">
+        <div className={cn(
+          "absolute top-full z-50 mt-2 w-[310px] bg-white border border-slate-100 rounded-2xl shadow-[0_16px_40px_rgba(0,0,0,0.12)] p-4 select-none animate-in fade-in slide-in-from-top-2 duration-200",
+          align === "right" ? "right-0" : "left-0"
+        )}>
           {/* Header */}
           <div className="flex items-center justify-between mb-4 px-1">
             <span className="text-sm font-bold text-slate-800">

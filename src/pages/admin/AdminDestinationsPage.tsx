@@ -246,6 +246,46 @@ const AdminDestinationsPage = () => {
     return Object.keys(newErrors).length === 0;
   };
 
+  const validateAircraftForm = (isEdit: boolean = false) => {
+    const newErrors: Record<string, string> = {};
+
+    const registration = String(form.registration || "").trim();
+    if (!registration) {
+      newErrors.registration = "Registration Number is required";
+    } else if (registration.length < 3) {
+      newErrors.registration = "Registration Number must be at least 3 characters";
+    } else if (registration.length > 20) {
+      newErrors.registration = "Registration Number cannot exceed 20 characters";
+    } else if (!/^[A-Z0-9-]+$/.test(registration)) {
+      newErrors.registration = "Registration Number must contain only letters, numbers, and dashes";
+    }
+
+    const model = String(form.model || "").trim();
+    if (!model) {
+      newErrors.model = "Aircraft Model is required";
+    } else if (model.length < 2) {
+      newErrors.model = "Aircraft Model must be at least 2 characters";
+    } else if (model.length > 50) {
+      newErrors.model = "Aircraft Model cannot exceed 50 characters";
+    } else if (!/^[A-Za-z0-9\s-]+$/.test(model)) {
+      newErrors.model = "Aircraft Model must contain only letters, numbers, spaces, and dashes";
+    }
+
+    if (!isEdit) {
+      if (seatConfigs.length === 0) {
+        newErrors.configuration = "At least one seat class configuration is required";
+      } else {
+        const hasInvalidQty = seatConfigs.some(c => !c.quantity || Number(c.quantity) <= 0 || !Number.isInteger(Number(c.quantity)));
+        if (hasInvalidQty) {
+          newErrors.configuration = "All seat class quantities must be positive integers";
+        }
+      }
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
   // Country and city options
   const countryOptions = useMemo(() => {
     return Object.keys(COUNTRY_CITIES_MAP).map((c) => ({ value: c, label: c }));
@@ -429,7 +469,16 @@ const AdminDestinationsPage = () => {
             <label className="text-[13px] font-bold text-slate-500 uppercase tracking-widest ml-1">Configuration</label>
             <button
               type="button"
-              onClick={() => setSeatConfigs([...seatConfigs, { seat_class_id: seatClasses[0]?.id || 1, quantity: 0 }])}
+              onClick={() => {
+                setSeatConfigs([...seatConfigs, { seat_class_id: seatClasses[0]?.id || 1, quantity: 150 }]);
+                if (errors.configuration) {
+                  setErrors((errs) => {
+                    const next = { ...errs };
+                    delete next.configuration;
+                    return next;
+                  });
+                }
+              }}
               className="text-xs font-bold text-[#496B92] hover:underline"
             >
               + Add Class
@@ -438,45 +487,69 @@ const AdminDestinationsPage = () => {
           {seatConfigs.map((config, idx) => (
             <div key={idx} className="flex gap-2 items-end bg-slate-50 p-3 rounded-xl border border-slate-100">
               <div className="flex-1 space-y-1">
-                <label className="text-[10px] font-bold text-slate-400 uppercase">Class</label>
-                <select
-                  value={config.seat_class_id}
-                  onChange={(e) => {
+                <label className="text-[10px] font-bold text-slate-400 uppercase ml-1">Class</label>
+                <Select
+                  value={String(config.seat_class_id)}
+                  onChange={(val) => {
                     const updated = [...seatConfigs];
-                    updated[idx].seat_class_id = Number(e.target.value);
+                    updated[idx].seat_class_id = Number(val);
                     setSeatConfigs(updated);
                   }}
-                  className="w-full h-10 px-3 bg-white border border-slate-200 rounded-lg text-sm outline-none focus:border-[#496B92] capitalize"
-                >
-                  {seatClasses.map(sc => (
-                    <option key={sc.id} value={sc.id} className="capitalize">{sc.name}</option>
-                  ))}
-                </select>
+                  options={seatClasses.map(sc => ({
+                    value: String(sc.id),
+                    label: sc.name.charAt(0).toUpperCase() + sc.name.slice(1),
+                  }))}
+                  triggerClassName="w-full h-10 bg-white border border-slate-200 rounded-lg text-sm outline-none focus:border-[#496B92]/20 focus:ring-2 focus:ring-[#496B92]/10 text-left capitalize font-medium"
+                />
               </div>
               <div className="w-24 space-y-1">
-                <label className="text-[10px] font-bold text-slate-400 uppercase">Qty</label>
+                <label className="text-[10px] font-bold text-slate-400 uppercase ml-1">Qty</label>
                 <input
                   type="number"
                   min={0}
                   value={config.quantity}
+                  onKeyPress={(e) => {
+                    if (!/[0-9]/.test(e.key)) {
+                      e.preventDefault();
+                    }
+                  }}
                   onChange={(e) => {
                     const updated = [...seatConfigs];
                     updated[idx].quantity = Math.max(0, Math.floor(Number(e.target.value) || 0));
                     setForm((f) => ({ ...f, _configDirty: Date.now() })); // Trigger re-render/dirty check
                     setSeatConfigs(updated);
+                    if (errors.configuration) {
+                      setErrors((errs) => {
+                        const next = { ...errs };
+                        delete next.configuration;
+                        return next;
+                      });
+                    }
                   }}
-                  className="w-full h-10 px-3 bg-white border border-slate-200 rounded-lg text-sm outline-none focus:border-[#496B92]"
+                  className="w-full h-10 px-3 bg-white border border-slate-200 rounded-lg text-sm font-medium outline-none focus:border-[#496B92]"
                 />
               </div>
               <button
                 type="button"
-                onClick={() => setSeatConfigs(seatConfigs.filter((_, i) => i !== idx))}
-                className="p-2 text-rose-500 hover:bg-rose-50 rounded-lg transition-colors"
+                onClick={() => {
+                  setSeatConfigs(seatConfigs.filter((_, i) => i !== idx));
+                  if (errors.configuration) {
+                    setErrors((errs) => {
+                      const next = { ...errs };
+                      delete next.configuration;
+                      return next;
+                    });
+                  }
+                }}
+                className="p-2 text-rose-500 hover:bg-rose-50 rounded-lg transition-colors border border-transparent hover:border-rose-100"
               >
                 <Trash2 size={16} />
               </button>
             </div>
           ))}
+          {errors.configuration && (
+            <p className="text-xs text-rose-500 mt-1 ml-1 font-bold">{errors.configuration}</p>
+          )}
         </div>
       </div>
     );
@@ -676,6 +749,9 @@ const AdminDestinationsPage = () => {
                 if (activeTab === "airports") {
                   if (!validateAirportForm(false)) return;
                 }
+                if (activeTab === "aircraft") {
+                  if (!validateAircraftForm(false)) return;
+                }
                 addMutation.mutate();
               }}
               loading={addMutation.isPending}
@@ -698,6 +774,9 @@ const AdminDestinationsPage = () => {
                 if (activeTab === "airports") {
                   if (!validateAirportForm(true)) return;
                 }
+                if (activeTab === "aircraft") {
+                  if (!validateAircraftForm(true)) return;
+                }
                 editMutation.mutate();
               }}
               loading={editMutation.isPending}
@@ -717,7 +796,7 @@ const AdminDestinationsPage = () => {
           <div className="flex gap-3 pt-2">
             <Button variant="secondary" className="flex-1 rounded-xl h-12" onClick={() => setDeleteModalOpen(false)}>Cancel</Button>
             <Button
-              className="flex-1 bg-white hover:bg-rose-50 border border-rose-200 text-rose-600 h-12 rounded-xl"
+              className="flex-1 bg-rose-600 hover:bg-rose-700 text-white border-transparent h-12 rounded-xl font-bold transition-all shadow-lg shadow-rose-600/10"
               onClick={() => deleteMutation.mutate()}
               loading={deleteMutation.isPending}
             >

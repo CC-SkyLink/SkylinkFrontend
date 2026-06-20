@@ -66,11 +66,19 @@ const AdminBookingDrawer = ({ bookingId, onClose }: Props) => {
       >
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100">
-          <div className="flex items-center gap-3">
-            <h2 className="text-lg font-bold text-slate-900">
-              {booking?.pnr ?? "Booking Detail"}
-            </h2>
-            {booking && <StatusBadge label={booking.status} />}
+          <div className="flex items-center gap-3 h-7">
+            {bookingLoading ? (
+              <div className="h-5 bg-slate-200 rounded w-28 animate-pulse" />
+            ) : (
+              <h2 className="text-lg font-bold text-slate-900">
+                {booking?.pnr ?? "Booking Detail"}
+              </h2>
+            )}
+            {bookingLoading ? (
+              <div className="h-5 bg-slate-100 rounded w-16 animate-pulse" />
+            ) : booking ? (
+              <StatusBadge label={booking.status} />
+            ) : null}
           </div>
           <button
             onClick={onClose}
@@ -83,8 +91,89 @@ const AdminBookingDrawer = ({ bookingId, onClose }: Props) => {
         {/* Content */}
         <div className="flex-1 overflow-y-auto px-6 py-5 space-y-5">
           {bookingLoading ? (
-            <div className="flex justify-center py-20">
-              <div className="animate-spin size-8 border-4 border-[#496B92] border-t-transparent rounded-full" />
+            <div className="space-y-5 animate-pulse">
+              {/* Flight Info Skeleton */}
+              <section className="rounded-2xl border border-slate-100 bg-slate-50 p-4 space-y-4">
+                <div className="flex items-center gap-2">
+                  <div className="size-4 bg-slate-200 rounded" />
+                  <div className="h-3 bg-slate-200 rounded w-12" />
+                </div>
+                <div className="flex items-center justify-between py-1">
+                  <div className="h-7 bg-slate-200 rounded w-16" />
+                  <span className="text-slate-300 font-medium">→</span>
+                  <div className="h-7 bg-slate-200 rounded w-16" />
+                </div>
+                <div className="grid grid-cols-2 gap-3 text-xs">
+                  {Array.from({ length: 4 }).map((_, i) => (
+                    <div key={i} className="space-y-1">
+                      <div className="h-3 bg-slate-200 rounded w-14" />
+                      <div className="h-3 bg-slate-100 rounded w-20" />
+                    </div>
+                  ))}
+                </div>
+              </section>
+
+              {/* Passenger Info Skeleton */}
+              <section className="rounded-2xl border border-slate-100 bg-slate-50 p-4 space-y-4">
+                <div className="flex items-center gap-2">
+                  <div className="size-4 bg-slate-200 rounded" />
+                  <div className="h-3 bg-slate-200 rounded w-20" />
+                </div>
+                <div className="grid grid-cols-2 gap-3 text-xs">
+                  {Array.from({ length: 4 }).map((_, i) => (
+                    <div key={i} className="space-y-1">
+                      <div className="h-3 bg-slate-200 rounded w-16" />
+                      <div className="h-3 bg-slate-100 rounded w-24" />
+                    </div>
+                  ))}
+                </div>
+              </section>
+
+              {/* Payment Skeleton */}
+              <section className="rounded-2xl border border-slate-100 bg-slate-50 p-4 space-y-4">
+                <div className="flex items-center gap-2">
+                  <div className="size-4 bg-slate-200 rounded" />
+                  <div className="h-3 bg-slate-200 rounded w-16" />
+                </div>
+                <div className="flex items-center justify-between">
+                  <div className="h-4 bg-slate-200 rounded w-10" />
+                  <div className="h-6 bg-slate-200 rounded w-24" />
+                </div>
+                <div className="flex items-center justify-between">
+                  <div className="h-3 bg-slate-200 rounded w-24" />
+                  <div className="h-3 bg-slate-100 rounded w-16" />
+                </div>
+                <div className="flex items-center justify-between">
+                  <div className="h-3 bg-slate-200 rounded w-16" />
+                  <div className="h-3 bg-slate-100 rounded w-20" />
+                </div>
+              </section>
+
+              {/* ML Risk Card Skeleton */}
+              <section className="rounded-2xl border border-slate-100 bg-slate-50 p-4 space-y-4">
+                <div className="flex items-center gap-2">
+                  <div className="size-4 bg-slate-200 rounded" />
+                  <div className="h-3 bg-slate-200 rounded w-28" />
+                </div>
+                <div className="flex items-center justify-between">
+                  <div className="h-6 bg-slate-200 rounded-full w-24" />
+                  <div className="h-5 bg-slate-200 rounded w-10" />
+                </div>
+                <div className="grid grid-cols-2 gap-3 text-xs">
+                  <div className="space-y-1">
+                    <div className="h-3 bg-slate-200 rounded w-16" />
+                    <div className="h-3 bg-slate-100 rounded w-20" />
+                  </div>
+                  <div className="space-y-1">
+                    <div className="h-3 bg-slate-200 rounded w-16" />
+                    <div className="h-3 bg-slate-100 rounded w-16" />
+                  </div>
+                  <div className="col-span-2 space-y-1">
+                    <div className="h-3 bg-slate-200 rounded w-12" />
+                    <div className="h-3 bg-slate-100 rounded w-32" />
+                  </div>
+                </div>
+              </section>
             </div>
           ) : !booking ? (
             <p className="text-center text-slate-400 py-20">Booking not found.</p>
@@ -189,8 +278,25 @@ const AdminBookingDrawer = ({ bookingId, onClose }: Props) => {
                   <span className="ml-1 text-[10px] normal-case font-medium text-slate-400">(ML)</span>
                 </div>
                 {riskLoading ? (
-                  <div className="flex justify-center py-4">
-                    <div className="animate-spin size-5 border-2 border-[#496B92] border-t-transparent rounded-full" />
+                  <div className="space-y-3 animate-pulse">
+                    <div className="flex items-center justify-between">
+                      <div className="h-6 bg-slate-200 rounded-full w-24" />
+                      <div className="h-5 bg-slate-200 rounded w-10" />
+                    </div>
+                    <div className="grid grid-cols-2 gap-2 text-xs">
+                      <div className="space-y-1">
+                        <div className="h-3 bg-slate-200 rounded w-16" />
+                        <div className="h-3 bg-slate-100 rounded w-20" />
+                      </div>
+                      <div className="space-y-1">
+                        <div className="h-3 bg-slate-200 rounded w-16" />
+                        <div className="h-3 bg-slate-100 rounded w-16" />
+                      </div>
+                      <div className="col-span-2 space-y-1">
+                        <div className="h-3 bg-slate-200 rounded w-12" />
+                        <div className="h-3 bg-slate-100 rounded w-32" />
+                      </div>
+                    </div>
                   </div>
                 ) : !risk || risk.risk_level === "unknown" ? (
                   <p className="text-xs text-slate-400">No risk data available.</p>
